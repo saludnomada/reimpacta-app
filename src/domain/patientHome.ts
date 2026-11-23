@@ -155,3 +155,15 @@ export function notices(c: Ctx, p: Patient): Notice[] {
   }
   return out
 }
+
+/** Una frase que dé ganas de entrar, sacada de sus propios datos (en tono de Jone). */
+export function motivation(c: Ctx, p: Patient, streakN: number, improvementPct: number | null): string {
+  const r = routineFor(c, p, c.today)
+  const s = p.sessions[isoD(c.today)]
+  const doneToday = !!s && s.status === 'done'
+  if (doneToday) return streakN > 1 ? `Hecho. Llevas ${streakN} sesiones seguidas.` : 'Sesión hecha. Así se avanza.'
+  if (streakN >= 3) return `Llevas ${streakN} sesiones seguidas. Hoy, a por la siguiente.`
+  if (improvementPct != null && improvementPct >= 20) return `Tu dolor ha bajado un ${improvementPct}% desde que empezaste.`
+  if (r) return `Hoy toca ${sessName(r).toLowerCase()}: ${estMin(r)} minutos y listo.`
+  return 'Hoy toca descansar. Muévete a tu ritmo.'
+}

@@ -468,7 +468,6 @@ html[data-theme="light"]{--runner-back:#AEB8B0}
 html[data-theme="light"]{--accent:#0A140D}
 .tchip{display:inline-flex;align-items:baseline;gap:1px;border-radius:999px;padding:2px 9px;font-weight:800;color:#0A140D;background:var(--tc);font-variant-numeric:tabular-nums}
 .tchip small{font-size:11px;opacity:.7;margin-left:1px}
-.tdot{font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;border-bottom:3px solid var(--tc);line-height:1.1}
 .t-good{--tc:var(--t-good)}.t-mid{--tc:var(--t-mid)}.t-bad{--tc:var(--t-bad)}.t-stop{--tc:var(--t-stop)}
 .tchip.t-stop{color:#fff}
 .pg-deltas b{gap:8px;align-items:center}
@@ -484,4 +483,45 @@ html[data-theme="light"] .pg-grow i.miss.k-fuerza,html[data-theme="light"] .pg-g
 html[data-theme="light"] .pg-bars em,html[data-theme="light"] .x-wbar i,html[data-theme="light"] .se-bar i.ok{box-shadow:inset 0 0 0 1px rgba(10,20,13,.10)}
 html[data-theme="light"] .pg-bars i,html[data-theme="light"] .x-wbar{background:#E7EBE2}
 :root,html[data-theme="light"]{--s-painex:#FF7F50}
-.tdot{border-bottom:0;color:var(--dim);font-size:15px}
+
+
+/* ===== Medalla de fase (sustituye al dibujo) ===== */
+.pbadge{display:inline-grid;place-items:center;flex-shrink:0}
+.x-phase{grid-template-columns:72px 1fr auto}
+.zchip{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font-size:12px;font-weight:700;color:var(--text);background:color-mix(in srgb,#E5281B 14%,transparent);border-radius:999px;padding:3px 10px}
+.zchip i{width:7px;height:7px;border-radius:50%;background:#E5281B;box-shadow:0 0 0 3px color-mix(in srgb,#E5281B 25%,transparent)}
+.pcard .pbadge{margin-top:4px}
+
+/* ===== Hoy: tu semana de un vistazo ===== */
+.x-sub{font-size:15px;color:var(--text);opacity:.85}
+.x-weekstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:var(--card);border:1px solid var(--hair);border-radius:18px;padding:10px 10px 12px}
+.ws{display:flex;flex-direction:column;align-items:center;gap:6px}
+.ws small{font-size:11px;font-weight:700;color:var(--dim)}
+.ws i{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#0A140D}
+.ws i svg{width:14px;height:14px}
+.ws.done i{background:var(--k,var(--lime))}
+.ws.done.k-movilidad i,.ws.done.k-correr i{color:#fff}
+.ws.now i{box-shadow:inset 0 0 0 2.5px var(--lime)}
+.ws.now small{color:var(--text)}
+.ws.miss i{box-shadow:inset 0 0 0 1.5px var(--ring-track);background:none}
+.ws.future i{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--k,var(--dim)) 45%,transparent)}
+.ws.rest i::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--ring-track)}
+.x-h2.big{font-size:13px;color:var(--text);margin-top:6px}
+
+/* ===== Antes → ahora, legible ===== */
+.pg-from{color:var(--text);font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+.pg-deltas .arr{font-size:16px;color:var(--muted)}
+.pg-deltas>div>span:first-child{font-size:14.5px}
+
+/* ===== Gráfica de evolución ===== */
+.tc .ch-plot svg{touch-action:pan-y}
+.tc-band{opacity:.13;fill:var(--tc)}
+html[data-theme="light"] .tc-band{opacity:.2}
+.tc-band.t-good{opacity:.16}
+html[data-theme="light"] .tc-band.t-good{opacity:.32}
+.tc-area{fill:var(--text);opacity:.06}
+.tc-line{fill:none;stroke:var(--text);stroke-width:2.75;stroke-linecap:round;stroke-linejoin:round}
+.tc-dot{fill:var(--tc);stroke:var(--card);stroke-width:2.5}
+.tc-bub{fill:var(--tc)}
+.tc-bubt{font-family:var(--display);font-weight:900;font-size:13px;fill:#0A140D}
+.tc-bubt.t-stop{fill:#fff}

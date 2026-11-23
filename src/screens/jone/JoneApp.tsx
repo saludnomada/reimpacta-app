@@ -3,7 +3,7 @@ import { useCtx } from '../../data/store'
 import { compliance, currentPhase, recovered, weekNo } from '../../domain/logic'
 import { PHASES } from '../../domain/model'
 import { Logo } from '../../ui/icons'
-import { Sprite } from '../../ui/Sprite'
+import { PhaseBadge } from '../../ui/PhaseBadge'
 import { useApplyTheme } from '../../ui/theme'
 import { complianceTone } from '../../domain/scales'
 
@@ -61,7 +61,7 @@ export function JoneApp() {
             const [pct, , sch] = compliance(c, p)
             return (
               <div key={p.id} className="pcard">
-                <Sprite look={p.look} zone={recovered(p) ? null : p.zone} scale={2.4} anim={false} />
+                <PhaseBadge p={p} size={56} />
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline' }}>
                     <h3>{p.name}</h3>

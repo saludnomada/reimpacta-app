@@ -3,11 +3,13 @@ import { diffDays, monday, parseD } from '../../domain/dates'
 import { currentPhase, doseText, endOf, estMin, recovered, routineFor, sessName, streak, sType, videoById, weekNo, type Ctx } from '../../domain/logic'
 import type { Patient, Routine } from '../../domain/model'
 import { PHASES } from '../../domain/model'
-import { lastWeekSummary, todayItems, type TodoItem } from '../../domain/patientHome'
-import { IcCheck, IcChevron, IcClock, IcFlame, IcPlay } from '../../ui/icons'
+import { lastWeekSummary, motivation, todayItems, type TodoItem } from '../../domain/patientHome'
+import { improvements, weeksGrid } from '../../domain/progress'
+import { WD } from '../../domain/dates'
+import { IcCheck, IcChevron, IcClock, IcPlay } from '../../ui/icons'
 import { MEDAL } from '../../ui/Medal'
 import { Ring } from '../../ui/Ring'
-import { Sprite } from '../../ui/Sprite'
+import { PhaseBadge, zoneLabel } from '../../ui/PhaseBadge'
 import { TaskIcon } from '../../ui/TaskIcon'
 import { VideoThumb } from '../../ui/VideoThumb'
 import { goPath } from './goPath'
@@ -36,6 +38,9 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
   const rest = items.filter((x) => x !== main)
   const st = streak(c, p)
   const sum = lastWeekSummary(c, p)
+  const imp = improvements(p).find((x) => x.key === 'painLife')
+  const best = imp && imp.pct > 0 ? imp.pct : null
+  const week = weeksGrid(c, p, 1).slice(-1)[0]
 
   return (
     <>
@@ -46,14 +51,7 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
             {totalWeeks ? `/${totalWeeks}` : ''}
           </span>
           <h1 className="x-title">Hola, {p.name}</h1>
-          <p className="x-sub">
-            {pend ? `Hoy tienes ${pend} ${pend === 1 ? 'tarea' : 'tareas'}` : items.length ? 'Hoy lo tienes todo hecho' : 'Hoy es día libre'}
-            {st > 0 && (
-              <span className="x-streak">
-                <IcFlame /> {st} {st === 1 ? 'seguida' : 'seguidas'}
-              </span>
-            )}
-          </p>
+          <p className="x-sub">{motivation(c, p, st, best)}</p>
         </div>
         {items.length > 0 && (
           <Ring value={done / items.length} size={60} stroke={6}>
@@ -63,6 +61,17 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
           </Ring>
         )}
       </header>
+
+      {week && (
+        <div className="x-weekstrip" aria-label="Tu semana">
+          {week.cells.map((cell, i) => (
+            <span key={cell.day} className={`ws ${cell.state} ${cell.kind ? 'k-' + cell.kind : ''}`}>
+              <small>{WD[i]}</small>
+              <i>{cell.state === 'done' ? <IcCheck /> : null}</i>
+            </span>
+          ))}
+        </div>
+      )}
 
       {sum && (
         <button className="x-week" onClick={() => nav('/progreso')}>
@@ -78,11 +87,13 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
         </button>
       )}
 
+      <h2 className="x-h2 big">{pend ? `Hoy tienes ${pend} ${pend === 1 ? 'tarea' : 'tareas'}` : items.length ? 'Hoy lo tienes todo hecho' : 'Hoy es día libre'}</h2>
+
       {main && <SessionCard x={main} r={routineFor(c, p, c.today)} c={c} onClick={() => nav(goPath(main.go))} />}
 
       {rest.length > 0 && (
         <section className="x-group">
-          <h2 className="x-h2">{main ? 'También hoy' : 'Hoy'}</h2>
+          {main && <h2 className="x-h2">También hoy</h2>}
           <ul className="x-list">
             {rest.map((x, i) => (
               <li key={i}>
@@ -159,7 +170,7 @@ function SessionCard({ x, r, c, onClick }: { x: TodoItem; r: Routine | null; c: 
   )
 }
 
-/** La fase: corredor/a con su punto de dolor, tramos y su meta. */
+/** La fase: su medalla con el anillo de lo que le falta, la zona de dolor y su meta. */
 function PhaseCard({ p }: { p: Patient }) {
   const nav = useNavigate()
   const ph = currentPhase(p)
@@ -168,11 +179,9 @@ function PhaseCard({ p }: { p: Patient }) {
   const ok = goals.filter((g) => g.ok).length
   return (
     <button className="x-phase" onClick={() => nav('/progreso')}>
-      <span className="x-runner">
-        <Sprite look={p.look} zone={rec ? null : p.zone} scale={2.4} />
-      </span>
+      <PhaseBadge p={p} size={72} />
       <span className="x-ph">
-        <span className="x-over">{rec ? '5 de 5 fases' : `Fase ${ph} de 5`}</span>
+        <span className="x-over">{rec ? '5 de 5 fases' : `Fase ${ph} de 5 · ${ok}/${goals.length} objetivos`}</span>
         <b>{rec ? 'Te has recuperado' : PHASES[ph - 1]}</b>
         <span className="x-seg" aria-hidden="true">
           {[1, 2, 3, 4, 5].map((f) => (
@@ -189,7 +198,11 @@ function PhaseCard({ p }: { p: Patient }) {
             />
           ))}
         </span>
-        {p.objective && <small>Meta: {p.objective}</small>}
+        {!rec && (
+          <span className="zchip">
+            <i /> {zoneLabel(p.zone)}
+          </span>
+        )}
       </span>
       <span className="x-go">
         <IcChevron />

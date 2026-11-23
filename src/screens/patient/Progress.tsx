@@ -4,12 +4,18 @@ import { compliance, currentPhase, painOk, painSeries, recovered, sessionsDone, 
 import type { Patient } from '../../domain/model'
 import { PHASES } from '../../domain/model'
 import { bestStreak, improvements, muscleWork, trainingDays, weeksGrid, type DayKind } from '../../domain/progress'
-import { LineChart } from '../../ui/charts'
+import { CONF_BANDS, PAIN_BANDS, TrendChart } from '../../ui/charts'
 import { IcCheck, IcFlame } from '../../ui/icons'
 import { Medal } from '../../ui/Medal'
 import { Ring } from '../../ui/Ring'
 import { TaskIcon } from '../../ui/TaskIcon'
 import { complianceTone, confidenceTone, painTone, toneVar } from '../../domain/scales'
+
+const METRICS: ['painEx' | 'painLife' | 'mind', string][] = [
+  ['painLife', 'Dolor día a día'],
+  ['painEx', 'Dolor en ejercicios'],
+  ['mind', 'Confianza'],
+]
 
 const KINDS: [DayKind, string][] = [
   ['fuerza', 'Fuerza'],
@@ -25,6 +31,7 @@ const KINDS: [DayKind, string][] = [
  */
 export function Progress({ c, p }: { c: Ctx; p: Patient }) {
   const [more, setMore] = useState(false)
+  const [metric, setMetric] = useState<'painEx' | 'painLife' | 'mind'>('painLife')
   const comp = compliance(c, p)
   const thr = painOk(p)
   const toneOf = (k: string, v: number) => (k === 'mind' ? confidenceTone(v) : painTone(v, thr))
@@ -71,7 +78,7 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
             <div key={x.key}>
               <span>{x.label}</span>
               <b>
-                <span className={`tdot t-${toneOf(x.key, x.from)}`}>{x.from}</span>
+                <span className="pg-from">{x.from}</span>
                 <span className="arr">→</span>
                 <span className={`tchip t-${toneOf(x.key, x.to)}`}>
                   {x.to}
@@ -98,18 +105,34 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
         </section>
       )}
 
-      {/* Dolor y confianza */}
+      {/* Evolución: una métrica cada vez, con sus zonas de color */}
       {se.length >= 2 && (
         <section className="pg-card">
-          <h2 className="pg-h">Dolor y confianza</h2>
-          <LineChart
+          <div className="pg-row">
+            <h2 className="pg-h">Tu evolución</h2>
+            {(() => {
+              const x = imp.find((i) => i.key === metric)
+              return x && x.pct !== 0 ? (
+                <span className={`tchip ${x.pct > 0 ? 't-good' : 't-bad'}`}>
+                  {x.pct > 0 ? 'Mejor' : 'Peor'} {Math.abs(x.pct)}%
+                </span>
+              ) : null
+            })()}
+          </div>
+          <div className="pg-chips">
+            {METRICS.map(([k, l]) => (
+              <button key={k} className={metric === k ? 'on' : ''} onClick={() => setMetric(k)}>
+                {l}
+              </button>
+            ))}
+          </div>
+          <TrendChart
             labels={se.map((x) => fDM(parseD(x.d)))}
-            series={[
-              { name: 'Dolor en ejercicios', color: 'var(--s-painex)', vals: se.map((x) => x.painEx) },
-              { name: 'Dolor día a día', color: 'var(--s-painlife)', vals: se.map((x) => x.painLife), dash: true },
-              { name: 'Confianza', color: 'var(--s-mind)', vals: se.map((x) => x.mind ?? 0) },
-            ]}
+            vals={se.map((x) => (metric === 'mind' ? (x.mind ?? 0) : x[metric]))}
+            tone={(v) => toneOf(metric, v)}
+            bands={metric === 'mind' ? CONF_BANDS : PAIN_BANDS}
           />
+          <p className="pg-note">{metric === 'mind' ? 'Lo ideal: que suba hacia la zona verde.' : 'Lo ideal: que baje hacia la zona verde. Toca la gráfica para ver cada semana.'}</p>
         </section>
       )}
 
