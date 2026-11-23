@@ -8,6 +8,7 @@ import { useCtx } from '../../data/store'
 import { IconBell, IconCal, IconClasses, IconGear, IconHome, IconPhone, IconProg, Logo } from '../../ui/icons'
 import { Classes } from './Classes'
 import { Progress } from './Progress'
+import { Week } from './Week'
 import { Session } from './Session'
 import { goPath } from './goPath'
 import { Home } from './Home'
@@ -59,7 +60,7 @@ function Shell({ p }: { p: Patient }) {
       <div className="phone">
         <Routes>
           <Route path="/" element={<Home c={c} p={p} />} />
-          <Route path="/semana" element={<SoonInline title="Semana" />} />
+          <Route path="/semana" element={<Week c={c} p={p} />} />
           <Route path="/progreso" element={<Progress c={c} p={p} />} />
           <Route path="/carrera" element={<Progress c={c} p={p} />} />
           <Route path="/clases" element={<Classes c={c} p={p} />} />
