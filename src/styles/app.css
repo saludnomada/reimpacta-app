@@ -678,3 +678,53 @@ html[data-theme="light"] .h5-day.k-fuerza i{color:#0A140D;background:color-mix(i
 .wk-extra svg{width:16px;height:16px}
 .wk-extra.due{color:var(--text);font-weight:700}
 .pg-hrow{flex-wrap:wrap}
+
+/* =====================================================================
+   v8 · SOBRIO Y PROFESIONAL (menos "juego")
+   Esquinas más contenidas, títulos menos gruesos, barra inferior fija y plana,
+   botón de entrenar integrado en la barra, menos burbujas y menos color de relleno.
+   ===================================================================== */
+:root{--r-card:16px;--r-ctl:12px}
+/* esquinas */
+.x-session,.h5-rest,.x-list,.x-phase,.h5-days,.pg-card,.pg-goal,.pg-flat,.se-item,.se-card,.wk-sess,.wk-rest,.c-item,.fin-stats div,.sheet .x-cta,a.banner,.x-week{border-radius:var(--r-card)!important}
+.x-cta,.se-ghost,.se-yn button,.se-donebtn,.se-sets input,.se-sets .tk,.wk-nav button:not(.info-btn){border-radius:var(--r-ctl)!important}
+.x-chip{border-radius:8px}
+.tchip,.pg-goals em{border-radius:6px}
+.x-ic,.wk-ic{border-radius:10px}
+.vthumb{border-radius:10px}
+/* títulos: mayúscula pero menos peso */
+.x-title{font-weight:800;font-size:24px;letter-spacing:.01em}
+.h5-head .x-title{font-size:24px}
+.x-s-title{font-weight:800;font-size:17px}
+.x-h2,.pg-h{font-weight:800;letter-spacing:.08em;font-size:12px;color:var(--muted)}
+.pg-h{color:var(--text)}
+.x-tx b,.wk-tx b{font-family:var(--body);font-weight:700;letter-spacing:0;text-transform:none;font-size:15px}
+.wk-tx b{text-transform:capitalize}
+/* barra inferior: fija abajo, plana, a todo el ancho */
+.nav.nav5{left:0;right:0;transform:none;width:100%;max-width:none;bottom:0;border-radius:0;border:0;border-top:1px solid var(--hair);box-shadow:none;padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom));background:var(--card)}
+.nav.nav5 a{min-height:52px;font-size:10.5px;font-weight:600}
+.nav.nav5 a.on::after{content:none}
+.nav.nav5 a.on{color:var(--text)!important}
+.nav.nav5 .gobtn{top:0;gap:3px;justify-content:center}
+.nav.nav5 .gobtn span{width:44px;height:44px;font-size:15px;border:0;box-shadow:none;border-radius:14px}
+.nav.nav5 .gobtn small{font-size:10.5px}
+.phone{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.nav .badge{display:none}
+/* sesión: menos brillo */
+.x-session{border-color:var(--hair);box-shadow:none}
+html[data-theme="light"] .x-session{box-shadow:0 1px 2px rgba(10,20,13,.08)}
+.x-cta{font-family:var(--body);font-weight:700;font-size:15px;letter-spacing:0;padding:13px}
+/* semana en Hoy: puntos más discretos */
+.h5-day i{width:30px;height:30px}
+.h5-day i svg{width:15px;height:15px}
+.h5-days{padding:10px 6px}
+/* escala de dolor: sin rayitas de colores, el color solo al elegir */
+.pscale button{box-shadow:none;border:1px solid var(--hair);background:var(--card)}
+.pscale button.on{border-color:transparent}
+/* lista de semana: menos color de fondo en los iconos */
+.wk-ic{background:var(--card2)!important;color:var(--text)!important;box-shadow:inset 3px 0 0 var(--k)}
+.wk-sess.st-done .wk-ic{background:var(--k)!important;color:#0A140D!important;box-shadow:none}
+/* chips de cabecera */
+.x-chip{padding:4px 9px;font-size:11px}
+/* appbar */
+.appbar{padding-top:10px;padding-bottom:6px}
