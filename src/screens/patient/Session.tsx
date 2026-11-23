@@ -112,7 +112,7 @@ export function Session({ c, p }: { c: Ctx; p: Patient }) {
                   <b>{itemName(c, it)}</b>
                   <span>{doseText(it)}</span>
                   {e?.pain && e.lvl != null && (
-                    <em style={{ color: toneVar(painTone(e.lvl, painOk(p))) }}>Dolor {e.lvl}/10</em>
+                    <em className={`tchip t-${painTone(e.lvl, painOk(p))}`}>Dolor {e.lvl}/10</em>
                   )}
                 </span>
                 <span className={`se-check ${e?.done ? 'on' : ''}`} aria-label={e?.done ? 'Hecho' : 'Sin hacer'}>

@@ -27,7 +27,7 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
   const [more, setMore] = useState(false)
   const comp = compliance(c, p)
   const thr = painOk(p)
-  const toneOf = (k: string, v: number) => toneVar(k === 'mind' ? confidenceTone(v) : painTone(v, thr))
+  const toneOf = (k: string, v: number) => (k === 'mind' ? confidenceTone(v) : painTone(v, thr))
   const se = painSeries(p)
   const imp = improvements(p)
   const best = imp.filter((x) => x.lowGood && x.pct > 0).sort((a, b) => b.pct - a.pct)[0] || imp.find((x) => x.pct > 0)
@@ -71,10 +71,12 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
             <div key={x.key}>
               <span>{x.label}</span>
               <b>
-                <s style={{ color: toneOf(x.key, x.from) }}>{x.from}</s>
+                <span className={`tdot t-${toneOf(x.key, x.from)}`}>{x.from}</span>
                 <span className="arr">→</span>
-                <span style={{ color: toneOf(x.key, x.to) }}>{x.to}</span>
-                <small>/10</small>
+                <span className={`tchip t-${toneOf(x.key, x.to)}`}>
+                  {x.to}
+                  <small>/10</small>
+                </span>
               </b>
             </div>
           ))}
@@ -85,7 +87,7 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
       {comp[2] > 0 && (
         <section className="pg-comp">
           <Ring value={comp[0] / 100} size={74} stroke={8} color={toneVar(complianceTone(comp[0]))}>
-            <b style={{ color: toneVar(complianceTone(comp[0])) }}>{comp[0]}%</b>
+            <b>{comp[0]}%</b>
           </Ring>
           <div>
             <h2 className="pg-h">Cumplimiento</h2>
