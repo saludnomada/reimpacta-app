@@ -1,0 +1,4 @@
+/* Ajustes para React encima de los estilos del prototipo (prototype.css, copiado tal cual). */
+.nav a{text-decoration:none}
+a.banner{text-decoration:none}
+#root{min-height:100vh}
