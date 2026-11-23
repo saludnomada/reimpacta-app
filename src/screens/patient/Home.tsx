@@ -125,7 +125,7 @@ function PhaseCard({ p }: { p: Patient }) {
   const goals = p.goals[ph] || []
   const ok = goals.filter((g) => g.ok).length
   return (
-    <button className="h-phase" onClick={() => nav('/carrera')}>
+    <button className="h-phase" onClick={() => nav('/progreso')}>
       <span className="h-runner">
         <Sprite look={p.look} zone={rec ? null : p.zone} scale={2.6} />
       </span>

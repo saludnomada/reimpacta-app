@@ -5,8 +5,9 @@ import { weekNo, type Ctx } from '../../domain/logic'
 import type { Patient } from '../../domain/model'
 import { notices, type Notice } from '../../domain/patientHome'
 import { useCtx } from '../../data/store'
-import { IconBell, IconCal, IconClasses, IconGear, IconHome, IconPhone, Logo } from '../../ui/icons'
+import { IconBell, IconCal, IconClasses, IconGear, IconHome, IconPhone, IconProg, Logo } from '../../ui/icons'
 import { Classes } from './Classes'
+import { Progress } from './Progress'
 import { goPath } from './goPath'
 import { Home } from './Home'
 import { InstallGuide } from './InstallGuide'
@@ -42,6 +43,9 @@ function Shell({ p }: { p: Patient }) {
           <span>REIMPACTA</span>
         </div>
         <div className="hdr-btns">
+          <button className="icon-btn jone-btn" aria-label="Jone: llamada y WhatsApp" onClick={() => nav('/jone')}>
+            <IconPhone />
+          </button>
           <button className="icon-btn" aria-label="Ajustes" onClick={() => nav('/ajustes')}>
             <IconGear />
           </button>
@@ -55,7 +59,8 @@ function Shell({ p }: { p: Patient }) {
         <Routes>
           <Route path="/" element={<Home c={c} p={p} />} />
           <Route path="/semana" element={<SoonInline title="Semana" />} />
-          <Route path="/carrera" element={<SoonInline title="Mi carrera" />} />
+          <Route path="/progreso" element={<Progress c={c} p={p} />} />
+          <Route path="/carrera" element={<Progress c={c} p={p} />} />
           <Route path="/clases" element={<Classes c={c} p={p} />} />
           <Route path="/jone/*" element={<SoonInline title="Con Jone" />} />
           <Route path="*" element={<Home c={c} p={p} />} />
@@ -87,7 +92,7 @@ function BottomNav({ c, p }: { c: Ctx; p: Patient }) {
         <small>Entrenar</small>
       </button>
       {tab('/clases', 'Clases', <IconClasses />, newCls)}
-      {tab('/jone', 'Jone', <IconPhone />)}
+      {tab('/progreso', 'Progreso', <IconProg />)}
     </nav>
   )
 }
