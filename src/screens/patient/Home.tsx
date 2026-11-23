@@ -6,6 +6,7 @@ import { todayItems, weekSummary, type TodoItem } from '../../domain/patientHome
 import { weeksGrid } from '../../domain/progress'
 import { IcCheck, IcChevron, IcClock, IcPlay } from '../../ui/icons'
 import { TaskIcon } from '../../ui/TaskIcon'
+import { Ring } from '../../ui/Ring'
 import { VideoThumb } from '../../ui/VideoThumb'
 import { goPath } from './goPath'
 import { InstallBanner } from './InstallGuide'
@@ -34,23 +35,23 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
 
   return (
     <>
-      <header className="h5-head">
+      <header className="h5-head h5-row">
+        <div>
         <span className="x-over">
           {dayLabel(c.today)} · Semana {weekNo(c, p)}
           {totalWeeks ? ` de ${totalWeeks}` : ''}
         </span>
         <h1 className="x-title">Hola, {p.name}</h1>
         <p className="h5-sub">{pend ? `Hoy tienes ${pend} ${pend === 1 ? 'tarea' : 'tareas'}` : items.length ? 'Hoy lo tienes todo hecho' : 'Hoy es día libre. Muévete a tu ritmo.'}</p>
+        </div>
         {wk.total > 0 && (
-          <div className="h5-weekcount">
-            <span>
-              Esta semana: <b>{wk.done} de {wk.total} sesiones</b>
-            </span>
-            <span className="h5-wbar" aria-hidden="true">
-              {[...Array(wk.total)].map((_, i) => (
-                <i key={i} className={i < wk.done ? 'ok' : ''} />
-              ))}
-            </span>
+          <div className="h5-ring" aria-label={`Esta semana: ${wk.done} de ${wk.total} sesiones`}>
+            <Ring value={wk.done / wk.total} size={68} stroke={7}>
+              <b>
+                {wk.done}/{wk.total}
+              </b>
+            </Ring>
+            <small>esta semana</small>
           </div>
         )}
       </header>
