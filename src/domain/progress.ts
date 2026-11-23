@@ -115,3 +115,40 @@ export function muscleWork(c: Ctx, p: Patient, days = 28): { name: string; sets:
     .map(([name, sets]) => ({ name, sets }))
     .sort((a, b) => b.sets - a.sets)
 }
+
+/** Todo lo que ya lleva conseguido, en números grandes. */
+export function totals(c: Ctx, p: Patient) {
+  let sessions = 0,
+    minutes = 0,
+    sets = 0
+  Object.entries(p.sessions).forEach(([k, s]) => {
+    if (s.status !== 'done') return
+    sessions++
+    minutes += Math.round((s.elapsed || 0) / 6e4)
+    const r = routineFor(c, p, parseD(k))
+    if (r) s.ex.forEach((e) => (sets += (e.sets || []).filter(setOk).length))
+  })
+  const weeks = Math.max(0, Math.floor(diffDays(monday(parseD(p.start)), c.today) / 7) + 1)
+  const imp = improvements(p).find((x) => x.key === 'painLife')
+  const testsOk = Object.values(p.recs).reduce((a, r) => a + Object.values(r.passed || {}).filter(Boolean).length, 0)
+  return { sessions, minutes, sets, weeks, medals: p.done, painDrop: imp && imp.pct > 0 ? imp.pct : null, best: bestStreak(c, p), testsOk }
+}
+
+export interface Milestone {
+  id: string
+  icon: 'flag' | 'flame' | 'dumbbell' | 'medal' | 'down' | 'calendar' | 'check'
+  title: string
+}
+/** Hitos ya conseguidos (solo los conseguidos: esto es para celebrar, no para señalar lo que falta). */
+export function milestones(c: Ctx, p: Patient): Milestone[] {
+  const t = totals(c, p)
+  const out: Milestone[] = []
+  if (t.sessions >= 1) out.push({ id: 's1', icon: 'flag', title: 'Primera sesión' })
+  if (t.weeks >= 2 && t.sessions >= 3) out.push({ id: 'w1', icon: 'calendar', title: 'Primera semana' })
+  ;[10, 25, 50, 100].forEach((n) => t.sessions >= n && out.push({ id: 's' + n, icon: 'dumbbell', title: `${n} sesiones` }))
+  ;[5, 10, 20].forEach((n) => t.best >= n && out.push({ id: 'r' + n, icon: 'flame', title: `Racha de ${n}` }))
+  for (let f = 1; f <= p.done; f++) out.push({ id: 'f' + f, icon: 'medal', title: `Fase ${f} superada` })
+  if (t.testsOk) out.push({ id: 't', icon: 'check', title: `${t.testsOk} ${t.testsOk === 1 ? 'test superado' : 'tests superados'}` })
+  if (t.painDrop && t.painDrop >= 50) out.push({ id: 'half', icon: 'down', title: 'Dolor a la mitad' })
+  return out.reverse() // lo más reciente/grande primero
+}

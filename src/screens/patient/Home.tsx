@@ -14,6 +14,7 @@ import { TaskIcon } from '../../ui/TaskIcon'
 import { VideoThumb } from '../../ui/VideoThumb'
 import { goPath } from './goPath'
 import { InstallBanner } from './InstallGuide'
+import { Achieved } from '../../ui/Achieved'
 
 /** "STEP DOWN DERECHO" → "Step down derecho" */
 export const sentence = (t: string) => (t ? t.charAt(0) + t.slice(1).toLowerCase() : t)
@@ -44,6 +45,7 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
 
   return (
     <>
+      <section className="x-hero">
       <header className="x-head">
         <div>
           <span className="x-over">
@@ -72,6 +74,7 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
           ))}
         </div>
       )}
+      </section>
 
       {sum && (
         <button className="x-week" onClick={() => nav('/progreso')}>
@@ -115,6 +118,7 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
         </section>
       )}
 
+      <Achieved c={c} p={p} compact />
       <PhaseCard p={p} />
       <InstallBanner />
     </>

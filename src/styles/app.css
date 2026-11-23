@@ -532,3 +532,43 @@ html[data-theme="light"] .x-seg i.cur{box-shadow:inset 0 0 0 1px rgba(10,20,13,.
 .pg-medals .cur small{color:var(--text);font-weight:700}
 html[data-theme="light"] .pbadge svg circle:first-of-type{stroke:#E4E9DF}
 .zchip{background:var(--card2)}
+
+/* =====================================================================
+   v5 · Cabecera de marca y "Lo que ya has conseguido"
+   ===================================================================== */
+.phone{gap:18px}
+/* bloque oscuro de marca: saludo, ánimo, anillo y semana */
+.x-hero{background:var(--ink);color:var(--on-ink);border-radius:28px;padding:18px 16px 14px;display:flex;flex-direction:column;gap:16px;border:1px solid rgba(208,251,0,.14);position:relative;overflow:hidden}
+.x-hero::after{content:"";position:absolute;right:-60px;top:-60px;width:180px;height:180px;border-radius:50%;border:28px solid rgba(208,251,0,.05);pointer-events:none}
+.x-hero .x-over{color:var(--on-ink-2)}
+.x-hero .x-title{color:#fff;font-size:28px}
+.x-hero .x-sub{color:#E3ECE5;opacity:1}
+.x-hero .ring2 circle:first-child{stroke:rgba(255,255,255,.12)}
+.x-hero .ring2-c b{color:#fff}
+.x-hero .x-weekstrip{background:rgba(255,255,255,.04);border:0;border-radius:18px;padding:10px 8px 12px}
+.x-hero .ws small{color:var(--on-ink-2)}
+.x-hero .ws.now small{color:var(--lime)}
+.x-hero .ws.miss i{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.14)}
+.x-hero .ws.rest i::after{background:rgba(255,255,255,.18)}
+.x-hero .ws.future i{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.16)}
+html[data-theme="light"] .x-hero{box-shadow:0 20px 40px -24px rgba(10,20,13,.6)}
+
+/* lo conseguido */
+.ach{display:flex;flex-direction:column;gap:10px}
+.ach-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ach.compact .ach-tiles{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px;padding:0 18px 4px;scrollbar-width:none}
+.ach.compact .ach-tiles::-webkit-scrollbar{display:none}
+.ach-t{background:var(--card);border:1px solid var(--hair);border-radius:18px;padding:14px 12px;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;min-height:92px;scroll-snap-align:start}
+.ach.compact .ach-t{flex:0 0 118px}
+.ach-t b{font-family:var(--display);font-weight:900;font-size:26px;line-height:1;letter-spacing:-.01em;color:var(--text);font-variant-numeric:tabular-nums}
+.ach-t span{font-size:12.5px;color:var(--muted);line-height:1.25}
+.ach-t.hero{background:var(--lime);border-color:var(--lime);grid-column:1/-1;min-height:110px}
+.ach.compact .ach-t.hero{flex:0 0 168px}
+.ach-t.hero b{color:#0A140D;font-size:40px}
+.ach-t.hero span{color:#0A140D;opacity:.75;font-weight:600}
+.ach-ms{display:flex;flex-wrap:wrap;gap:8px}
+.ach.compact .ach-ms{flex-wrap:nowrap;overflow-x:auto;margin:0 -18px;padding:0 18px 2px;scrollbar-width:none}
+.ach-m{display:inline-flex;align-items:center;gap:8px;flex-shrink:0;background:var(--card);border:1px solid var(--hair);border-radius:999px;padding:5px 14px 5px 5px;font-size:13px;font-weight:700;color:var(--text);white-space:nowrap}
+.ach-m i{width:28px;height:28px;border-radius:50%;background:var(--lime);color:#0A140D;display:grid;place-items:center}
+.ach-m i svg{width:15px;height:15px}
+.x-hero::after{content:none}

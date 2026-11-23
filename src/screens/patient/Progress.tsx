@@ -8,6 +8,7 @@ import { CONF_BANDS, PAIN_BANDS, TrendChart } from '../../ui/charts'
 import { IcCheck, IcFlame } from '../../ui/icons'
 import { Medal } from '../../ui/Medal'
 import { Ring } from '../../ui/Ring'
+import { Achieved } from '../../ui/Achieved'
 import { TaskIcon } from '../../ui/TaskIcon'
 import { complianceTone, confidenceTone, painTone, toneVar } from '../../domain/scales'
 
@@ -37,7 +38,6 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
   const toneOf = (k: string, v: number) => (k === 'mind' ? confidenceTone(v) : painTone(v, thr))
   const se = painSeries(p)
   const imp = improvements(p)
-  const best = imp.filter((x) => x.lowGood && x.pct > 0).sort((a, b) => b.pct - a.pct)[0] || imp.find((x) => x.pct > 0)
   const ph = currentPhase(p)
   const rec = recovered(p)
   const goals = p.goals[ph] || []
@@ -55,21 +55,7 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
         <h1 className="h-hello">Tu progreso</h1>
       </div>
 
-      {/* La cifra */}
-      {best ? (
-        <section className="pg-hero">
-          <span className="h-k">Desde que empezaste</span>
-          <div className="pg-num">{best.pct}%</div>
-          <p>
-            {best.lowGood ? 'menos' : 'más'} {best.label.toLowerCase()}
-          </p>
-        </section>
-      ) : (
-        <section className="pg-flat">
-          <span className="h-k2">Tu evolución</span>
-          <p>Aparece en cuanto rellenes tus dos primeros cuestionarios de los viernes.</p>
-        </section>
-      )}
+      <Achieved c={c} p={p} />
 
       {/* Antes → ahora */}
       {imp.length > 0 && (
