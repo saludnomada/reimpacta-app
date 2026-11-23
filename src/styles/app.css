@@ -572,3 +572,38 @@ html[data-theme="light"] .x-hero{box-shadow:0 20px 40px -24px rgba(10,20,13,.6)}
 .ach-m i{width:28px;height:28px;border-radius:50%;background:var(--lime);color:#0A140D;display:grid;place-items:center}
 .ach-m i svg{width:15px;height:15px}
 .x-hero::after{content:none}
+
+/* =====================================================================
+   v6 · HOY LIMPIA: lo de hoy arriba, «Esta semana» al final
+   ===================================================================== */
+.h5-head{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.h5-head .x-title{font-size:28px;margin:4px 0 0}
+.h5-sub{margin:2px 0 0;font-size:16px;color:var(--muted)}
+.h5-week{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.h5-days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:var(--card);border:1px solid var(--hair);border-radius:20px;padding:12px 8px}
+.h5-day{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:0;color:var(--text);cursor:pointer}
+.h5-day.free{cursor:default}
+.h5-day small{font-size:11px;font-weight:700;color:var(--dim)}
+.h5-num{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted)}
+.h5-day i{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;margin-top:2px}
+.h5-day i svg{width:17px;height:17px}
+/* toca ese día: anillo del color del tipo, con su icono */
+.h5-day.k-fuerza i,.h5-day.k-movilidad i,.h5-day.k-correr i{box-shadow:inset 0 0 0 2px var(--k);color:var(--k)}
+html[data-theme="light"] .h5-day.k-fuerza i{color:#0A140D;background:color-mix(in srgb,var(--lime) 30%,transparent);box-shadow:inset 0 0 0 2px var(--lime)}
+/* hecho: relleno */
+.h5-day.done i{background:var(--k);color:#fff;box-shadow:none}
+.h5-day.done.k-fuerza i{color:#0A140D}
+/* sin hacer: apagado */
+.h5-day.miss i{opacity:.4}
+/* hoy */
+.h5-day.now small,.h5-day.now .h5-num{color:var(--text)}
+.h5-day.now .h5-num{background:var(--text);color:var(--bg);border-radius:999px;padding:0 6px}
+/* descanso */
+.h5-day.free i::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--ring-track)}
+.h5-leg{display:flex;gap:16px;justify-content:center;font-size:12.5px;color:var(--muted);font-weight:600}
+.h5-leg span{display:inline-flex;align-items:center;gap:6px}
+.h5-leg i{width:10px;height:10px;border-radius:50%;background:var(--k)}
+.x-list{margin-top:-4px}
+.h5-rest{background:var(--ink);color:#fff;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:6px;border:1px solid rgba(208,251,0,.14)}
+.h5-rest b{font-family:var(--display);font-weight:800;font-size:20px;text-transform:uppercase;color:var(--lime)}
+.h5-rest span{font-size:14.5px;color:#DDE6DF;line-height:1.45}

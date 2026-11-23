@@ -88,7 +88,7 @@ export function Session({ c, p }: { c: Ctx; p: Patient }) {
           <TaskIcon k={sType(r) || 'fuerza'} /> {sessName(r)}
         </span>
         <span className="se-count">
-          {doneN}/{r.items.length} ejercicios
+          {doneN}/{r.items.length} {r.items.length === 1 ? 'ejercicio' : 'ejercicios'}
         </span>
       </div>
       <div className="se-bar" aria-hidden="true">
