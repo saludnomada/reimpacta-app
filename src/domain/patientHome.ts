@@ -16,9 +16,14 @@ import {
   recItems,
   routineFor,
   sessName,
+  sType,
   weekNo,
 } from './logic'
-import type { Patient } from './model'
+import type { Patient, Routine } from './model'
+
+/** Emoji de cada tipo de sesión */
+export const sessionIcon = (r: Routine | null) =>
+  ({ movilidad: '🧘', fuerza: '💪', caco: '🏃', correr: '🏃' } as Record<string, string>)[sType(r) || ''] || '💪'
 
 /** Adónde lleva tocar una tarea o un aviso */
 export type Go =
@@ -29,6 +34,7 @@ export type Go =
   | { to: 'classes' }
 
 export interface TodoItem {
+  icon: string // emoji que se ve al lado, para entenderlo sin leer
   title: string
   sub: string
   go: Go
@@ -49,12 +55,12 @@ export function todayItems(c: Ctx, p: Patient): TodoItem[] {
     const n = r.items.length
     const hechos = s ? s.ex.filter((e) => e.done).length : 0
     if (s && s.status === 'done')
-      items.push({ done: true, go: { to: 'session', day: k }, title: sessName(r), sub: `Hecha · ${n} ejercicios. Toca para revisarla` })
+      items.push({ icon: sessionIcon(r), done: true, go: { to: 'session', day: k }, title: sessName(r), sub: `Hecha · ${n} ejercicios. Toca para revisarla` })
     else if (s && s.status === 'active' && hechos)
-      items.push({ main: true, go: { to: 'session', day: k }, title: sessName(r), sub: `En marcha: ${hechos}/${n} hechos. Sigue donde lo dejaste` })
+      items.push({ icon: sessionIcon(r), main: true, go: { to: 'session', day: k }, title: sessName(r), sub: `En marcha: ${hechos}/${n} hechos. Sigue donde lo dejaste` })
     else if (s && s.status === 'partial')
-      items.push({ main: true, go: { to: 'session', day: k }, title: sessName(r), sub: `A medias: ${hechos}/${n} hechos. Retoma donde lo dejaste` })
-    else items.push({ main: true, go: { to: 'session', day: k }, title: sessName(r), sub: `${n} ejercicios · ~${estMin(r)} min` })
+      items.push({ icon: sessionIcon(r), main: true, go: { to: 'session', day: k }, title: sessName(r), sub: `A medias: ${hechos}/${n} hechos. Retoma donde lo dejaste` })
+    else items.push({ icon: sessionIcon(r), main: true, go: { to: 'session', day: k }, title: sessName(r), sub: `${n} ejercicios · ~${estMin(r)} min` })
   }
 
   // 2. lo que quedó pendiente esta semana
@@ -62,6 +68,7 @@ export function todayItems(c: Ctx, p: Patient): TodoItem[] {
   if (missed.length > 1) {
     const [d] = missed[0]
     items.push({
+      icon: '⏳',
       co: true,
       go: { to: 'session', day: isoD(d) },
       title: `Te quedaron ${missed.length} sesiones pendientes`,
@@ -71,6 +78,7 @@ export function todayItems(c: Ctx, p: Patient): TodoItem[] {
     missed.forEach(([d, r2, s2]) => {
       const g = goodDay(c, p)
       items.push({
+        icon: '⏳',
         co: true,
         go: { to: 'session', day: isoD(d) },
         title: `Te quedó pendiente: ${sessName(r2)}`,
@@ -88,13 +96,14 @@ export function todayItems(c: Ctx, p: Patient): TodoItem[] {
 
   // 3. cuestionario del viernes
   const fISO = tt.getDay() === 0 || tt.getDay() >= 5 ? isoD(fridayOf(tt)) : null
-  if (pendingFriday(c, p)) items.push({ go: { to: 'friday' }, title: 'Cuestionario del viernes', sub: '5 preguntas, menos de un minuto' })
-  else if (fISO && p.fridays[fISO]) items.push({ done: true, go: { to: 'friday' }, title: 'Cuestionario del viernes', sub: 'Enviado. ¡Gracias!' })
+  if (pendingFriday(c, p)) items.push({ icon: '📝', go: { to: 'friday' }, title: 'Cuestionario del viernes', sub: '5 preguntas, menos de un minuto' })
+  else if (fISO && p.fridays[fISO]) items.push({ icon: '📝', done: true, go: { to: 'friday' }, title: 'Cuestionario del viernes', sub: 'Enviado. ¡Gracias!' })
 
   // 4. grabarse
   const chk = pendingRec(c, p)
   if (chk)
     items.push({
+      icon: '🎥',
       co: true,
       go: { to: 'recordings' },
       title: `Grábate: ${chk.label.toLowerCase()}`,
@@ -104,9 +113,9 @@ export function todayItems(c: Ctx, p: Patient): TodoItem[] {
   // 5. llamada
   const bk = myBooking(c, p)
   if (bk && isoD(new Date(bk.at)) === k)
-    items.push({ go: { to: 'call' }, title: 'Llamada con Jone', sub: `Hoy a las ${fTime(new Date(bk.at))} · 30 min` })
+    items.push({ icon: '📞', go: { to: 'call' }, title: 'Llamada con Jone', sub: `Hoy a las ${fTime(new Date(bk.at))} · 30 min` })
   else if (!bk && !earliestCall(c, p))
-    items.push({ go: { to: 'call' }, title: 'Agenda tu llamada', sub: 'Ya puedes reservar tu próxima llamada conmigo' })
+    items.push({ icon: '📞', go: { to: 'call' }, title: 'Agenda tu llamada', sub: 'Ya puedes reservar tu próxima llamada conmigo' })
 
   return items
 }

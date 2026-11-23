@@ -115,6 +115,7 @@ export interface FollowUp {
 export interface PatientSettings {
   notif: 'push' | 'app'
   reminder: string // "08:00"
+  theme?: 'auto' | 'claro' | 'oscuro' // fondo de la app que elige la paciente
   callDay?: boolean
   callHour?: boolean
 }

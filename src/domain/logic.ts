@@ -251,3 +251,23 @@ export function daysLeft(c: Ctx, p: Patient) {
   const e = endOf(p)
   return e ? diffDays(c.today, e) : null
 }
+
+/* ---------- racha y logros (para motivar a volver cada día) ---------- */
+/**
+ * Racha: sesiones seguidas hechas, contando hacia atrás desde hoy.
+ * Los días sin sesión (descanso) no la rompen. La sesión de hoy suma si ya está hecha,
+ * y si aún no la ha hecho no rompe la racha (todavía tiene el día).
+ */
+export function streak(c: Ctx, p: Patient): number {
+  const start = parseD(p.start)
+  let n = 0
+  for (let d = c.today, i = 0; d >= start && i < 400; d = addD(d, -1), i++) {
+    if (!routineFor(c, p, d)) continue
+    const s = p.sessions[isoD(d)]
+    const done = !!s && s.status === 'done'
+    if (done) n++
+    else if (isoD(d) !== isoD(c.today)) break
+  }
+  return n
+}
+export const sessionsDone = (p: Patient) => Object.values(p.sessions).filter((s) => s.status === 'done').length

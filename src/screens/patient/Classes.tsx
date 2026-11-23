@@ -19,7 +19,7 @@ export function Classes({ c, p }: { c: Ctx; p: Patient }) {
     <>
       <div className="h-top">
         <h1 className="h-hello">Tus clases</h1>
-        <p className="h-count" style={{ display: 'block' }}>
+        <p className="c-intro">
           Tu recuperación no son solo ejercicios: tu dolor, tu descanso, lo que comes y tu cabeza también cuentan. Vuelve a verlas cuando lo
           necesites.
         </p>
@@ -48,7 +48,7 @@ export function Classes({ c, p }: { c: Ctx; p: Patient }) {
             {locked.map((v) => (
               <li key={v.id}>
                 <div className="h-row locked">
-                  <span className="h-tick">
+                  <span className="h-ic">
                     <Lock />
                   </span>
                   <span className="h-tx">

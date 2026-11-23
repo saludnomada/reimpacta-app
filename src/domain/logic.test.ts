@@ -81,3 +81,21 @@ describe('pantalla Hoy', () => {
     for (const p of c.st.patients) for (const n of notices(c, p)) expect(n.title + n.body).not.toMatch(/recordatorio/i)
   })
 })
+
+describe('racha', () => {
+  it('cuenta sesiones seguidas hechas; los días de descanso no la rompen y hoy sin hacer tampoco', async () => {
+    const { streak } = await import('./logic')
+    const c = ctx(addD(MON, 4)) // viernes
+    const p = c.st.patients.find((x) => x.id === 'a3')! // L-X-V
+    p.start = isoD(MON)
+    p.sessions = {}
+    const done = (d: Date) => (p.sessions[isoD(d)] = { status: 'done', ex: [] })
+    done(MON)
+    done(addD(MON, 2))
+    expect(streak(c, p)).toBe(2) // viernes aún sin hacer: no rompe
+    done(addD(MON, 4))
+    expect(streak(c, p)).toBe(3)
+    delete p.sessions[isoD(MON)]
+    expect(streak(c, p)).toBe(2) // el lunes sin hacer corta la racha
+  })
+})

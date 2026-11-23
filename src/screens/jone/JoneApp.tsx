@@ -4,6 +4,7 @@ import { compliance, currentPhase, recovered, weekNo } from '../../domain/logic'
 import { PHASES } from '../../domain/model'
 import { Logo } from '../../ui/icons'
 import { Sprite } from '../../ui/Sprite'
+import { useApplyTheme } from '../../ui/theme'
 
 const TABS: [string, string][] = [
   ['pacientes', 'Pacientes'],
@@ -18,6 +19,7 @@ const TABS: [string, string][] = [
 
 /** Panel de Jone. En el bloque 1 solo el esqueleto: el contenido llega en los bloques 3 y 4. */
 export function JoneApp() {
+  useApplyTheme('oscuro') // tu panel, siempre en oscuro
   const c = useCtx()
   const [tab, setTab] = useState('pacientes')
   // de menos a más semanas

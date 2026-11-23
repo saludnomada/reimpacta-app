@@ -10,15 +10,18 @@ import { Classes } from './Classes'
 import { goPath } from './goPath'
 import { Home } from './Home'
 import { InstallGuide } from './InstallGuide'
+import { Settings } from './Settings'
+import { useApplyTheme } from '../../ui/theme'
 
 export function PatientApp({ p }: { p: Patient }) {
+  useApplyTheme(p.settings.theme)
   return (
     <Routes>
       <Route path="/instalar" element={<InstallGuide />} />
       <Route path="/sesion/:day" element={<Soon title="Tu sesión" />} />
       <Route path="/viernes" element={<Soon title="Cuestionario del viernes" />} />
       <Route path="/grabarte" element={<Soon title="Grábate" />} />
-      <Route path="/ajustes" element={<Soon title="Ajustes" />} />
+      <Route path="/ajustes" element={<Settings p={p} />} />
       <Route path="*" element={<Shell p={p} />} />
     </Routes>
   )

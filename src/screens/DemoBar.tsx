@@ -5,6 +5,7 @@ import { SampleBackend } from '../data/sampleBackend'
 import { useStore } from '../data/store'
 import { addD, isoD, monday } from '../domain/dates'
 import { sampleState } from '../data/sample'
+import { setPatientSetting } from '../data/actions'
 
 /** Barra de prueba (solo con datos de ejemplo): ver como paciente o como Jone, y simular otro día. */
 export function DemoBar() {
@@ -50,6 +51,15 @@ export function DemoBar() {
             ))}
           </select>
         </label>
+      )}
+      {s.session.role === 'paciente' && p && (
+        <div className="seg">
+          {(['claro', 'oscuro'] as const).map((t) => (
+            <button key={t} className={(p.settings.theme || 'auto') === t ? 'on' : ''} onClick={() => setPatientSetting(p.id, 'theme', t)}>
+              {t === 'claro' ? '☀️ Claro' : '🌙 Oscuro'}
+            </button>
+          ))}
+        </div>
       )}
       <label>
         Día simulado <input type="date" value={isoD(today)} onChange={(e) => go(e.target.value || null)} />
