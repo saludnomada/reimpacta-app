@@ -48,3 +48,9 @@ export const IconShare = () => (
     <path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8" />
   </svg>
 )
+export const IconClasses = () => (
+  <svg viewBox="0 0 24 24">
+    <path d="M2 8.5 12 4l10 4.5-10 4.5z" />
+    <path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5M22 8.5V14" />
+  </svg>
+)

@@ -1,29 +1,15 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Route, Routes, useNavigate } from 'react-router-dom'
-import { diffDays, fLong, isoD, monday, parseD } from '../../domain/dates'
-import { compliance, currentPhase, endOf, recovered, weekNo, type Ctx } from '../../domain/logic'
+import { isoD } from '../../domain/dates'
+import { weekNo, type Ctx } from '../../domain/logic'
 import type { Patient } from '../../domain/model'
-import { PHASES } from '../../domain/model'
-import { notices, todayItems, type Go, type Notice, type TodoItem } from '../../domain/patientHome'
+import { notices, type Notice } from '../../domain/patientHome'
 import { useCtx } from '../../data/store'
-import { IconBell, IconCal, IconGear, IconHome, IconPhone, IconProg, Logo } from '../../ui/icons'
-import { RaceTrack } from '../../ui/RaceTrack'
-import { InstallBanner, InstallGuide } from './InstallGuide'
-
-function goPath(g: Go): string {
-  switch (g.to) {
-    case 'session':
-      return `/sesion/${g.day}`
-    case 'friday':
-      return '/viernes'
-    case 'recordings':
-      return '/grabarte'
-    case 'call':
-      return '/jone'
-    case 'classes':
-      return '/jone/clases'
-  }
-}
+import { IconBell, IconCal, IconClasses, IconGear, IconHome, IconPhone, Logo } from '../../ui/icons'
+import { Classes } from './Classes'
+import { goPath } from './goPath'
+import { Home } from './Home'
+import { InstallGuide } from './InstallGuide'
 
 export function PatientApp({ p }: { p: Patient }) {
   return (
@@ -67,6 +53,7 @@ function Shell({ p }: { p: Patient }) {
           <Route path="/" element={<Home c={c} p={p} />} />
           <Route path="/semana" element={<SoonInline title="Semana" />} />
           <Route path="/carrera" element={<SoonInline title="Mi carrera" />} />
+          <Route path="/clases" element={<Classes c={c} p={p} />} />
           <Route path="/jone/*" element={<SoonInline title="Con Jone" />} />
           <Route path="*" element={<Home c={c} p={p} />} />
         </Routes>
@@ -96,92 +83,9 @@ function BottomNav({ c, p }: { c: Ctx; p: Patient }) {
         <span>▶</span>
         <small>Entrenar</small>
       </button>
-      {tab('/carrera', 'Mi carrera', <IconProg />)}
-      {tab('/jone', 'Jone', <IconPhone />, newCls)}
+      {tab('/clases', 'Clases', <IconClasses />, newCls)}
+      {tab('/jone', 'Jone', <IconPhone />)}
     </nav>
-  )
-}
-
-function Home({ c, p }: { c: Ctx; p: Patient }) {
-  const nav = useNavigate()
-  const tt = c.today
-  const ph = currentPhase(p)
-  const rec = recovered(p)
-  const goals = p.goals[ph] || []
-  const left = goals.filter((g) => !g.ok).length
-  const [pct, , sch] = compliance(c, p)
-  const items = todayItems(c, p)
-  const pend = items.filter((x) => !x.done).length
-  const end = endOf(p)
-  const totalWeeks = end && !rec ? Math.round(diffDays(monday(parseD(p.start)), end) / 7) : null
-
-  return (
-    <>
-      <div className="p-top">
-        <div>
-          <div className="date">
-            {fLong(tt)} · semana {weekNo(c, p)}
-            {totalWeeks ? ` de ${totalWeeks}` : ''}
-          </div>
-          <div className="hello">Hola, {p.name}</div>
-        </div>
-      </div>
-      <div className="todohead">
-        <span>
-          {pend ? (
-            <>
-              Hoy tienes{' '}
-              <b>
-                {pend} {pend === 1 ? 'tarea' : 'tareas'}
-              </b>
-            </>
-          ) : items.length ? (
-            <>
-              <b>¡Hoy lo tienes todo hecho!</b> 🎉
-            </>
-          ) : (
-            <>
-              <b>Hoy es día libre.</b> Muévete a tu ritmo y disfruta.
-            </>
-          )}
-        </span>
-        {sch > 0 && <span className="cmini">{pct}% cumplido</span>}
-      </div>
-      <div className="todos">
-        {items.map((x, i) => (
-          <TodoRow key={i} x={x} onClick={() => nav(goPath(x.go))} />
-        ))}
-      </div>
-      <InstallBanner />
-      <button className="race compact" onClick={() => nav('/carrera')}>
-        <div className="top">
-          <div>
-            <span className="lbl">{rec ? '5 de 5 fases' : `Fase ${ph} de 5`}</span>
-            <h2>{rec ? '¡Te has recuperado!' : PHASES[ph - 1]}</h2>
-          </div>
-          <span className="more">
-            {rec ? '' : left ? `${goals.length - left}/${goals.length} objetivos` : 'Objetivos cumplidos'} ›
-          </span>
-        </div>
-        <RaceTrack p={p} scale={2} />
-        <div className="gl">
-          <span style={{ color: 'var(--lime)', fontWeight: 700 }}>Tu meta:</span> {p.objective}
-        </div>
-      </button>
-    </>
-  )
-}
-
-function TodoRow({ x, onClick }: { x: TodoItem; onClick: () => void }) {
-  return (
-    <button className={`todo ${x.main ? 'main' : ''} ${x.done ? 'done' : ''} ${x.co ? 'co' : ''}`} onClick={onClick}>
-      <span className="tick">{x.done ? '✓' : ''}</span>
-      <span className="tx">
-        <b>{x.title}</b>
-        <small>{x.sub}</small>
-      </span>
-      <span className="go">›</span>
-    </button>
   )
 }
 

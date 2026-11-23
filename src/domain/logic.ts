@@ -169,11 +169,14 @@ export function lastCall(c: Ctx, p: Patient) {
     .filter((b) => b.patient === p.id && +new Date(b.at) <= c.now)
     .sort((a, b) => (a.at < b.at ? 1 : -1))[0]
 }
-/** Primer día en que puede reservar la siguiente llamada, o null si ya puede */
+/**
+ * Primer día en que puede reservar la siguiente llamada, o null si ya puede.
+ * Regla: 15 días desde la última llamada; la primera, 15 días desde que empieza.
+ */
 export function earliestCall(c: Ctx, p: Patient): Date | null {
   const lc = lastCall(c, p)
-  if (!lc) return null
-  const e = addD(new Date(lc.at), 15)
+  const from = lc ? new Date(lc.at) : parseD(p.start)
+  const e = addD(from, 15)
   return e > c.today ? e : null
 }
 

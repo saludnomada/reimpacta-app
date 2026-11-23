@@ -47,6 +47,14 @@ export function sampleState(T: Date = todayReal()): AppState {
     vis: hidden ? 'oculto' : 'visible',
     url: '',
   }))
+  const DESC: Record<string, string> = {
+    v1: 'Qué está pasando en tu lesión, por qué duele y cómo vamos a trabajarla. Entenderlo te quita miedo y te ayuda a leer las señales de tu cuerpo.',
+    v20: 'Qué comer para que tus tejidos se recuperen y tengas energía para entrenar. Sin dietas raras: pequeños cambios que suman.',
+    v21: 'El miedo a que vuelva el dolor cambia cómo corres. Aquí trabajamos la confianza para que vuelvas a correr con tranquilidad.',
+    v22: 'Dormir bien y recuperar entre sesiones también es parte del tratamiento. Cómo descansar mejor sin dejar de moverte.',
+    v23: 'Cómo planificar tus kilómetros y tus entrenamientos para volver a correr y no recaer.',
+  }
+  V.forEach((v) => DESC[v.id] && (v.desc = DESC[v.id]))
   const vt = (id: string) => V.find((v) => v.id === id)!.type
   const it = (v: string, sets: number, amount: number, kg = '') => ({
     v,

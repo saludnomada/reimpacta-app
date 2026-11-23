@@ -46,6 +46,12 @@ describe('llamadas cada 15 días', () => {
     c.st.bookings = [{ id: 'x', patient: p.id, at: addD(MON, -15).toISOString() }]
     expect(earliestCall(c, p)).toBeNull()
   })
+  it('la primera llamada se puede reservar a los 15 días de empezar', () => {
+    const c = ctx(MON)
+    const p = c.st.patients.find((x) => x.id === 'a3')! // empieza hoy, sin llamadas
+    expect(isoD(earliestCall(c, p)!)).toBe(isoD(addD(MON, 15)))
+    expect(todayItems(c, p).some((x) => x.title === 'Agenda tu llamada')).toBe(false)
+  })
 })
 
 describe('programa', () => {
