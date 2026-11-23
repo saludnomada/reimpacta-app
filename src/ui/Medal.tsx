@@ -19,9 +19,9 @@ export function Medal({ n, size = 52, state = 'on' }: { n: number; size?: number
   return (
     <svg viewBox="0 0 64 80" width={size} height={(size * 80) / 64} role="img" aria-label={`Medalla ${n}: ${PHASES[n - 1]}${on ? '' : state === 'cur' ? ' (en curso)' : ' (bloqueada)'}`}>
       <path d="M22 2h9l-3 22h-9zM42 2h-9l3 22h9z" fill={on ? m.fill : 'none'} opacity={on ? 0.55 : 1} stroke={on ? 'none' : 'var(--line)'} strokeWidth="1.5" />
-      <circle cx="32" cy="50" r="24" fill={on ? m.fill : 'none'} stroke={on ? 'none' : state === 'cur' ? 'var(--coral)' : 'var(--line)'} strokeWidth="2.5" strokeDasharray={state === 'cur' ? '5 4' : undefined} />
+      <circle cx="32" cy="50" r="24" fill={on ? m.fill : 'none'} stroke={on ? 'none' : state === 'cur' ? 'var(--lime)' : 'var(--line)'} strokeWidth="2.5" strokeDasharray={state === 'cur' ? '5 4' : undefined} />
       <circle cx="32" cy="50" r="18" fill="none" stroke={on ? m.ink : 'transparent'} strokeOpacity=".35" strokeWidth="1.5" />
-      <text x="32" y="58" textAnchor="middle" fontFamily="Montserrat, sans-serif" fontWeight="900" fontSize="22" fill={on ? m.ink : state === 'cur' ? 'var(--coral-t)' : 'var(--dim)'}>
+      <text x="32" y="58" textAnchor="middle" fontFamily="Montserrat, sans-serif" fontWeight="900" fontSize="22" fill={on ? m.ink : state === 'cur' ? 'var(--text)' : 'var(--dim)'}>
         {n}
       </text>
     </svg>

@@ -525,3 +525,10 @@ html[data-theme="light"] .tc-band.t-good{opacity:.32}
 .tc-bub{fill:var(--tc)}
 .tc-bubt{font-family:var(--display);font-weight:900;font-size:13px;fill:#0A140D}
 .tc-bubt.t-stop{fill:#fff}
+
+/* La fase en curso se ve en lima (avance), nunca en coral: el coral es solo para lo pendiente */
+.x-seg i.cur,.h-seg i.cur{background:linear-gradient(90deg,var(--lime) var(--fill),color-mix(in srgb,var(--lime) 22%,transparent) var(--fill))}
+html[data-theme="light"] .x-seg i.cur{box-shadow:inset 0 0 0 1px rgba(10,20,13,.08)}
+.pg-medals .cur small{color:var(--text);font-weight:700}
+html[data-theme="light"] .pbadge svg circle:first-of-type{stroke:#E4E9DF}
+.zchip{background:var(--card2)}

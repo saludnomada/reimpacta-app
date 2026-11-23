@@ -15,7 +15,7 @@ export function PhaseBadge({ p, size = 84 }: { p: Patient; size?: number }) {
   const sw = Math.max(5, size * 0.08)
   const r = size / 2 - sw / 2
   const c = 2 * Math.PI * r
-  const color = rec ? m.fill : 'var(--coral)'
+  const color = 'var(--lime)'
   return (
     <span className="pbadge" style={{ width: size, height: size }} role="img" aria-label={`Fase ${ph} de 5: ${Math.round(v * 100)}% de los objetivos`}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
@@ -23,8 +23,8 @@ export function PhaseBadge({ p, size = 84 }: { p: Patient; size?: number }) {
         {v > 0 && (
           <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeDasharray={`${c * v} ${c}`} transform={`rotate(-90 ${size / 2} ${size / 2})`} />
         )}
-        <circle cx={size / 2} cy={size / 2} r={size * 0.33} fill={rec ? m.fill : 'var(--coral)'} />
-        <text x={size / 2} y={size / 2 + size * 0.11} textAnchor="middle" fontFamily="Montserrat, sans-serif" fontWeight="900" fontSize={size * 0.32} fill="#0A140D">
+        <circle cx={size / 2} cy={size / 2} r={size * 0.33} fill={rec ? m.fill : 'var(--ink)'} />
+        <text x={size / 2} y={size / 2 + size * 0.11} textAnchor="middle" fontFamily="Montserrat, sans-serif" fontWeight="900" fontSize={size * 0.32} fill={rec ? '#0A140D' : 'var(--lime)'}>
           {ph}
         </text>
       </svg>

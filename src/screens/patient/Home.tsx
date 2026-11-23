@@ -181,7 +181,7 @@ function PhaseCard({ p }: { p: Patient }) {
     <button className="x-phase" onClick={() => nav('/progreso')}>
       <PhaseBadge p={p} size={72} />
       <span className="x-ph">
-        <span className="x-over">{rec ? '5 de 5 fases' : `Fase ${ph} de 5 · ${ok}/${goals.length} objetivos`}</span>
+        <span className="x-over">{rec ? '5 de 5 fases' : ok === 0 ? `Fase ${ph} de 5 · a por tu medalla ${ph}` : `Fase ${ph} de 5 · ${ok} de ${goals.length} objetivos`}</span>
         <b>{rec ? 'Te has recuperado' : PHASES[ph - 1]}</b>
         <span className="x-seg" aria-hidden="true">
           {[1, 2, 3, 4, 5].map((f) => (
