@@ -99,3 +99,31 @@ describe('racha', () => {
     expect(streak(c, p)).toBe(2) // el lunes sin hacer corta la racha
   })
 })
+
+describe('pendientes: no se acumulan', () => {
+  it('una sesión sin hacer solo se ofrece al día siguiente y nunca pasa a la semana siguiente', async () => {
+    const { yesterdayToRecover, todayItems: items } = await import('./patientHome')
+    const st = sampleState(MON)
+    const p = st.patients.find((x) => x.id === 'a3')! // fuerza L-X-V
+    p.start = isoD(addD(MON, -7))
+    p.sessions = {}
+    st.programs.find((x) => x.id === p.program)!.weeks = [['r6', null, null, null, null, null, null]] // movilidad los lunes
+    const at = (d: Date): Ctx => ({ st, today: d, now: +d })
+    // martes: el lunes no la hizo → "¿Recuperas la de ayer?"
+    expect(yesterdayToRecover(at(addD(MON, 1)), p)).not.toBeNull()
+    expect(items(at(addD(MON, 1)), p).some((x) => x.title === '¿Recuperas la de ayer?')).toBe(true)
+    // miércoles: ya no aparece
+    expect(yesterdayToRecover(at(addD(MON, 2)), p)).toBeNull()
+    // lunes siguiente: lo del domingo/semana anterior no se arrastra
+    expect(yesterdayToRecover(at(addD(MON, 7)), p)).toBeNull()
+  })
+  it('no ofrece recuperar una de fuerza si hoy queda pegado a otra de fuerza', async () => {
+    const { yesterdayToRecover } = await import('./patientHome')
+    const st = sampleState(MON)
+    const p = st.patients.find((x) => x.id === 'a3')! // fuerza L-X-V
+    p.start = isoD(addD(MON, -7))
+    p.sessions = {}
+    // martes: mañana (miércoles) hay fuerza → no se ofrece
+    expect(yesterdayToRecover({ st, today: addD(MON, 1), now: 0 }, p)).toBeNull()
+  })
+})

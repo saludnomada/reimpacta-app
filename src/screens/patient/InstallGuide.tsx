@@ -10,7 +10,9 @@ export function InstallBanner() {
   if (isStandalone() || platform() === 'other') return null
   return (
     <Link to="/instalar" className="banner" style={{ textDecoration: 'none' }}>
-      <span className="ic">📲</span>
+      <span className="ic">
+        <IconShare />
+      </span>
       <div>
         <b>Pon la app en tu pantalla de inicio</b>
         <span>Así te llegan mis avisos al móvil. Son 30 segundos.</span>

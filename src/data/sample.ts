@@ -55,6 +55,24 @@ export function sampleState(T: Date = todayReal()): AppState {
     v23: 'Cómo planificar tus kilómetros y tus entrenamientos para volver a correr y no recaer.',
   }
   V.forEach((v) => DESC[v.id] && (v.desc = DESC[v.id]))
+  const MUS: Record<string, string[]> = {
+    v2: ['Cuádriceps'],
+    v3: ['Glúteos', 'Isquiotibiales'],
+    v4: ['Pie y tobillo'],
+    v5: ['Cuádriceps', 'Glúteos'],
+    v6: ['Isquiotibiales', 'Glúteos'],
+    v7: ['Gemelo y sóleo'],
+    v8: ['Cuádriceps', 'Glúteos'],
+    v9: ['Core'],
+    v10: ['Cadera'],
+    v11: ['Gemelo y sóleo', 'Pie y tobillo'],
+    v12: ['Gemelo y sóleo'],
+    v13: ['Cuádriceps', 'Core'],
+    v14: ['Glúteos', 'Pie y tobillo'],
+    v15: ['Gemelo y sóleo'],
+    v19: ['Isquiotibiales'],
+  }
+  V.forEach((v) => MUS[v.id] && (v.muscles = MUS[v.id]))
   const vt = (id: string) => V.find((v) => v.id === id)!.type
   const it = (v: string, sets: number, amount: number, kg = '') => ({
     v,

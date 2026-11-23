@@ -56,7 +56,7 @@ export function DemoBar() {
         <div className="seg">
           {(['claro', 'oscuro'] as const).map((t) => (
             <button key={t} className={(p.settings.theme || 'auto') === t ? 'on' : ''} onClick={() => setPatientSetting(p.id, 'theme', t)}>
-              {t === 'claro' ? '☀️ Claro' : '🌙 Oscuro'}
+              {t === 'claro' ? 'Claro' : 'Oscuro'}
             </button>
           ))}
         </div>

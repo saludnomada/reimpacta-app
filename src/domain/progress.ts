@@ -1,7 +1,7 @@
 // Datos para la pantalla PROGRESO: mejoría, gráficas, logros.
 
-import { addD, fDM, isoD, parseD } from './dates'
-import { type Ctx, painSeries, routineFor, sessStats, sessionsDone, streak } from './logic'
+import { addD, diffDays, isoD, monday, parseD } from './dates'
+import { type Ctx, painSeries, routineFor, setOk, sType, streak, videoById } from './logic'
 import type { Patient } from './model'
 
 /** Mejor racha de toda su historia (sesiones seguidas hechas) */
@@ -45,44 +45,73 @@ export function improvements(p: Patient): Improvement[] {
   })
 }
 
-export interface Achievement {
-  id: string
-  icon: string
-  title: string
-  desc: string
-  got: boolean
-}
-export function achievements(c: Ctx, p: Patient): Achievement[] {
-  const n = sessionsDone(p)
-  const bs = bestStreak(c, p)
-  const fr = Object.keys(p.fridays).length
-  const vids = Object.values(p.recs).some((r) => r.files.length && r.at)
-  const se = painSeries(p)
-  const halved = se.length >= 2 && se[0].painLife > 0 && se[se.length - 1].painLife <= se[0].painLife / 2
-  const list: [string, string, string, string, boolean][] = [
-    ['first', '🚀', 'Primera sesión', 'Has empezado tu recuperación', n >= 1],
-    ['s10', '💪', '10 sesiones', 'Constancia: diez sesiones hechas', n >= 10],
-    ['s25', '🏋️', '25 sesiones', 'Ya es un hábito', n >= 25],
-    ['s50', '🦾', '50 sesiones', 'Imparable', n >= 50],
-    ['r5', '🔥', 'Racha de 5', '5 sesiones seguidas sin fallar', bs >= 5],
-    ['r10', '☄️', 'Racha de 10', '10 sesiones seguidas sin fallar', bs >= 10],
-    ['fri4', '📝', '4 viernes', 'Me has contado cómo vas 4 semanas', fr >= 4],
-    ['vid', '🎥', 'Primeros vídeos', 'Te has grabado para que vea cómo cambias', vids],
-    ['half', '📉', 'Dolor a la mitad', 'Tu dolor del día a día ha bajado a la mitad', halved],
-  ]
-  return list.map(([id, icon, title, desc, got]) => ({ id, icon, title, desc, got }))
+/** Tipo de día para el calendario de Progreso: correr agrupa CaCo y correr. */
+export type DayKind = 'fuerza' | 'movilidad' | 'correr'
+const kindOf = (t: string | null): DayKind => (t === 'movilidad' ? 'movilidad' : t === 'caco' || t === 'correr' ? 'correr' : 'fuerza')
+
+/** Días hechos de cada tipo desde que empezó */
+export function trainingDays(c: Ctx, p: Patient): Record<DayKind, number> {
+  const out: Record<DayKind, number> = { fuerza: 0, movilidad: 0, correr: 0 }
+  Object.entries(p.sessions).forEach(([k, s]) => {
+    if (s.status !== 'done') return
+    const r = routineFor(c, p, parseD(k))
+    if (r) out[kindOf(sType(r))]++
+  })
+  return out
 }
 
-export type TrainMetric = 'kg' | 'min' | 'pain'
-/** Barras de las últimas sesiones hechas */
-export function trainingSeries(c: Ctx, p: Patient, m: TrainMetric, last = 12) {
-  const rows = Object.keys(p.sessions)
-    .sort()
-    .map((k) => ({ k, s: p.sessions[k], r: routineFor(c, p, parseD(k)) }))
-    .filter((x) => x.s.status === 'done' && x.r)
-  const vals = rows.map(({ k, s, r }) => ({
-    label: fDM(parseD(k)),
-    v: m === 'kg' ? sessStats(s, r!).kg : m === 'min' ? Math.round((s.elapsed || 0) / 6e4) : (s.painSession ?? null),
-  }))
-  return vals.filter((x) => x.v != null && (m !== 'kg' || (x.v as number) > 0)).slice(-last) as { label: string; v: number }[]
+export interface GridCell {
+  day: string
+  kind: DayKind | null // null = descanso
+  state: 'done' | 'miss' | 'rest' | 'future' | 'now'
+}
+/** Calendario de las últimas semanas: una fila por semana, lunes a domingo. */
+export function weeksGrid(c: Ctx, p: Patient, weeks = 8): { label: string; cells: GridCell[] }[] {
+  const start = monday(parseD(p.start))
+  const thisMon = monday(c.today)
+  const first = addD(thisMon, -7 * (weeks - 1))
+  const from = first < start ? start : first
+  const rows: { label: string; cells: GridCell[] }[] = []
+  for (let m = from; m <= thisMon; m = addD(m, 7)) {
+    const cells: GridCell[] = []
+    for (let i = 0; i < 7; i++) {
+      const d = addD(m, i)
+      const r = d >= parseD(p.start) ? routineFor(c, p, d) : null
+      const s = p.sessions[isoD(d)]
+      const kind = r ? kindOf(sType(r)) : null
+      const state: GridCell['state'] = !r
+        ? d > c.today ? 'future' : 'rest'
+        : s && s.status === 'done'
+          ? 'done'
+          : isoD(d) === isoD(c.today)
+            ? 'now'
+            : d > c.today
+              ? 'future'
+              : 'miss'
+      cells.push({ day: isoD(d), kind, state })
+    }
+    rows.push({ label: `S${Math.floor(diffDays(start, m) / 7) + 1}`, cells })
+  }
+  return rows
+}
+
+/** Series hechas por grupo muscular en los últimos `days` días, de más a menos. */
+export function muscleWork(c: Ctx, p: Patient, days = 28): { name: string; sets: number }[] {
+  const acc: Record<string, number> = {}
+  const from = addD(c.today, -days + 1)
+  Object.entries(p.sessions).forEach(([k, s]) => {
+    const d = parseD(k)
+    if (d < from || d > c.today) return
+    const r = routineFor(c, p, d)
+    if (!r) return
+    r.items.forEach((it, i) => {
+      if (it.kind === 'caco') return
+      const n = (s.ex[i]?.sets || []).filter(setOk).length
+      if (!n) return
+      ;(videoById(c, it.v)?.muscles || []).forEach((m) => (acc[m] = (acc[m] || 0) + n))
+    })
+  })
+  return Object.entries(acc)
+    .map(([name, sets]) => ({ name, sets }))
+    .sort((a, b) => b.sets - a.sets)
 }

@@ -3,10 +3,10 @@ import { setPatientSetting } from '../../data/actions'
 import type { Patient } from '../../domain/model'
 import type { ThemeChoice } from '../../ui/theme'
 
-const OPTS: [ThemeChoice, string, string, string][] = [
-  ['claro', 'Claro', '#F3F5EF', '☀️'],
-  ['oscuro', 'Oscuro', '#0A140D', '🌙'],
-  ['auto', 'Como mi móvil', 'linear-gradient(90deg,#F3F5EF 50%,#0A140D 50%)', '📱'],
+const OPTS: [ThemeChoice, string, string][] = [
+  ['claro', 'Claro', '#F3F5EF'],
+  ['oscuro', 'Oscuro', '#0A140D'],
+  ['auto', 'Como mi móvil', 'linear-gradient(90deg,#F3F5EF 50%,#0A140D 50%)'],
 ]
 
 /** AJUSTES (de momento: el fondo; el resto llega en el bloque 2) */
@@ -24,11 +24,9 @@ export function Settings({ p }: { p: Patient }) {
       <section className="card">
         <span className="lbl">Fondo de la app</span>
         <div className="t-pick">
-          {OPTS.map(([k, l, bg, ic]) => (
+          {OPTS.map(([k, l, bg]) => (
             <button key={k} className={cur === k ? 'on' : ''} aria-pressed={cur === k} onClick={() => setPatientSetting(p.id, 'theme', k)}>
-              <span className="t-sw" style={{ background: bg }}>
-                {ic}
-              </span>
+              <span className="t-sw" style={{ background: bg, boxShadow: 'inset 0 0 0 1px var(--line)' }} />
               {l}
             </button>
           ))}

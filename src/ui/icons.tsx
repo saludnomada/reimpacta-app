@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 // Iconos del prototipo, como componentes.
 
 export const Logo = () => <>R</> // "R" provisional hasta que Jone pase su logo
@@ -52,5 +53,56 @@ export const IconClasses = () => (
   <svg viewBox="0 0 24 24">
     <path d="M2 8.5 12 4l10 4.5-10 4.5z" />
     <path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5M22 8.5V14" />
+  </svg>
+)
+
+/* ---- Iconos de línea para tareas y progreso (sin emojis) ---- */
+const L = ({ children }: { children: ReactNode }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {children}
+  </svg>
+)
+export const IcDumbbell = () => (
+  <L>
+    <path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11" />
+  </L>
+)
+export const IcStretch = () => (
+  <L>
+    <circle cx="12" cy="4.5" r="2" />
+    <path d="M12 7v6l-4 7M12 13l4 7M5 10l7-2 7 2" />
+  </L>
+)
+export const IcRun = () => (
+  <L>
+    <circle cx="15" cy="4.5" r="2" />
+    <path d="M10 21l2.5-5L10 13l2-5 3 3h3.5M8.5 8.5 12 8M12.5 16 16 18v3" />
+  </L>
+)
+export const IcClipboard = () => (
+  <L>
+    <rect x="5" y="4" width="14" height="17" rx="2" />
+    <path d="M9 4V3h6v1M9 10h6M9 14h4" />
+  </L>
+)
+export const IcCamera = () => (
+  <L>
+    <rect x="3" y="6.5" width="13" height="11" rx="2" />
+    <path d="M16 10.5l5-3v9l-5-3" />
+  </L>
+)
+export const IcPhone = () => (
+  <L>
+    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z" />
+  </L>
+)
+export const IcRedo = () => (
+  <L>
+    <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4" />
+  </L>
+)
+export const IcFlame = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 2c1 3.5 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z" />
   </svg>
 )

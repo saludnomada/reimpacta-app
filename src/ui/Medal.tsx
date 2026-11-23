@@ -1,33 +1,27 @@
-import { useId } from 'react'
+import { PHASES } from '../domain/model'
 
-const MCOL: Record<number, [string, string, string]> = {
-  1: ['#F3C6A0', '#C98552', '#7A4521'],
-  2: ['#FFCDB5', '#FF7F50', '#A3441C'],
-  3: ['#F4F5F2', '#BFC4C2', '#6D7472'],
-  4: ['#FFF1B8', '#F5C542', '#A87400'],
-  5: ['#F7FFC9', '#D0FB00', '#6F7F10'],
+/** Color sobrio de cada medalla: bronce, cobre, plata, oro y lima (la final). */
+export const MEDAL: Record<number, { fill: string; ink: string }> = {
+  1: { fill: '#B07A4F', ink: '#FFF4EA' },
+  2: { fill: '#C9663F', ink: '#FFF1EA' },
+  3: { fill: '#A9B2B0', ink: '#1E2624' },
+  4: { fill: '#D2A53A', ink: '#2A2108' },
+  5: { fill: '#D0FB00', ink: '#0A140D' },
 }
 
-/** Medalla de cada fase (bronce, coral, plata, oro, lima), como en el prototipo. */
-export function Medal({ n, size = 46, off = false }: { n: number; size?: number; off?: boolean }) {
-  const [a, b, c] = MCOL[n]
-  const g = 'm' + useId().replace(/:/g, '')
-  const cy = n === 5 ? 110 : 105
-  const R = n === 5 ? 38 : 34
+/**
+ * Medalla de fase: disco plano con anillo y número, cinta sencilla.
+ * Sin degradados ni brillos. Bloqueada = solo el contorno.
+ */
+export function Medal({ n, size = 52, state = 'on' }: { n: number; size?: number; state?: 'on' | 'cur' | 'off' }) {
+  const m = MEDAL[n]
+  const on = state === 'on'
   return (
-    <svg viewBox="0 0 120 150" width={size} height={(size * 150) / 120} aria-hidden="true" style={off ? { opacity: 0.18, filter: 'grayscale(1)' } : undefined}>
-      <defs>
-        <radialGradient id={g} cx="40%" cy="35%" r="70%">
-          <stop offset="0" stopColor={a} />
-          <stop offset=".55" stopColor={b} />
-          <stop offset="1" stopColor={c} />
-        </radialGradient>
-      </defs>
-      <path d="M38 0h18l14 60H52z" fill="#D0FB00" />
-      <path d="M82 0H64L50 60h18z" fill="#F3F5F2" />
-      <circle cx="60" cy={cy} r={R} fill={`url(#${g})`} stroke={c} strokeWidth="3" />
-      <circle cx="60" cy={cy} r={R - 8} fill="none" stroke={a} strokeOpacity=".7" strokeWidth="2" />
-      <text x="60" y={cy + 11} textAnchor="middle" fontFamily="Montserrat" fontWeight="900" fontSize="30" fill={c}>
+    <svg viewBox="0 0 64 80" width={size} height={(size * 80) / 64} role="img" aria-label={`Medalla ${n}: ${PHASES[n - 1]}${on ? '' : state === 'cur' ? ' (en curso)' : ' (bloqueada)'}`}>
+      <path d="M22 2h9l-3 22h-9zM42 2h-9l3 22h9z" fill={on ? m.fill : 'none'} opacity={on ? 0.55 : 1} stroke={on ? 'none' : 'var(--line)'} strokeWidth="1.5" />
+      <circle cx="32" cy="50" r="24" fill={on ? m.fill : 'none'} stroke={on ? 'none' : state === 'cur' ? 'var(--coral)' : 'var(--line)'} strokeWidth="2.5" strokeDasharray={state === 'cur' ? '5 4' : undefined} />
+      <circle cx="32" cy="50" r="18" fill="none" stroke={on ? m.ink : 'transparent'} strokeOpacity=".35" strokeWidth="1.5" />
+      <text x="32" y="58" textAnchor="middle" fontFamily="Montserrat, sans-serif" fontWeight="900" fontSize="22" fill={on ? m.ink : state === 'cur' ? 'var(--coral-t)' : 'var(--dim)'}>
         {n}
       </text>
     </svg>

@@ -19,6 +19,8 @@ export interface Video {
   week: number | null // semana en la que se desbloquea (solo clases)
   vis: 'visible' | 'oculto'
   desc?: string
+  /** grupos musculares que trabaja (para la gráfica de Progreso) */
+  muscles?: string[]
 }
 
 export interface ExerciseItem {
@@ -235,3 +237,6 @@ export const DEFAULT_GOALS: Record<number, string[]> = {
   4: ['Saltos a una pierna 3×10 por lado', 'Aterrizas estable en saltos horizontales', 'Cambios de dirección suaves sin dolor que te frene'],
   5: ['Corres 20 minutos seguidos', 'Corres 3 días por semana durante 3 semanas sin recaída', 'Cumples tu objetivo personal'],
 }
+
+/** Grupos musculares que Jone puede asignar a cada ejercicio */
+export const MUSCLES = ['Cuádriceps', 'Glúteos', 'Isquiotibiales', 'Gemelo y sóleo', 'Core', 'Pie y tobillo', 'Cadera']
