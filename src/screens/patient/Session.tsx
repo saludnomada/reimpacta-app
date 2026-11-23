@@ -293,9 +293,9 @@ export function PainMsg({ v, thr }: { v: number; thr: number }) {
   return (
     <div className={`pmsg2 t-${t}`}>
       <p>{msg}</p>
-      {(z === 'hi' || z === 'stop') && (
+      {z === 'stop' && (
         <a className="se-wa" href={WA(z === 'stop' ? `Hola Jone, me ha dolido ${v}/10 en un ejercicio y no lo repito hasta hablar contigo` : `Hola Jone, en un ejercicio me ha dolido ${v}/10`)} target="_blank" rel="noopener">
-          {z === 'stop' ? 'Avisar a Jone por WhatsApp' : 'Escríbeme al WhatsApp'}
+          Avisar a Jone por WhatsApp
         </a>
       )}
     </div>
