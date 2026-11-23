@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { diffDays, monday, parseD, WD } from '../../domain/dates'
 import { doseText, endOf, estMin, recovered, routineFor, sessName, sType, videoById, weekNo, type Ctx } from '../../domain/logic'
 import type { Patient, Routine } from '../../domain/model'
-import { todayItems, type TodoItem } from '../../domain/patientHome'
+import { todayItems, weekSummary, type TodoItem } from '../../domain/patientHome'
 import { weeksGrid } from '../../domain/progress'
 import { IcCheck, IcChevron, IcClock, IcPlay } from '../../ui/icons'
 import { TaskIcon } from '../../ui/TaskIcon'
@@ -30,6 +30,7 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
   const first = items[0]
   const main = first && first.go.to === 'session' && (first.main || first.done) ? first : undefined
   const rest = items.filter((x) => x !== main)
+  const wk = weekSummary(c, p, monday(c.today))
 
   return (
     <>
@@ -40,6 +41,18 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
         </span>
         <h1 className="x-title">Hola, {p.name}</h1>
         <p className="h5-sub">{pend ? `Hoy tienes ${pend} ${pend === 1 ? 'tarea' : 'tareas'}` : items.length ? 'Hoy lo tienes todo hecho' : 'Hoy es día libre. Muévete a tu ritmo.'}</p>
+        {wk.total > 0 && (
+          <div className="h5-weekcount">
+            <span>
+              Esta semana: <b>{wk.done} de {wk.total} sesiones</b>
+            </span>
+            <span className="h5-wbar" aria-hidden="true">
+              {[...Array(wk.total)].map((_, i) => (
+                <i key={i} className={i < wk.done ? 'ok' : ''} />
+              ))}
+            </span>
+          </div>
+        )}
       </header>
 
       {main ? (

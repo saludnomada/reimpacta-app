@@ -728,3 +728,9 @@ html[data-theme="light"] .x-session{box-shadow:0 1px 2px rgba(10,20,13,.08)}
 .x-chip{padding:4px 9px;font-size:11px}
 /* appbar */
 .appbar{padding-top:10px;padding-bottom:6px}
+.h5-weekcount{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;font-size:14px;color:var(--muted)}
+.h5-weekcount b{color:var(--text)}
+.h5-wbar{display:flex;gap:4px;flex-shrink:0}
+.h5-wbar i{width:18px;height:6px;border-radius:3px;background:var(--ring-track)}
+.h5-wbar i.ok{background:var(--lime)}
+html[data-theme="light"] .h5-wbar i.ok{box-shadow:inset 0 0 0 1px rgba(10,20,13,.12)}
