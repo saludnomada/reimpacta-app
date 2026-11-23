@@ -8,6 +8,7 @@ import { useCtx } from '../../data/store'
 import { IconBell, IconCal, IconClasses, IconGear, IconHome, IconPhone, IconProg, Logo } from '../../ui/icons'
 import { Classes } from './Classes'
 import { Progress } from './Progress'
+import { Session } from './Session'
 import { goPath } from './goPath'
 import { Home } from './Home'
 import { InstallGuide } from './InstallGuide'
@@ -19,7 +20,7 @@ export function PatientApp({ p }: { p: Patient }) {
   return (
     <Routes>
       <Route path="/instalar" element={<InstallGuide />} />
-      <Route path="/sesion/:day" element={<Soon title="Tu sesión" />} />
+      <Route path="/sesion/:day" element={<SessionRoute p={p} />} />
       <Route path="/viernes" element={<Soon title="Cuestionario del viernes" />} />
       <Route path="/grabarte" element={<Soon title="Grábate" />} />
       <Route path="/ajustes" element={<Settings p={p} />} />
@@ -215,4 +216,9 @@ function Soon({ title }: { title: string }) {
       </section>
     </div>
   )
+}
+
+function SessionRoute({ p }: { p: Patient }) {
+  const c = useCtx()
+  return <Session c={c} p={p} />
 }

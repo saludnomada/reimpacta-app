@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { fDM, parseD, WD } from '../../domain/dates'
-import { currentPhase, painSeries, recovered, sessionsDone, streak, videoById, type Ctx } from '../../domain/logic'
+import { compliance, currentPhase, painOk, painSeries, recovered, sessionsDone, streak, videoById, type Ctx } from '../../domain/logic'
 import type { Patient } from '../../domain/model'
 import { PHASES } from '../../domain/model'
 import { bestStreak, improvements, muscleWork, trainingDays, weeksGrid, type DayKind } from '../../domain/progress'
 import { LineChart } from '../../ui/charts'
 import { IcCheck, IcFlame } from '../../ui/icons'
 import { Medal } from '../../ui/Medal'
+import { Ring } from '../../ui/Ring'
+import { TaskIcon } from '../../ui/TaskIcon'
+import { complianceTone, confidenceTone, painTone, toneVar } from '../../domain/scales'
 
 const KINDS: [DayKind, string][] = [
   ['fuerza', 'Fuerza'],
@@ -22,6 +25,9 @@ const KINDS: [DayKind, string][] = [
  */
 export function Progress({ c, p }: { c: Ctx; p: Patient }) {
   const [more, setMore] = useState(false)
+  const comp = compliance(c, p)
+  const thr = painOk(p)
+  const toneOf = (k: string, v: number) => toneVar(k === 'mind' ? confidenceTone(v) : painTone(v, thr))
   const se = painSeries(p)
   const imp = improvements(p)
   const best = imp.filter((x) => x.lowGood && x.pct > 0).sort((a, b) => b.pct - a.pct)[0] || imp.find((x) => x.pct > 0)
@@ -62,15 +68,32 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
       {imp.length > 0 && (
         <div className="pg-deltas">
           {imp.map((x) => (
-            <div key={x.key} className={x.pct > 0 ? 'good' : x.pct < 0 ? 'bad' : ''}>
+            <div key={x.key}>
               <span>{x.label}</span>
               <b>
-                <s>{x.from}</s>→ {x.to}
+                <s style={{ color: toneOf(x.key, x.from) }}>{x.from}</s>
+                <span className="arr">→</span>
+                <span style={{ color: toneOf(x.key, x.to) }}>{x.to}</span>
                 <small>/10</small>
               </b>
             </div>
           ))}
         </div>
+      )}
+
+      {/* Cumplimiento */}
+      {comp[2] > 0 && (
+        <section className="pg-comp">
+          <Ring value={comp[0] / 100} size={74} stroke={8} color={toneVar(complianceTone(comp[0]))}>
+            <b style={{ color: toneVar(complianceTone(comp[0])) }}>{comp[0]}%</b>
+          </Ring>
+          <div>
+            <h2 className="pg-h">Cumplimiento</h2>
+            <p>
+              {comp[1]} de {comp[2]} sesiones hechas
+            </p>
+          </div>
+        </section>
       )}
 
       {/* Dolor y confianza */}
@@ -116,12 +139,18 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
             <div key={w.label} className="pg-grow">
               <span>{w.label}</span>
               {w.cells.map((cell) => (
-                <i key={cell.day} className={`${cell.state} ${cell.kind ? 'k-' + cell.kind : ''}`} title={`${fDM(parseD(cell.day))}`} />
+                <i key={cell.day} className={`${cell.state} ${cell.kind ? 'k-' + cell.kind : ''}`} title={`${fDM(parseD(cell.day))}`}>
+                  {cell.state === 'done' && cell.kind ? <TaskIcon k={cell.kind} /> : null}
+                </i>
               ))}
             </div>
           ))}
         </div>
-        <p className="pg-note">Relleno = hecho · contorno = sin hacer · vacío = descanso</p>
+        <div className="pg-legend">
+          <span><i className="done k-fuerza" /> Hecha</span>
+          <span><i className="miss" /> Sin hacer</span>
+          <span><i className="rest" /> Descanso</span>
+        </div>
       </section>
 
       {/* Músculos */}

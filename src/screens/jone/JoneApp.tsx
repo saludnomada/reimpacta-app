@@ -5,6 +5,7 @@ import { PHASES } from '../../domain/model'
 import { Logo } from '../../ui/icons'
 import { Sprite } from '../../ui/Sprite'
 import { useApplyTheme } from '../../ui/theme'
+import { complianceTone, toneVar } from '../../domain/scales'
 
 const TABS: [string, string][] = [
   ['pacientes', 'Pacientes'],
@@ -81,7 +82,7 @@ export function JoneApp() {
                   </div>
                   <div className="stats">
                     <span>
-                      Cumplimiento <b>{sch ? pct + '%' : '–'}</b>
+                      Cumplimiento <b style={sch ? { color: toneVar(complianceTone(pct)) } : undefined}>{sch ? pct + '%' : '–'}</b>
                     </span>
                   </div>
                 </div>

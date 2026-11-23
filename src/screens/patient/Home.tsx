@@ -9,7 +9,7 @@ import { MEDAL } from '../../ui/Medal'
 import { Ring } from '../../ui/Ring'
 import { Sprite } from '../../ui/Sprite'
 import { TaskIcon } from '../../ui/TaskIcon'
-import { ytId } from '../../ui/VideoBox'
+import { VideoThumb } from '../../ui/VideoThumb'
 import { goPath } from './goPath'
 import { InstallBanner } from './InstallGuide'
 
@@ -114,7 +114,7 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
 function SessionCard({ x, r, c, onClick }: { x: TodoItem; r: Routine | null; c: Ctx; onClick: () => void }) {
   if (!r) return null
   const kind = sType(r) || 'fuerza'
-  const list = r.items.slice(0, 3)
+  const list = r.items.slice(0, 4)
   const more = r.items.length - list.length
   return (
     <section className={`x-session ${x.done ? 'done' : ''}`}>
@@ -130,13 +130,14 @@ function SessionCard({ x, r, c, onClick }: { x: TodoItem; r: Routine | null; c: 
       <ol className="x-ex">
         {list.map((it, i) => {
           const v = it.kind === 'caco' ? null : videoById(c, it.v)
-          const id = ytId(v?.url)
           return (
             <li key={i}>
-              {id ? (
-                <span className="x-th" style={{ backgroundImage: `url(https://i.ytimg.com/vi/${id}/mqdefault.jpg)` }} />
+              {it.kind === 'caco' ? (
+                <span className="x-num">
+                  <TaskIcon k="correr" />
+                </span>
               ) : (
-                <span className="x-num">{String(i + 1).padStart(2, '0')}</span>
+                <VideoThumb v={v} w={52} />
               )}
               <span className="x-exn">{it.kind === 'caco' ? (+it.walk ? 'Correr y caminar' : 'Carrera continua') : sentence(v?.title || 'Ejercicio')}</span>
               <span className="x-dose">{doseText(it)}</span>

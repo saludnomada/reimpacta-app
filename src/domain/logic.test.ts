@@ -127,3 +127,18 @@ describe('pendientes: no se acumulan', () => {
     expect(yesterdayToRecover({ st, today: addD(MON, 1), now: 0 }, p)).toBeNull()
   })
 })
+
+describe('colores por valor (iguales en toda la app)', () => {
+  it('dolor: 5-7 coral, 8-10 rojo', async () => {
+    const { painTone } = await import('./scales')
+    expect([0, 3, 4, 5, 7, 8, 10].map((v) => painTone(v, 3))).toEqual(['good', 'good', 'mid', 'bad', 'bad', 'stop', 'stop'])
+  })
+  it('cumplimiento: >70 lima, 50-70 amarillo, <50 coral', async () => {
+    const { complianceTone } = await import('./scales')
+    expect([71, 70, 50, 49].map(complianceTone)).toEqual(['good', 'mid', 'mid', 'bad'])
+  })
+  it('confianza: >7 lima, 5-7 amarillo, <5 coral', async () => {
+    const { confidenceTone } = await import('./scales')
+    expect([8, 7, 5, 4].map(confidenceTone)).toEqual(['good', 'mid', 'mid', 'bad'])
+  })
+})
