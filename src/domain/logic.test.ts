@@ -11,11 +11,11 @@ function ctx(today: Date, now = +today + 10 * 36e5): Ctx {
 }
 
 describe('dolor en ejercicios (umbral 3)', () => {
-  it('0-3 bien, 4 vigila, 5-8 baja carga, 9-10 para', () => {
+  it('0-3 bien, 4 vigila, 5-7 baja carga, 8-10 no lo repitas sin avisarme', () => {
     expect([0, 3].map((v) => painZone(v, 3))).toEqual(['ok', 'ok'])
     expect(painZone(4, 3)).toBe('warn')
-    expect([5, 8].map((v) => painZone(v, 3))).toEqual(['hi', 'hi'])
-    expect([9, 10].map((v) => painZone(v, 3))).toEqual(['stop', 'stop'])
+    expect([5, 7].map((v) => painZone(v, 3))).toEqual(['hi', 'hi'])
+    expect([8, 9, 10].map((v) => painZone(v, 3))).toEqual(['stop', 'stop', 'stop'])
   })
 })
 

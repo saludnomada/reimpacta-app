@@ -289,13 +289,13 @@ export function PainMsg({ v, thr }: { v: number; thr: number }) {
         ? 'Vigílalo: si en la siguiente serie sube, baja un poco el peso o las repeticiones.'
         : z === 'hi'
           ? `Con un ${v}/10, en la próxima serie baja el peso, las repeticiones o el rango.`
-          : `Un ${v}/10 es demasiado. No repitas este ejercicio sin hablar antes conmigo.`
+          : `Un ${v}/10 es demasiado. No lo repitas sin avisarme.`
   return (
     <div className={`pmsg2 t-${t}`}>
       <p>{msg}</p>
       {(z === 'hi' || z === 'stop') && (
-        <a className="se-wa" href={WA(`Hola Jone, en un ejercicio me ha dolido ${v}/10`)} target="_blank" rel="noopener">
-          Escríbeme al WhatsApp
+        <a className="se-wa" href={WA(z === 'stop' ? `Hola Jone, me ha dolido ${v}/10 en un ejercicio y no lo repito hasta hablar contigo` : `Hola Jone, en un ejercicio me ha dolido ${v}/10`)} target="_blank" rel="noopener">
+          {z === 'stop' ? 'Avisar a Jone por WhatsApp' : 'Escríbeme al WhatsApp'}
         </a>
       )}
     </div>

@@ -99,8 +99,8 @@ export function progressOf(p: Patient): number {
 /* ---------- dolor ---------- */
 export const painOk = (p: Patient) => p.painOk ?? 3
 export type PainZone = 'ok' | 'warn' | 'hi' | 'stop'
-/** 0–umbral bien · umbral+1 vigila · hasta 8 baja carga · 9–10 para */
-export const painZone = (v: number, thr: number): PainZone => (v <= thr ? 'ok' : v === thr + 1 ? 'warn' : v <= 8 ? 'hi' : 'stop')
+/** 0–umbral bien · umbral+1 vigila · hasta 7 baja carga · 8–10 para: «No lo repitas sin avisarme» */
+export const painZone = (v: number, thr: number): PainZone => (v >= 8 ? 'stop' : v <= thr ? 'ok' : v === thr + 1 ? 'warn' : 'hi')
 export const painCol = (v: number, thr: number) => ({ ok: '#8DB000', warn: '#F5D90A', hi: '#FF7F50', stop: '#E5281B' })[painZone(v, thr)]
 
 /* ---------- semana, viernes y cumplimiento ---------- */
