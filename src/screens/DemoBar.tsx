@@ -19,7 +19,7 @@ export function DemoBar() {
     return (
       <div className="demo mini">
         <button className="demotog" onClick={() => setOpen(true)}>
-          ⚙ Prueba · datos de ejemplo · {s.session.role === 'paciente' ? `App paciente (${p?.name})` : 'Panel de Jone'} <span>▾</span>
+          ⚙ Prueba · versión {__BUILD__} · {s.session.role === 'paciente' ? `App paciente (${p?.name})` : 'Panel de Jone'} <span>▾</span>
         </button>
       </div>
     )
