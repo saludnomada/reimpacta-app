@@ -141,7 +141,7 @@ function EntryPop({ p, list }: { p: Patient; list: Notice[] }) {
             <span>{x.body}</span>
             {list.length > 1 && (
               <em className="pop-sub">
-                🔔 +{list.length - 1} aviso{list.length > 2 ? 's' : ''} en la campana
+                +{list.length - 1} aviso{list.length > 2 ? 's' : ''} en la campana
               </em>
             )}
           </span>

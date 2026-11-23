@@ -5,7 +5,7 @@ import type { Patient } from '../../domain/model'
 import { PHASES } from '../../domain/model'
 import { bestStreak, improvements, muscleWork, trainingDays, weeksGrid, type DayKind } from '../../domain/progress'
 import { LineChart } from '../../ui/charts'
-import { IcFlame } from '../../ui/icons'
+import { IcCheck, IcFlame } from '../../ui/icons'
 import { Medal } from '../../ui/Medal'
 
 const KINDS: [DayKind, string][] = [
@@ -180,7 +180,7 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
               <ul className="pg-goals">
                 {goals.map((g, i) => (
                   <li key={i} className={g.ok ? 'ok' : ''}>
-                    <span>{g.ok ? '✓' : ''}</span>
+                    <span>{g.ok ? <IcCheck /> : null}</span>
                     {g.t}
                   </li>
                 ))}
@@ -190,7 +190,7 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
               <ul className="pg-goals">
                 {tests.map((x, i) => (
                   <li key={i} className={x.st === 'ok' ? 'ok' : ''}>
-                    <span>{x.st === 'ok' ? '✓' : ''}</span>
+                    <span>{x.st === 'ok' ? <IcCheck /> : null}</span>
                     {(videoById(c, x.v)?.title || '').replace('TEST: ', '').toLowerCase()}
                     <em>{x.st === 'ok' ? 'Superado' : x.st === 'rev' ? 'En revisión' : 'Por grabar'}</em>
                   </li>

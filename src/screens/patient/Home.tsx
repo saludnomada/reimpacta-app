@@ -1,26 +1,33 @@
 import { useNavigate } from 'react-router-dom'
-import { diffDays, fLong, monday, parseD } from '../../domain/dates'
-import { currentPhase, endOf, recovered, routineFor, streak, videoById, weekNo, type Ctx } from '../../domain/logic'
+import { diffDays, monday, parseD } from '../../domain/dates'
+import { currentPhase, doseText, endOf, estMin, recovered, routineFor, sessName, streak, sType, videoById, weekNo, type Ctx } from '../../domain/logic'
 import type { Patient, Routine } from '../../domain/model'
 import { PHASES } from '../../domain/model'
 import { lastWeekSummary, todayItems, type TodoItem } from '../../domain/patientHome'
-import { IcFlame } from '../../ui/icons'
+import { IcCheck, IcChevron, IcClock, IcFlame, IcPlay } from '../../ui/icons'
 import { MEDAL } from '../../ui/Medal'
+import { Ring } from '../../ui/Ring'
 import { Sprite } from '../../ui/Sprite'
 import { TaskIcon } from '../../ui/TaskIcon'
 import { ytId } from '../../ui/VideoBox'
 import { goPath } from './goPath'
 import { InstallBanner } from './InstallGuide'
 
+/** "STEP DOWN DERECHO" → "Step down derecho" */
+export const sentence = (t: string) => (t ? t.charAt(0) + t.slice(1).toLowerCase() : t)
+const dayLabel = (d: Date) =>
+  d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^./, (x) => x.toUpperCase())
+
 /**
  * HOY: "Hoy tienes X tareas" en forma de lista. Al grano.
- * La sesión de hoy en lima grande · lo pendiente en coral · lo hecho tachado ·
+ * La sesión de hoy destacada · lo pendiente en coral · lo hecho tachado ·
  * abajo la fase con el corredor/a y su meta. Lo no hecho no se acumula.
  */
 export function Home({ c, p }: { c: Ctx; p: Patient }) {
   const nav = useNavigate()
   const items = todayItems(c, p)
-  const pend = items.filter((x) => !x.done).length
+  const done = items.filter((x) => x.done).length
+  const pend = items.length - done
   const end = endOf(p)
   const rec = recovered(p)
   const totalWeeks = end && !rec ? Math.round(diffDays(monday(parseD(p.start)), end) / 7) : null
@@ -32,55 +39,69 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
 
   return (
     <>
-      <div className="h-top">
-        <div className="h-line">
-          <span className="h-date">
-            {fLong(c.today)} · semana {weekNo(c, p)}
-            {totalWeeks ? ` de ${totalWeeks}` : ''}
+      <header className="x-head">
+        <div>
+          <span className="x-over">
+            {dayLabel(c.today)} · Semana {weekNo(c, p)}
+            {totalWeeks ? `/${totalWeeks}` : ''}
           </span>
-          {st > 0 && (
-            <span className="h-streak" aria-label={`${st} sesiones seguidas`}>
-              <IcFlame /> {st}
-            </span>
-          )}
+          <h1 className="x-title">Hola, {p.name}</h1>
+          <p className="x-sub">
+            {pend ? `Hoy tienes ${pend} ${pend === 1 ? 'tarea' : 'tareas'}` : items.length ? 'Hoy lo tienes todo hecho' : 'Hoy es día libre'}
+            {st > 0 && (
+              <span className="x-streak">
+                <IcFlame /> {st} {st === 1 ? 'seguida' : 'seguidas'}
+              </span>
+            )}
+          </p>
         </div>
-        <h1 className="h-hello">Hola, {p.name}</h1>
-      </div>
+        {items.length > 0 && (
+          <Ring value={done / items.length} size={60} stroke={6}>
+            <b>
+              {done}/{items.length}
+            </b>
+          </Ring>
+        )}
+      </header>
 
       {sum && (
-        <button className="h-week" onClick={() => nav('/progreso')}>
-          <span className="h-k2">Tu semana pasada</span>
-          <b>
-            {sum.done} de {sum.total} sesiones
-          </b>
-          <span className="h-wbar" aria-hidden="true">
+        <button className="x-week" onClick={() => nav('/progreso')}>
+          <span>
+            <small>Semana pasada</small>
+            <b>
+              {sum.done} de {sum.total} sesiones
+            </b>
+          </span>
+          <span className="x-wbar" aria-hidden="true">
             <i style={{ width: `${(sum.done / sum.total) * 100}%` }} />
           </span>
-          <small>{sum.done === sum.total ? 'Semana completa. Así se hace.' : 'Semana nueva, empezamos de cero.'}</small>
         </button>
       )}
 
-      <h2 className="h-count">{pend ? `Hoy tienes ${pend} ${pend === 1 ? 'tarea' : 'tareas'}` : items.length ? 'Hoy lo tienes todo hecho' : 'Hoy es día libre'}</h2>
-
-      {main && <SessionHero x={main} r={routineFor(c, p, c.today)} c={c} onClick={() => nav(goPath(main.go))} />}
+      {main && <SessionCard x={main} r={routineFor(c, p, c.today)} c={c} onClick={() => nav(goPath(main.go))} />}
 
       {rest.length > 0 && (
-        <ul className="h-list">
-          {rest.map((x, i) => (
-            <li key={i}>
-              <button className={`h-row ${x.done ? 'done' : x.co ? 'co' : ''}`} onClick={() => nav(goPath(x.go))}>
-                <span className="h-ic" aria-hidden="true">
-                  {x.done ? '✓' : <TaskIcon k={x.icon} />}
-                </span>
-                <span className="h-tx">
-                  <b>{x.title}</b>
-                  <small>{x.sub}</small>
-                </span>
-                <span className="h-go">›</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <section className="x-group">
+          <h2 className="x-h2">{main ? 'También hoy' : 'Hoy'}</h2>
+          <ul className="x-list">
+            {rest.map((x, i) => (
+              <li key={i}>
+                <button className={`x-row ${x.done ? 'done' : x.co ? 'co' : ''}`} onClick={() => nav(goPath(x.go))}>
+                  <span className="x-ic" aria-hidden="true">
+                    {x.done ? <IcCheck /> : <TaskIcon k={x.icon} />}
+                  </span>
+                  <span className="x-tx">
+                    <b>{x.title}</b>
+                    <small>{x.sub}</small>
+                  </span>
+                  <span className="x-go">
+                    <IcChevron />
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       <PhaseCard p={p} />
@@ -89,43 +110,55 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
   )
 }
 
-/** La sesión de hoy en grande, con la imagen de cada ejercicio. */
-function SessionHero({ x, r, c, onClick }: { x: TodoItem; r: Routine | null; c: Ctx; onClick: () => void }) {
-  const thumbs = (r?.items || []).slice(0, 4)
-  const more = (r?.items.length || 0) - thumbs.length
+/** La sesión de hoy: tarjeta oscura con sus ejercicios y un botón claro para empezar. */
+function SessionCard({ x, r, c, onClick }: { x: TodoItem; r: Routine | null; c: Ctx; onClick: () => void }) {
+  if (!r) return null
+  const kind = sType(r) || 'fuerza'
+  const list = r.items.slice(0, 3)
+  const more = r.items.length - list.length
   return (
-    <button className={`h-hero ${x.done ? 'done' : ''}`} onClick={onClick}>
-      <span className="h-k">{x.done ? 'Hecha hoy' : 'Hoy toca'}</span>
-      <b className="h-t">{x.title}</b>
-      <span className="h-s">{x.sub}</span>
-      {thumbs.length > 0 && (
-        <span className="h-thumbs" aria-hidden="true">
-          {thumbs.map((it, i) => {
-            if (it.kind === 'caco')
-              return (
-                <span key={i} className="h-th ph">
-                  <TaskIcon k="correr" />
-                </span>
-              )
-            const v = videoById(c, it.v)
-            const id = ytId(v?.url)
-            return id ? (
-              <span key={i} className="h-th" style={{ backgroundImage: `url(https://i.ytimg.com/vi/${id}/mqdefault.jpg)` }} />
-            ) : (
-              <span key={i} className="h-th ph">
-                <small>{(v?.title || '').split(' ').slice(0, 2).join(' ').toLowerCase()}</small>
-              </span>
-            )
-          })}
-          {more > 0 && <span className="h-th more">+{more}</span>}
+    <section className={`x-session ${x.done ? 'done' : ''}`}>
+      <div className="x-s-top">
+        <span className="x-chip">
+          <TaskIcon k={kind} /> {sessName(r)}
         </span>
-      )}
-      {!x.done && <span className="h-cta">Empezar</span>}
-    </button>
+        <span className="x-meta">
+          <IcClock /> {estMin(r)} min · {r.items.length} ejercicios
+        </span>
+      </div>
+      <h2 className="x-s-title">{x.done ? 'Sesión hecha' : 'Tu sesión de hoy'}</h2>
+      <ol className="x-ex">
+        {list.map((it, i) => {
+          const v = it.kind === 'caco' ? null : videoById(c, it.v)
+          const id = ytId(v?.url)
+          return (
+            <li key={i}>
+              {id ? (
+                <span className="x-th" style={{ backgroundImage: `url(https://i.ytimg.com/vi/${id}/mqdefault.jpg)` }} />
+              ) : (
+                <span className="x-num">{String(i + 1).padStart(2, '0')}</span>
+              )}
+              <span className="x-exn">{it.kind === 'caco' ? (+it.walk ? 'Correr y caminar' : 'Carrera continua') : sentence(v?.title || 'Ejercicio')}</span>
+              <span className="x-dose">{doseText(it)}</span>
+            </li>
+          )
+        })}
+        {more > 0 && <li className="x-more">y {more} más</li>}
+      </ol>
+      <button className="x-cta" onClick={onClick}>
+        {x.done ? (
+          'Ver la sesión'
+        ) : (
+          <>
+            <IcPlay /> {x.sub.includes('sigue') ? 'Seguir' : 'Empezar'}
+          </>
+        )}
+      </button>
+    </section>
   )
 }
 
-/** La fase: corredor/a con su punto de dolor, 5 tramos y su meta. */
+/** La fase: corredor/a con su punto de dolor, tramos y su meta. */
 function PhaseCard({ p }: { p: Patient }) {
   const nav = useNavigate()
   const ph = currentPhase(p)
@@ -133,14 +166,14 @@ function PhaseCard({ p }: { p: Patient }) {
   const goals = p.goals[ph] || []
   const ok = goals.filter((g) => g.ok).length
   return (
-    <button className="h-phase" onClick={() => nav('/progreso')}>
-      <span className="h-runner">
-        <Sprite look={p.look} zone={rec ? null : p.zone} scale={2.6} />
+    <button className="x-phase" onClick={() => nav('/progreso')}>
+      <span className="x-runner">
+        <Sprite look={p.look} zone={rec ? null : p.zone} scale={2.4} />
       </span>
-      <span className="h-ph">
-        <span className="h-k2">{rec ? '5 de 5 fases' : `Fase ${ph} de 5`}</span>
+      <span className="x-ph">
+        <span className="x-over">{rec ? '5 de 5 fases' : `Fase ${ph} de 5`}</span>
         <b>{rec ? 'Te has recuperado' : PHASES[ph - 1]}</b>
-        <span className="h-seg" aria-hidden="true">
+        <span className="x-seg" aria-hidden="true">
           {[1, 2, 3, 4, 5].map((f) => (
             <i
               key={f}
@@ -155,12 +188,10 @@ function PhaseCard({ p }: { p: Patient }) {
             />
           ))}
         </span>
-        {!rec && (
-          <small>
-            {ok} de {goals.length} objetivos para la medalla
-          </small>
-        )}
-        {p.objective && <span className="h-goal">{p.objective}</span>}
+        {p.objective && <small>Meta: {p.objective}</small>}
+      </span>
+      <span className="x-go">
+        <IcChevron />
       </span>
     </button>
   )

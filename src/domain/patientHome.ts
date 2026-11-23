@@ -135,23 +135,23 @@ export function notices(c: Ctx, p: Patient): Notice[] {
   const r = routineFor(c, p, tt)
   const s = p.sessions[isoD(tt)]
   if (r && !(s && s.status === 'done'))
-    out.push({ title: '💪 Hoy te toca: ' + sessName(r), body: `${r.items.length} ejercicios · ${estMin(r)} min`, go: { to: 'session', day: isoD(tt) } })
+    out.push({ title: 'Hoy te toca: ' + sessName(r), body: `${r.items.length} ejercicios · ${estMin(r)} min`, go: { to: 'session', day: isoD(tt) } })
   const y = yesterdayToRecover(c, p)
-  if (y) out.push({ title: '⏳ ¿Recuperas la de ayer?', body: `${sessName(y.r)} · opcional`, go: { to: 'session', day: isoD(y.day) } })
-  if (pendingFriday(c, p)) out.push({ title: '📝 Cuestionario del viernes', body: '¿Cómo ha ido la semana? 1 minuto.', go: { to: 'friday' } })
+  if (y) out.push({ title: '¿Recuperas la de ayer?', body: `${sessName(y.r)} · opcional`, go: { to: 'session', day: isoD(y.day) } })
+  if (pendingFriday(c, p)) out.push({ title: 'Cuestionario del viernes', body: '¿Cómo ha ido la semana? 1 minuto.', go: { to: 'friday' } })
   const rec = pendingRec(c, p)
-  if (rec) out.push({ title: '🎥 ' + rec.label, body: 'Te explico cada vídeo', go: { to: 'recordings' } })
+  if (rec) out.push({ title: rec.label, body: 'Te explico cada vídeo', go: { to: 'recordings' } })
   const nc = c.st.videos.find((v) => v.type === 'clase' && v.vis === 'visible' && v.week === weekNo(c, p))
-  if (nc) out.push({ title: '🎓 Clase nueva', body: nc.title, go: { to: 'classes' } })
+  if (nc) out.push({ title: 'Clase nueva', body: nc.title, go: { to: 'classes' } })
   const b = myBooking(c, p)
   if (b) {
     const bd = new Date(b.at)
     const mins = (+bd - c.now) / 6e4
     const tomorrow = isoD(bd) === isoD(addD(tt, 1))
     if (mins <= 60 && p.settings.callHour !== false)
-      out.unshift({ title: '📞 Tu llamada con Jone es en ' + Math.max(1, Math.round(mins)) + ' min', body: `A las ${fTime(bd)}`, go: { to: 'call' } })
-    else if (tomorrow && p.settings.callDay !== false) out.unshift({ title: '📞 Mañana tienes llamada con Jone', body: `A las ${fTime(bd)}`, go: { to: 'call' } })
-    else out.push({ title: '📞 Llamada con Jone', body: fShort(bd) + ' a las ' + fTime(bd), go: { to: 'call' } })
+      out.unshift({ title: 'Tu llamada con Jone es en ' + Math.max(1, Math.round(mins)) + ' min', body: `A las ${fTime(bd)}`, go: { to: 'call' } })
+    else if (tomorrow && p.settings.callDay !== false) out.unshift({ title: 'Mañana tienes llamada con Jone', body: `A las ${fTime(bd)}`, go: { to: 'call' } })
+    else out.push({ title: 'Llamada con Jone', body: fShort(bd) + ' a las ' + fTime(bd), go: { to: 'call' } })
   }
   return out
 }
