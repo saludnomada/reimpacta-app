@@ -130,7 +130,7 @@ function ThisWeek({ c, p }: { c: Ctx; p: Patient }) {
             >
               <small>{WD[i]}</small>
               <span className="h5-num">{d.getDate()}</span>
-              <i>{cell.kind ? cell.state === 'done' ? <IcCheck /> : <TaskIcon k={cell.kind} /> : null}</i>
+              <i>{cell.kind ? <TaskIcon k={cell.kind} /> : null}</i>
             </button>
           )
         })}

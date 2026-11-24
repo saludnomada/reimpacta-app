@@ -921,3 +921,28 @@ html[data-theme="light"] .pg-grow i.done::after{box-shadow:inset 0 0 0 1px rgba(
 .pg-legend2 i{width:10px;height:10px;border-radius:50%;display:inline-block}
 .pg-legend2 i.d{background:var(--lime)}.pg-legend2 i.m{box-shadow:inset 0 0 0 2px var(--coral)}.pg-legend2 i.r{width:4px;height:4px;background:var(--dim)}
 html[data-theme="light"] .pg-grow i.future.has::after{box-shadow:inset 0 0 0 1.5px #D5DBD0}
+
+/* ===== Calendarios: el icono del tipo (fuerza, movilidad, correr)
+   hecho = verde oscuro de marca · sin hacer = coral · por venir = gris suave ===== */
+:root{--done-ic:#D0FB00}
+html[data-theme="light"]{--done-ic:#1F3A12}
+.pg-grow i::after{content:none!important}
+.pg-grow i.rest::after,.pg-grow i.future:not(.has)::after{content:""!important;width:4px;height:4px;border-radius:50%;background:var(--ring-track)}
+.pg-grow i svg.ph{width:22px;height:22px}
+.pg-grow i.done{color:var(--done-ic)}
+.pg-grow i.miss{color:var(--coral)}
+.pg-grow i.now{color:var(--text)}
+.pg-grow i.now svg{background:color-mix(in srgb,var(--lime) 45%,transparent);border-radius:8px;padding:2px;width:26px;height:26px}
+.pg-grow i.future.has{color:var(--ring-track)}
+html[data-theme="light"] .pg-grow i.future.has{color:#CDD4C7}
+.pg-legend2 span svg{width:16px;height:16px}
+.pg-legend2 .d{color:var(--done-ic)}.pg-legend2 .m{color:var(--coral)}
+/* Hoy · Esta semana: mismo criterio */
+.h5-day i,.h5-day.done i,.h5-day.miss i,.h5-day.k-fuerza i,.h5-day.k-movilidad i,.h5-day.k-correr i{background:none!important;box-shadow:none!important;opacity:1!important}
+html[data-theme="light"] .h5-day.k-fuerza i{background:none!important;box-shadow:none!important}
+.h5-day i svg{width:22px!important;height:22px!important}
+.h5-day.done i{color:var(--done-ic)!important}
+.h5-day.miss i{color:var(--coral)!important}
+.h5-day.next i,.h5-day.future i{color:#9AA79E!important}
+.h5-day.now i{color:var(--text)!important;background:color-mix(in srgb,var(--lime) 45%,transparent)!important;border-radius:10px}
+.h5-leg{display:none}
