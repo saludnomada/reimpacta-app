@@ -897,3 +897,27 @@ html[data-theme="light"] .pv-rings .ring2 svg circle:first-child{stroke:#E6EAE1}
 .phacc li.open .chev{transform:rotate(90deg)}
 .phacc-b{padding:0 0 14px 46px}
 .phacc-b .preq{border-top:0;padding-top:0;margin-top:0}
+
+/* ===== Días de entreno: calendario minimalista (sin colores por tipo) =====
+   hecho = punto lima · sin hacer = aro coral · descanso = puntito gris · por venir = aro gris */
+.pg-kinds{grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.pg-kinds>div{display:flex;flex-direction:column;align-items:center;padding:10px 4px;gap:0}
+.pg-kinds>div+div{border-left:1px solid var(--hair)}
+.pg-kinds b{font-size:22px;font-weight:800}
+.pg-kinds span{font-size:12px}
+.pg-grow{grid-template-columns:34px repeat(7,1fr);gap:4px}
+.pg-grow i,.pg-grow i.done,.pg-grow i.miss,.pg-grow i.now,.pg-grow i.rest,.pg-grow i.future{aspect-ratio:auto;height:26px;max-height:none;border-radius:0;background:none!important;box-shadow:none!important;opacity:1;display:grid;place-items:center;position:relative}
+.pg-grow i::after{content:"";display:block;border-radius:50%}
+.pg-grow i.done::after{width:16px;height:16px;background:var(--lime)}
+html[data-theme="light"] .pg-grow i.done::after{box-shadow:inset 0 0 0 1px rgba(10,20,13,.12)}
+.pg-grow i.miss::after{width:14px;height:14px;box-shadow:inset 0 0 0 2px var(--coral)}
+.pg-grow i.now::after{width:16px;height:16px;box-shadow:inset 0 0 0 2px var(--text)}
+.pg-grow i.future.has::after{width:12px;height:12px;box-shadow:inset 0 0 0 1.5px var(--ring-track)}
+.pg-grow i.rest::after,.pg-grow i.future:not(.has)::after{width:4px;height:4px;background:var(--ring-track)}
+.pg-legend{gap:18px}
+.pg-legend i.done{background:var(--lime)}
+.pg-legend2{display:flex;gap:16px;justify-content:center;font-size:12px;color:var(--muted);margin-top:2px}
+.pg-legend2 span{display:inline-flex;align-items:center;gap:6px}
+.pg-legend2 i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.pg-legend2 i.d{background:var(--lime)}.pg-legend2 i.m{box-shadow:inset 0 0 0 2px var(--coral)}.pg-legend2 i.r{width:4px;height:4px;background:var(--dim)}
+html[data-theme="light"] .pg-grow i.future.has::after{box-shadow:inset 0 0 0 1.5px #D5DBD0}

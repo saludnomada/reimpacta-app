@@ -9,7 +9,6 @@ import { BrandIcon } from '../../ui/BrandIcon'
 import { PhasesAccordion } from '../../ui/PhaseReqs'
 import { Ring } from '../../ui/Ring'
 import { Info } from '../../ui/Info'
-import { TaskIcon } from '../../ui/TaskIcon'
 
 const METRICS: ['painEx' | 'painLife' | 'mind', string][] = [
   ['painLife', 'Dolor día a día'],
@@ -157,7 +156,6 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
         <div className="pg-kinds">
           {KINDS.map(([k, l]) => (
             <div key={k}>
-              <i className={`k-${k}`} />
               <b>{days[k]}</b>
               <span>{l}</span>
             </div>
@@ -174,12 +172,15 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
             <div key={w.label} className="pg-grow">
               <span>{w.label}</span>
               {w.cells.map((cell) => (
-                <i key={cell.day} className={`${cell.state} ${cell.kind ? 'k-' + cell.kind : ''}`} title={fDM(parseD(cell.day))}>
-                  {cell.state === 'done' && cell.kind ? <TaskIcon k={cell.kind} /> : null}
-                </i>
+                <i key={cell.day} className={`${cell.state} ${cell.kind ? 'has' : ''}`} title={fDM(parseD(cell.day))} />
               ))}
             </div>
           ))}
+        </div>
+        <div className="pg-legend2">
+          <span><i className="d" /> Hecha</span>
+          <span><i className="m" /> Sin hacer</span>
+          <span><i className="r" /> Descanso</span>
         </div>
         {streak(c, p) > 0 && (
           <p className="pg-note">
