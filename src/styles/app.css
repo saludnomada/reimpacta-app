@@ -1060,3 +1060,16 @@ html .pg-grow i.done,html[data-theme] .h5-day.done i,html .h5-day.done i{backgro
 .vl-prev{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .vl-prev img{border-radius:10px;object-fit:cover}
 .vl-prev>div{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+
+/* ===== Calendarios v4: pasados en recuadro (verde = hecha, coral = sin hacer), icono verde oscuro ===== */
+html .pg-grow i.done,html .pg-grow i.miss,html[data-theme] .h5-day.done i,html[data-theme] .h5-day.miss i,html .h5-day.done i,html .h5-day.miss i{color:#1F3A12!important;border-radius:10px!important;box-shadow:none!important;opacity:1!important}
+html .pg-grow i.done,html[data-theme] .h5-day.done i,html .h5-day.done i{background:var(--lime)!important}
+html .pg-grow i.miss,html[data-theme] .h5-day.miss i,html .h5-day.miss i{background:var(--coral)!important}
+.pg-grow i.miss{max-height:34px}
+.pg-grow i.miss svg.ph{width:20px;height:20px}
+.h5-day.miss i{width:34px;height:34px}
+.h5-day.miss i svg{width:19px!important;height:19px!important}
+.pg-legend2 .d svg,.pg-legend2 .m svg{color:#1F3A12;border-radius:5px;padding:2px}
+.pg-legend2 .d svg{background:var(--lime)}
+.pg-legend2 .m svg{background:var(--coral)}
+.pg-legend2 .m{color:var(--muted)}

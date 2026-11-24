@@ -142,7 +142,7 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
         <div className="pg-hrow">
           <h2 className="pg-h">Días de entreno</h2>
           <Info>
-            Tus últimas semanas, de lunes a domingo. Cuadro verde: hecha. Icono coral: sin hacer. Gris: por venir. Punto: día libre. <b>Seguidas</b> son las sesiones que llevas sin fallar ninguna (los descansos no cuentan); tu mejor marca es{' '}
+            Tus últimas semanas, de lunes a domingo. Cuadro verde: hecha. Cuadro coral: sin hacer. Gris: por venir. Punto: día libre. <b>Seguidas</b> son las sesiones que llevas sin fallar ninguna (los descansos no cuentan); tu mejor marca es{' '}
             {bestStreak(c, p)}.
           </Info>
         </div>
