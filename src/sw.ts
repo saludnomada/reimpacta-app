@@ -20,11 +20,11 @@ self.addEventListener('push', (event) => {
     } catch {
       return { body: event.data?.text() }
     }
-  })() as { title?: string; body?: string; url?: string }
+  })() as { title?: string; body?: string; url?: string; icon?: string }
   event.waitUntil(
     self.registration.showNotification(data.title || 'REIMPACTA', {
       body: data.body || '',
-      icon: '/icons/icon-192.png',
+      icon: data.icon ? `/icons/marca/${data.icon}.png` : '/icons/icon-192.png',
       badge: '/icons/icon-192.png',
       data: { url: data.url || '/' },
     }),

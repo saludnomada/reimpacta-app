@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { fDM, parseD, WD } from '../../domain/dates'
 import { compliance, currentPhase, painOk, painSeries, recovered, streak, type Ctx } from '../../domain/logic'
 import type { Patient } from '../../domain/model'
@@ -6,7 +6,8 @@ import { PHASES } from '../../domain/model'
 import { bestStreak, improvements, muscleWork, totals, trainingDays, weeksGrid, type DayKind } from '../../domain/progress'
 import { complianceTone, confidenceTone, painTone } from '../../domain/scales'
 import { CONF_BANDS, PAIN_BANDS, TrendChart } from '../../ui/charts'
-import { IcCheck, IcTarget } from '../../ui/icons'
+import { IcCheck } from '../../ui/icons'
+import { BrandIcon } from '../../ui/BrandIcon'
 import { PhaseReqs } from '../../ui/PhaseReqs'
 import { Info } from '../../ui/Info'
 import { TaskIcon } from '../../ui/TaskIcon'
@@ -29,6 +30,10 @@ const hours = (min: number) => (min >= 60 ? `${(Math.round((min / 60) * 10) / 10
  * fases y lo que falta para pasar a la siguiente. Cada bloque con su (?) explicativo.
  */
 export function Progress({ c, p }: { c: Ctx; p: Patient }) {
+  // si vienen desde la tarjeta de fase de Hoy, bajar directamente a la fase
+  useEffect(() => {
+    if (location.hash === '#fase') setTimeout(() => document.getElementById('fase')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80)
+  }, [])
   const [metric, setMetric] = useState<'painEx' | 'painLife' | 'mind'>('painLife')
   const comp = compliance(c, p)
   const thr = painOk(p)
@@ -210,7 +215,7 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
       )}
 
       {/* Fases y siguiente fase */}
-      <section className="pg-card">
+      <section className="pg-card" id="fase">
         <div className="pg-hrow">
           <h2 className="pg-h">Fases</h2>
           <Info>
@@ -236,9 +241,7 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
 
       {p.objective && (
         <section className="pg-goal goal-ic">
-          <i>
-            <IcTarget />
-          </i>
+          <BrandIcon k="meta" size={40} />
           <div>
             <span className="x-over">Tu meta</span>
             <p>{p.objective}</p>

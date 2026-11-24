@@ -810,3 +810,17 @@ svg.ph{fill:currentColor!important;stroke:none!important}
 .h5-goal i,.goal-ic>i{width:32px;height:32px;border-radius:10px;background:var(--ink);color:var(--lime);display:grid;place-items:center;flex-shrink:0}
 .goal-ic{display:flex;gap:12px;align-items:flex-start}
 .goal-ic p{margin:2px 0 0}
+
+/* ===== Iconos propios de la marca ===== */
+.bicon{display:block;border-radius:22%;flex-shrink:0}
+.x-bic{position:relative;flex-shrink:0;display:block}
+.bic-ok{position:absolute;right:-4px;bottom:-4px;width:20px;height:20px;border-radius:50%;background:var(--lime);color:#0A140D;display:grid;place-items:center;border:2px solid var(--card)}
+.bic-ok svg{width:11px;height:11px}
+.x-row.done .x-bic .bicon,.wk-sess.st-done .x-bic .bicon{opacity:.55}
+.wk-sess .x-bic{margin-right:2px}
+.notif-row{display:flex!important;gap:12px;align-items:flex-start}
+.pop-main .bicon{border-radius:10px}
+.h5-reqs-link{grid-area:reqs;margin-top:10px;padding-top:10px;border-top:1px solid var(--hair);font-size:13.5px;color:var(--muted);font-weight:600}
+.h5-reqs-link u{color:var(--text);text-underline-offset:3px}
+.h5-goal{align-items:center}
+.goal-ic{align-items:center}

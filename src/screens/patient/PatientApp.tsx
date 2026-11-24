@@ -7,6 +7,7 @@ import { notices, type Notice } from '../../domain/patientHome'
 import { useCtx } from '../../data/store'
 import { IconBell, IconCal, IconClasses, IconGear, IconHome, IconPhone, IconProg, Logo } from '../../ui/icons'
 import { Classes } from './Classes'
+import { BrandIcon } from '../../ui/BrandIcon'
 import { Progress } from './Progress'
 import { Week } from './Week'
 import { Session } from './Session'
@@ -131,9 +132,13 @@ function EntryPop({ p, list }: { p: Patient; list: Notice[] }) {
             nav(goPath(x.go))
           }}
         >
-          <span className="pop-ic">
-            <Logo />
-          </span>
+          {x.icon ? (
+            <BrandIcon k={x.icon} size={40} />
+          ) : (
+            <span className="pop-ic">
+              <Logo />
+            </span>
+          )}
           <span className="pop-tx">
             <span className="pop-h">
               <b>REIMPACTA</b>
@@ -165,10 +170,13 @@ function NotifsSheet({ list, onClose }: { list: Notice[]; onClose: () => void })
         <div className="notif">
           {list.length ? (
             list.map((n, i) => (
-              <div key={i} onClick={() => nav(goPath(n.go))} style={{ cursor: 'pointer' }}>
-                <b>{n.title}</b>
-                <br />
-                <span className="muted">{n.body}</span>
+              <div key={i} className="notif-row" onClick={() => nav(goPath(n.go))} style={{ cursor: 'pointer' }}>
+                {n.icon && <BrandIcon k={n.icon} size={36} />}
+                <span>
+                  <b>{n.title}</b>
+                  <br />
+                  <span className="muted">{n.body}</span>
+                </span>
               </div>
             ))
           ) : (

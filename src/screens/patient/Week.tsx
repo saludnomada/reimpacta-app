@@ -6,6 +6,7 @@ import type { Patient } from '../../domain/model'
 import { IcCheck, IcChevron } from '../../ui/icons'
 import { Info } from '../../ui/Info'
 import { TaskIcon } from '../../ui/TaskIcon'
+import { BrandIcon } from '../../ui/BrandIcon'
 
 const DAY = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 
@@ -72,7 +73,14 @@ export function Week({ c, p }: { c: Ctx; p: Patient }) {
             <div className="wk-body">
               {r ? (
                 <button className={`wk-sess st-${st} k-${sType(r) === 'movilidad' ? 'movilidad' : sType(r) === 'fuerza' ? 'fuerza' : 'correr'}`} onClick={() => nav(`/sesion/${k}`)}>
-                  <span className="wk-ic">{st === 'done' ? <IcCheck /> : <TaskIcon k={sType(r) || 'fuerza'} />}</span>
+                  <span className="x-bic">
+                    <BrandIcon k={sType(r) || 'fuerza'} size={42} />
+                    {st === 'done' && (
+                      <i className="bic-ok">
+                        <IcCheck />
+                      </i>
+                    )}
+                  </span>
                   <span className="wk-tx">
                     <b>{sessName(r)}</b>
                     <small>

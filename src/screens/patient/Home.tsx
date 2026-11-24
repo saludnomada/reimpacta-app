@@ -7,8 +7,9 @@ import { currentPhase } from '../../domain/logic'
 import { PHASES } from '../../domain/model'
 import { PhaseBadge } from '../../ui/PhaseBadge'
 import { weeksGrid } from '../../domain/progress'
-import { IcCheck, IcChevron, IcClock, IcPlay, IcTarget } from '../../ui/icons'
-import { PhaseReqs } from '../../ui/PhaseReqs'
+import { IcCheck, IcChevron, IcClock, IcPlay } from '../../ui/icons'
+import { phaseRequirements } from '../../domain/progress'
+import { BrandIcon } from '../../ui/BrandIcon'
 import { TaskIcon } from '../../ui/TaskIcon'
 import { Ring } from '../../ui/Ring'
 import { VideoThumb } from '../../ui/VideoThumb'
@@ -78,8 +79,13 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
           {rest.map((x, i) => (
             <li key={i}>
               <button className={`x-row ${x.done ? 'done' : x.co ? 'co' : ''}`} onClick={() => nav(goPath(x.go))}>
-                <span className="x-ic" aria-hidden="true">
-                  {x.done ? <IcCheck /> : <TaskIcon k={x.icon} />}
+                <span className="x-bic" aria-hidden="true">
+                  <BrandIcon k={x.icon} size={44} />
+                  {x.done && (
+                    <i className="bic-ok">
+                      <IcCheck />
+                    </i>
+                  )}
                 </span>
                 <span className="x-tx">
                   <b>{x.title}</b>
@@ -203,8 +209,9 @@ function PhaseLine({ c, p }: { c: Ctx; p: Patient }) {
   const nav = useNavigate()
   const rec = recovered(p)
   const ph = currentPhase(p)
+  const q = phaseRequirements(c, p)
   return (
-    <button className="h5-phase" onClick={() => nav('/progreso')}>
+    <button className="h5-phase" onClick={() => nav('/progreso#fase')}>
       <PhaseBadge p={p} size={52} />
       <span className="h5-ph">
         <small>{rec ? "Programa completado" : `Fase ${ph} de 5`}</small>
@@ -212,14 +219,14 @@ function PhaseLine({ c, p }: { c: Ctx; p: Patient }) {
 
       </span>
       <IcChevron />
-      <span className="h5-reqs">
-        <PhaseReqs c={c} p={p} compact />
-      </span>
+      {!rec && q.total > 0 && (
+        <span className="h5-reqs-link">
+          Para superar esta fase: {q.okN} de {q.total} · <u>ver tests e hitos</u>
+        </span>
+      )}
       {p.objective && (
         <span className="h5-goal">
-          <i>
-            <IcTarget />
-          </i>
+          <BrandIcon k="meta" size={36} />
           <span>
             <small>Tu meta</small>
             {p.objective}
