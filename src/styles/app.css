@@ -824,3 +824,76 @@ svg.ph{fill:currentColor!important;stroke:none!important}
 .h5-reqs-link u{color:var(--text);text-underline-offset:3px}
 .h5-goal{align-items:center}
 .goal-ic{align-items:center}
+
+/* =====================================================================
+   v10 · MÁS LIMPIO: letra con más aire, Progreso visual,
+   hecho = verde lima · pendiente = coral
+   ===================================================================== */
+/* letra: menos apretada y menos gruesa en títulos */
+.x-title,.h5-head .x-title{font-weight:700;letter-spacing:-.012em}
+.pg-h,.x-s-title,.x-h2{font-weight:700;letter-spacing:-.005em}
+body{letter-spacing:.002em}
+.h5-sub,.x-tx small,.wk-tx small,.h5-ph span,.preq li{line-height:1.5}
+.phone{gap:20px}
+
+/* hecho = verde lima · pendiente = coral (en todas las listas de comprobación) */
+.preq li i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#0A140D}
+.preq li.ok i{background:var(--lime);border:0}
+.preq li.pend i{border:2px solid var(--coral);background:color-mix(in srgb,var(--coral) 12%,transparent)}
+.preq li.ok span{color:var(--text)}
+.preq.future li.pend i{border-color:var(--hair);background:none}
+.preq.future li span{color:var(--muted)}
+.wk-sess.st-miss .x-bic::after{content:"";position:absolute;right:-4px;bottom:-4px;width:16px;height:16px;border-radius:50%;background:var(--coral);border:2px solid var(--card)}
+.wk-sess.st-miss{opacity:1}
+.wk-sess.st-miss .wk-tx small{color:var(--coral-t)}
+.h5-day.miss i{opacity:1;box-shadow:inset 0 0 0 2px var(--coral)!important;color:var(--coral)!important;background:none!important}
+.pg-grow i.miss{box-shadow:inset 0 0 0 2px var(--coral);opacity:1}
+.pg-legend i.miss{box-shadow:inset 0 0 0 2px var(--coral)}
+
+/* Progreso: bloque principal oscuro con la cifra y su curva */
+.pv-hero{background:var(--ink);color:#fff;border-radius:var(--r-card);padding:18px 18px 16px;display:flex;flex-direction:column;gap:10px}
+.pv-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.pv-k{font-size:13px;font-weight:600;color:#B7C4BA}
+.pv-hero .info-btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:#fff}
+.pv-hero .info-pop{background:rgba(255,255,255,.08);color:#fff}
+.pv-big{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.pv-big b{font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--lime)}
+.pv-big span{font-size:15px;color:#DDE6DF}
+.pv-empty{margin:0;font-size:14.5px;color:#DDE6DF}
+.pv-spark{width:100%;height:64px;display:block}
+.pv-spark .l{fill:none;stroke:var(--lime);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.pv-spark .a{fill:var(--lime);opacity:.1}
+.pv-spark .p{fill:var(--lime);stroke:var(--ink);stroke-width:2}
+.pv-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-top:1px solid rgba(255,255,255,.08);padding-top:12px}
+.pv-mini small{display:block;font-size:11.5px;color:#B7C4BA;margin-bottom:3px}
+.pv-mini span{display:flex;align-items:baseline;gap:6px;font-variant-numeric:tabular-nums}
+.pv-mini em{font-style:normal;font-size:15px;color:#B7C4BA}
+.pv-mini i{font-style:normal;font-size:13px;color:#7F9184}
+.pv-mini b{font-size:20px;font-weight:800;color:#fff}
+.pv-mini b.t-good{color:var(--lime)}.pv-mini b.t-mid{color:var(--t-mid)}.pv-mini b.t-bad{color:var(--coral)}.pv-mini b.t-stop{color:#FF6A5C}
+
+/* anillos */
+.pv-rings{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pv-rings>div{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-card);padding:14px 6px 12px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.pv-rings span{font-size:12.5px;font-weight:600;color:var(--muted)}
+.pv-rings .ring2-c b{font-size:17px;font-weight:800}
+html[data-theme="light"] .pv-rings .ring2 svg circle:first-child{stroke:#E6EAE1}
+
+/* fases desplegables */
+.phacc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.phacc li+li{border-top:1px solid var(--hair)}
+.phacc-h{width:100%;display:grid;grid-template-columns:34px 1fr auto;grid-template-areas:"n t chev" "n bar chev";column-gap:12px;row-gap:6px;align-items:center;background:none;border:0;padding:12px 0;text-align:left;color:var(--text);cursor:pointer}
+.phacc-h .n{grid-area:n;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;border:2px solid var(--hair);color:var(--dim)}
+.phacc li.ok .n{background:var(--lime);border-color:var(--lime);color:#0A140D}
+.phacc li.cur .n{border-color:var(--coral);color:var(--text)}
+.phacc-h .t{grid-area:t;display:flex;flex-direction:column;gap:1px}
+.phacc-h .t b{font-size:15px;font-weight:700}
+.phacc-h .t small{font-size:12.5px;color:var(--muted)}
+.phacc li.ok .t small{color:var(--text)}
+.phacc li.next .t b{color:var(--muted)}
+.phacc-bar{grid-area:bar;height:6px;border-radius:3px;background:color-mix(in srgb,var(--coral) 22%,transparent);overflow:hidden}
+.phacc-bar i{display:block;height:100%;background:var(--lime);border-radius:3px}
+.phacc .chev{grid-area:chev;color:var(--dim);transition:transform .2s}
+.phacc li.open .chev{transform:rotate(90deg)}
+.phacc-b{padding:0 0 14px 46px}
+.phacc-b .preq{border-top:0;padding-top:0;margin-top:0}

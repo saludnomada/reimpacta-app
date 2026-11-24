@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react'
-import { fDM, parseD, WD } from '../../domain/dates'
-import { compliance, currentPhase, painOk, painSeries, recovered, streak, type Ctx } from '../../domain/logic'
+import { addD, fDM, parseD, WD } from '../../domain/dates'
+import { compliance, currentPhase, endOf, painOk, painSeries, recovered, routineFor, streak, type Ctx } from '../../domain/logic'
 import type { Patient } from '../../domain/model'
-import { PHASES } from '../../domain/model'
 import { bestStreak, improvements, muscleWork, totals, trainingDays, weeksGrid, type DayKind } from '../../domain/progress'
-import { complianceTone, confidenceTone, painTone } from '../../domain/scales'
+import { complianceTone, confidenceTone, painTone, toneVar } from '../../domain/scales'
 import { CONF_BANDS, PAIN_BANDS, TrendChart } from '../../ui/charts'
-import { IcCheck } from '../../ui/icons'
 import { BrandIcon } from '../../ui/BrandIcon'
-import { PhaseReqs } from '../../ui/PhaseReqs'
+import { PhasesAccordion } from '../../ui/PhaseReqs'
+import { Ring } from '../../ui/Ring'
 import { Info } from '../../ui/Info'
 import { TaskIcon } from '../../ui/TaskIcon'
 
@@ -22,7 +21,6 @@ const KINDS: [DayKind, string][] = [
   ['movilidad', 'Movilidad'],
   ['correr', 'Correr'],
 ]
-const hours = (min: number) => (min >= 60 ? `${(Math.round((min / 60) * 10) / 10).toLocaleString('es-ES')} h` : `${min} min`)
 
 /**
  * PROGRESO, en tono profesional:
@@ -48,6 +46,10 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
   const mus = muscleWork(c, p, 28)
   const musMax = Math.max(1, ...mus.map((m) => m.sets))
   const lifeImp = imp.find((x) => x.key === 'painLife')
+  // sesiones previstas en todo el programa (para el anillo de sesiones)
+  const end = endOf(p)
+  let planned = 0
+  if (end) for (let d = parseD(p.start); d < end; d = addD(d, 1)) if (routineFor(c, p, d)) planned++
 
   return (
     <>
@@ -58,70 +60,63 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
         </p>
       </div>
 
-      {/* Resumen */}
-      <section className="pg-card">
-        <div className="pg-hrow">
-          <h2 className="pg-h">Resumen</h2>
+      {/* Bloque principal: la mejoría, con su curva */}
+      <section className="pv-hero">
+        <div className="pv-top">
+          <span className="pv-k">{lifeImp && lifeImp.pct > 0 ? 'Desde que empezaste' : 'Tu evolución'}</span>
           <Info>
-            Todo lo que llevas hecho desde que empezaste. El <b>cumplimiento</b> es el porcentaje de sesiones hechas de las que tenías
-            programadas hasta hoy.
+            Tus cuestionarios de los viernes: el primero comparado con el último. El dolor va del 0 al 10 (cuanto más bajo, mejor) y la
+            confianza también (cuanto más alta, mejor).
           </Info>
         </div>
-        {lifeImp && lifeImp.pct > 0 && (
-          <div className="pg-headline">
-            <b>−{lifeImp.pct}%</b>
-            <span>
-              de dolor en tu día a día desde que empezaste ({lifeImp.from} → {lifeImp.to} sobre 10)
-            </span>
-          </div>
+        {lifeImp && lifeImp.pct > 0 ? (
+          <>
+            <div className="pv-big">
+              <b>−{lifeImp.pct}%</b>
+              <span>de dolor en tu día a día</span>
+            </div>
+            <Spark vals={se.map((x) => x.painLife)} />
+          </>
+        ) : (
+          <p className="pv-empty">Aparece en cuanto rellenes tus dos primeros cuestionarios de los viernes.</p>
         )}
-        <div className="pg-kpis">
-          <div>
-            <b>{t.sessions}</b>
-            <span>sesiones</span>
-          </div>
-          <div>
-            <b>{hours(t.minutes)}</b>
-            <span>entrenando</span>
-          </div>
-          <div>
-            <b className={comp[2] ? `kpi-t t-${complianceTone(comp[0])}` : ''}>{comp[2] ? comp[0] + '%' : '–'}</b>
-            <span>cumplimiento</span>
-          </div>
-          <div>
-            <b>{t.medals}/5</b>
-            <span>fases</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Antes → ahora */}
-      {imp.length > 0 && (
-        <section className="pg-card">
-          <div className="pg-hrow">
-            <h2 className="pg-h">Antes y ahora</h2>
-            <Info>
-              Tu primer cuestionario del viernes comparado con el último. Dolor y confianza van del 0 al 10. En el dolor, cuanto más bajo
-              mejor; en la confianza, cuanto más alto mejor.
-            </Info>
-          </div>
-          <div className="pg-deltas flat">
+        {imp.length > 0 && (
+          <div className="pv-mini">
             {imp.map((x) => (
               <div key={x.key}>
-                <span>{x.label}</span>
-                <b>
-                  <span className="pg-from">{x.from}</span>
-                  <span className="arr">→</span>
-                  <span className={`tchip t-${toneOf(x.key, x.to)}`}>
-                    {x.to}
-                    <small>/10</small>
-                  </span>
-                </b>
+                <small>{x.key === 'painEx' ? 'Dolor en ejercicios' : x.key === 'painLife' ? 'Dolor diario' : 'Confianza'}</small>
+                <span>
+                  <em>{x.from}</em>
+                  <i>→</i>
+                  <b className={`t-${toneOf(x.key, x.to)}`}>{x.to}</b>
+                </span>
               </div>
             ))}
           </div>
-        </section>
-      )}
+        )}
+      </section>
+
+      {/* Cifras en anillos */}
+      <section className="pv-rings">
+        <div>
+          <Ring value={comp[2] ? comp[0] / 100 : 0} size={78} stroke={8} color={comp[2] ? toneVar(complianceTone(comp[0])) : undefined}>
+            <b>{comp[2] ? comp[0] + '%' : '–'}</b>
+          </Ring>
+          <span>Cumplimiento</span>
+        </div>
+        <div>
+          <Ring value={planned ? Math.min(1, t.sessions / planned) : 0} size={78} stroke={8}>
+            <b>{t.sessions}</b>
+          </Ring>
+          <span>{planned ? `de ${planned} sesiones` : 'Sesiones'}</span>
+        </div>
+        <div>
+          <Ring value={t.medals / 5} size={78} stroke={8}>
+            <b>{t.medals}/5</b>
+          </Ring>
+          <span>Fases</span>
+        </div>
+      </section>
 
       {/* Evolución */}
       {se.length >= 2 && (
@@ -214,29 +209,16 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
         </section>
       )}
 
-      {/* Fases y siguiente fase */}
+      {/* Fases desplegables */}
       <section className="pg-card" id="fase">
         <div className="pg-hrow">
-          <h2 className="pg-h">Fases</h2>
+          <h2 className="pg-h">Tus fases</h2>
           <Info>
-            Tu recuperación tiene 5 fases. Pasas a la siguiente cuando cumples sus objetivos y superas sus tests. Los tests los grabas en
-            vídeo y yo los reviso.
+            Tu recuperación tiene 5 fases. Para superar cada una tienes que cumplir sus hitos y superar sus tests (los grabas en vídeo y yo los
+            reviso). Toca una fase para ver todo lo que incluye. Verde: conseguido. Coral: pendiente.
           </Info>
         </div>
-        <ol className="pg-steps">
-          {PHASES.map((nm, i) => {
-            const st = i < p.done ? 'ok' : i === p.done && !rec ? 'cur' : ''
-            return (
-              <li key={nm} className={st}>
-                <span className="n">{st === 'ok' ? <IcCheck /> : i + 1}</span>
-                <small>{nm}</small>
-                {st === 'ok' && p.phaseAt[i + 1] && <em>{fDM(parseD(p.phaseAt[i + 1]))}</em>}
-              </li>
-            )
-          })}
-        </ol>
-
-        {!rec && <PhaseReqs c={c} p={p} />}
+        <PhasesAccordion c={c} p={p} />
       </section>
 
       {p.objective && (
@@ -249,5 +231,23 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
         </section>
       )}
     </>
+  )
+}
+
+/** Curva pequeña (sparkline) para el bloque principal. */
+function Spark({ vals }: { vals: number[] }) {
+  if (vals.length < 2) return null
+  const W = 300,
+    H = 64,
+    n = vals.length
+  const x = (i: number) => 4 + ((W - 8) * i) / (n - 1)
+  const y = (v: number) => 6 + (H - 12) * (1 - v / 10)
+  const d = vals.map((v, i) => `${i ? 'L' : 'M'}${x(i)},${y(v)}`).join(' ')
+  return (
+    <svg className="pv-spark" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
+      <path d={`${d} L${x(n - 1)},${H} L${x(0)},${H} Z`} className="a" />
+      <path d={d} className="l" />
+      <circle cx={x(n - 1)} cy={y(vals[n - 1])} r="4.5" className="p" />
+    </svg>
   )
 }

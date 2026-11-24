@@ -154,8 +154,8 @@ export function milestones(c: Ctx, p: Patient): Milestone[] {
 }
 
 /** Lo que falta para superar la fase actual: primero los tests, después los hitos (objetivos). */
-export function phaseRequirements(c: Ctx, p: Patient) {
-  const ph = Math.min(p.done + 1, 5)
+export function phaseRequirements(c: Ctx, p: Patient, phase?: number) {
+  const ph = phase ?? Math.min(p.done + 1, 5)
   const r = p.recs[ph] || { tests: [], files: [], at: null }
   const asked = (r.tests || []).map((v) => ({
     id: v,
