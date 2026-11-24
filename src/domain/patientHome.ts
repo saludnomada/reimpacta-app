@@ -134,7 +134,9 @@ export function notices(c: Ctx, p: Patient): Notice[] {
   const out: Notice[] = []
   const r = routineFor(c, p, tt)
   const s = p.sessions[isoD(tt)]
-  if (r && !(s && s.status === 'done'))
+  const eve = eveningNudge(c, p)
+  if (eve) out.push(eve)
+  else if (r && !(s && s.status === 'done'))
     out.push({ title: 'Hoy te toca: ' + sessName(r), body: `${r.items.length} ejercicios · ${estMin(r)} min`, go: { to: 'session', day: isoD(tt) } })
   const y = yesterdayToRecover(c, p)
   if (y) out.push({ title: '¿Recuperas la de ayer?', body: `${sessName(y.r)} · opcional`, go: { to: 'session', day: isoD(y.day) } })
@@ -166,4 +168,37 @@ export function motivation(c: Ctx, p: Patient, streakN: number, improvementPct: 
   if (improvementPct != null && improvementPct >= 20) return `Tu dolor ha bajado un ${improvementPct}% desde que empezaste.`
   if (r) return `Hoy toca ${sessName(r).toLowerCase()}: ${estMin(r)} minutos y listo.`
   return 'Hoy toca descansar. Muévete a tu ritmo.'
+}
+
+/** ¿Es ya la tarde-noche (desde las 19:00) y la sesión de hoy sigue sin hacer? */
+export function eveningNudge(c: Ctx, p: Patient): Notice | null {
+  const h = new Date(c.now).getHours()
+  if (h < 19) return null
+  const r = routineFor(c, p, c.today)
+  const s = p.sessions[isoD(c.today)]
+  if (!r || (s && s.status === 'done')) return null
+  return {
+    title: 'Aún estás a tiempo',
+    body: `Tu sesión de ${sessName(r).toLowerCase()} son ${estMin(r)} minutos. Hazla hoy y cierras el día.`,
+    go: { to: 'session', day: isoD(c.today) },
+  }
+}
+
+/** Frase de ánimo al terminar una sesión, sacada de sus datos. Tono de Jone: cercano, sin exagerar. */
+export function finishPhrase(c: Ctx, p: Patient, day: string): string {
+  const done = Object.values(p.sessions).filter((s) => s.status === 'done').length
+  if (done <= 1) return 'Primera sesión hecha. Aquí empieza tu vuelta a correr.'
+  const wk = weekSummary(c, p, monday(c.today))
+  if (wk.total && wk.done >= wk.total) return 'Semana completa. Así, paso a paso, es como se vuelve a correr.'
+  // racha
+  let n = 0
+  for (let d = c.today, i = 0; i < 60; d = addD(d, -1), i++) {
+    if (!routineFor(c, p, d)) continue
+    const s = p.sessions[isoD(d)]
+    if (s && s.status === 'done') n++
+    else if (isoD(d) !== day) break
+  }
+  if (n >= 3) return `Llevas ${n} sesiones seguidas. Esa constancia es lo que te acerca a tu meta.`
+  if (wk.total) return `Una más. Llevas ${wk.done} de ${wk.total} esta semana.`
+  return 'Sesión hecha. Buen trabajo.'
 }

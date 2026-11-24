@@ -2,7 +2,10 @@ import { useNavigate } from 'react-router-dom'
 import { diffDays, monday, parseD, WD } from '../../domain/dates'
 import { doseText, endOf, estMin, recovered, routineFor, sessName, sType, videoById, weekNo, type Ctx } from '../../domain/logic'
 import type { Patient, Routine } from '../../domain/model'
-import { todayItems, weekSummary, type TodoItem } from '../../domain/patientHome'
+import { eveningNudge, todayItems, weekSummary, type TodoItem } from '../../domain/patientHome'
+import { currentPhase } from '../../domain/logic'
+import { PHASES } from '../../domain/model'
+import { PhaseBadge } from '../../ui/PhaseBadge'
 import { weeksGrid } from '../../domain/progress'
 import { IcCheck, IcChevron, IcClock, IcPlay } from '../../ui/icons'
 import { TaskIcon } from '../../ui/TaskIcon'
@@ -32,6 +35,9 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
   const main = first && first.go.to === 'session' && (first.main || first.done) ? first : undefined
   const rest = items.filter((x) => x !== main)
   const wk = weekSummary(c, p, monday(c.today))
+  const eve = eveningNudge(c, p)
+  const rToday = routineFor(c, p, c.today)
+  const estMinToday = rToday ? estMin(rToday) : 0
 
   return (
     <>
@@ -41,8 +47,9 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
           {dayLabel(c.today)} · Semana {weekNo(c, p)}
           {totalWeeks ? ` de ${totalWeeks}` : ''}
         </span>
-        <h1 className="x-title">Hola, {p.name}</h1>
+        <h1 className="x-title">{greeting(c.now)}, {p.name}</h1>
         <p className="h5-sub">{pend ? `Hoy tienes ${pend} ${pend === 1 ? 'tarea' : 'tareas'}` : items.length ? 'Hoy lo tienes todo hecho' : 'Hoy es día libre. Muévete a tu ritmo.'}</p>
+        {eve && <p className="h5-eve">{eve.title}: {estMinToday} minutos y cierras el día.</p>}
         </div>
         {wk.total > 0 && (
           <div className="h5-ring" aria-label={`Esta semana: ${wk.done} de ${wk.total} sesiones`}>
@@ -86,6 +93,7 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
         </ul>
       )}
 
+      <PhaseLine p={p} />
       <ThisWeek c={c} p={p} />
       <InstallBanner />
     </>
@@ -182,3 +190,29 @@ function SessionCard({ x, r, c, onClick }: { x: TodoItem; r: Routine | null; c: 
   )
 }
 
+
+/** Saludo según la hora */
+function greeting(now: number) {
+  const h = new Date(now).getHours()
+  return h < 6 ? 'Buenas noches' : h < 14 ? 'Buenos días' : h < 21 ? 'Buenas tardes' : 'Buenas noches'
+}
+
+/** Su fase actual y su meta, en una tarjeta discreta. */
+function PhaseLine({ p }: { p: Patient }) {
+  const nav = useNavigate()
+  const rec = recovered(p)
+  const ph = currentPhase(p)
+  const goals = p.goals[ph] || []
+  const ok = goals.filter((g) => g.ok).length
+  return (
+    <button className="h5-phase" onClick={() => nav('/progreso')}>
+      <PhaseBadge p={p} size={52} />
+      <span className="h5-ph">
+        <small>{rec ? 'Programa completado' : `Fase ${ph} de 5 · ${ok} de ${goals.length} objetivos`}</small>
+        <b>{rec ? 'Te has recuperado' : PHASES[ph - 1]}</b>
+        {p.objective && <span>Tu meta: {p.objective}</span>}
+      </span>
+      <IcChevron />
+    </button>
+  )
+}

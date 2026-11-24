@@ -12,7 +12,7 @@ const OPTS: [ThemeChoice, string, string][] = [
 /** AJUSTES (de momento: el fondo; el resto llega en el bloque 2) */
 export function Settings({ p }: { p: Patient }) {
   const nav = useNavigate()
-  const cur = p.settings.theme || 'auto'
+  const cur = p.settings.theme || 'claro'
   return (
     <div className="phone">
       <div className="sbar">

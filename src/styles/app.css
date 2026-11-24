@@ -739,3 +739,48 @@ html[data-theme="light"] .h5-wbar i.ok{box-shadow:inset 0 0 0 1px rgba(10,20,13,
 .h5-ring small{font-size:11px;font-weight:700;color:var(--muted)}
 .h5-ring .ring2-c b{font-size:16px}
 html[data-theme="light"] .h5-ring .ring2 svg circle:first-child{stroke:#E2E7DC}
+
+/* =====================================================================
+   v9 · LETRA PLUS JAKARTA SANS, TÍTULOS EN MINÚSCULA, ICONOS DUOTONO
+   Salud cercana y profesional, sin parecer médico ni juego.
+   ===================================================================== */
+:root{--display:"Plus Jakarta Sans",system-ui,sans-serif;--body:"Plus Jakarta Sans",system-ui,sans-serif;--mono:"Plus Jakarta Sans",system-ui,sans-serif}
+html,body,button,input,select,textarea{font-family:var(--body)}
+body{font-feature-settings:"tnum" 0}
+/* títulos en minúscula normal */
+h1,h2,h3,.ptitle,.hello,.todo b,.race h2,.x-title,.x-s-title,.pg-h,.h5-rest b,.ahead h1,.se-sbar h2,.sbar h2,.c-body b,.ititle{text-transform:none!important;font-style:normal!important;letter-spacing:-.015em}
+.x-title{font-weight:800;font-size:28px;letter-spacing:-.025em}
+.h5-head .x-title{font-size:28px}
+.x-s-title{font-weight:700;font-size:18px}
+.pg-h{font-weight:700;font-size:16px;letter-spacing:-.01em;color:var(--text)}
+.se-sbar h2{font-weight:700;font-size:17px}
+.h5-rest b{font-size:19px;font-weight:800}
+.c-body b{font-weight:700;font-size:15.5px}
+/* etiquetas pequeñas: discretas */
+.x-h2,.x-over,.pg-sub2,.lbl,.h-k2{font-family:var(--body)}
+.x-h2{text-transform:none;letter-spacing:-.005em;font-size:15px;font-weight:700;color:var(--text)}
+.x-chip{font-family:var(--body);text-transform:none;letter-spacing:0;font-weight:700;font-size:12.5px}
+.wk-tx b{text-transform:none}
+.brandm{font-family:var(--body);font-weight:800;letter-spacing:.2em;font-size:12.5px}
+.brandm .mark,.brand i{font-family:var(--body);font-weight:800}
+/* números */
+.ring2-c b,.pg-kpis b,.pg-headline b,.ach-t b,.fin-stats b,.wk-date b,.pg-kinds b,.pg-from,.tchip{font-family:var(--body);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.wk-date b{font-weight:700}
+/* iconos Phosphor: rellenos con currentColor */
+svg.ph{fill:currentColor!important;stroke:none!important}
+.nav svg.ph{width:23px;height:23px}
+.x-ic svg.ph,.wk-ic svg.ph{width:22px;height:22px}
+.x-chip svg.ph{width:16px;height:16px}
+/* pop-up corto y sobrio */
+.pop{border-radius:16px}
+.pop-tx strong{font-size:14.5px;font-weight:700}
+.pop-tx>span:not(.pop-h){font-size:13px}
+.pop-ic{font-family:var(--body);font-weight:800;border-radius:9px}
+.h5-eve{margin:6px 0 0;font-size:13.5px;font-weight:700;color:var(--text);background:color-mix(in srgb,var(--lime) 35%,transparent);border-radius:8px;padding:5px 9px;display:inline-block}
+.h5-phase{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--hair);border-radius:var(--r-card);padding:12px 14px;color:var(--text);cursor:pointer}
+.h5-phase>svg{color:var(--dim)}
+.h5-ph{display:flex;flex-direction:column;gap:2px;min-width:0}
+.h5-ph small{font-size:12px;font-weight:600;color:var(--muted)}
+.h5-ph b{font-size:15.5px;font-weight:700}
+.h5-ph span{font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fin-phrase{margin:-4px 0 4px;font-size:15px;color:var(--text);line-height:1.45}

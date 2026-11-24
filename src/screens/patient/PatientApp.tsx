@@ -103,7 +103,7 @@ function BottomNav({ c, p }: { c: Ctx; p: Patient }) {
 function EntryPop({ p, list }: { p: Patient; list: Notice[] }) {
   const nav = useNavigate()
   const c = useCtx()
-  const key = `reimpacta-pop-${p.id}-${isoD(c.today)}`
+  const key = `reimpacta-pop-${p.id}-${isoD(c.today)}-${new Date(c.now).getHours() >= 19 ? 'tarde' : 'dia'}`
   const [show, setShow] = useState(false)
   useEffect(() => {
     let seen = false

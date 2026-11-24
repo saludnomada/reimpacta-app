@@ -14,7 +14,7 @@ export function useApplyTheme(choice: ThemeChoice | undefined) {
     mq.addEventListener('change', on)
     return () => mq.removeEventListener('change', on)
   }, [])
-  const c = choice || 'auto'
+  const c = choice || 'claro' // por defecto, fondo claro (decidido por Jone)
   const theme = c === 'claro' ? 'light' : c === 'oscuro' ? 'dark' : sysDark ? 'dark' : 'light'
   useEffect(() => {
     document.documentElement.dataset.theme = theme

@@ -21,6 +21,7 @@ import { TaskIcon } from '../../ui/TaskIcon'
 import { VideoBox } from '../../ui/VideoBox'
 import { VideoThumb } from '../../ui/VideoThumb'
 import { sentence } from './Home'
+import { finishPhrase } from '../../domain/patientHome'
 import { getStore } from '../../data/store'
 
 const itemName = (c: Ctx, it: RoutineItem) =>
@@ -315,6 +316,7 @@ function FinishSheet({ c, p, day, onClose }: { c: Ctx; p: Patient; day: string; 
         <h2 id="finh" className="x-title" style={{ fontSize: 24 }}>
           Bien hecho, {p.name}
         </h2>
+        <p className="fin-phrase">{finishPhrase(c, p, day)}</p>
         <div className="fin-stats">
           <div>
             <b>{fmtClock(s.elapsed || 0)}</b>
