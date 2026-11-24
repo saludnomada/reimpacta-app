@@ -4,7 +4,7 @@ import type { Ctx } from '../domain/logic'
 import type { Patient } from '../domain/model'
 import { PHASES } from '../domain/model'
 import { phaseRequirements, TEST_STATUS } from '../domain/progress'
-import { IcCheck, IcChevron } from './icons'
+import { IcCheck, IcChevron, IcLock } from './icons'
 
 /** Lista de tests y hitos. Hecho = verde lima · pendiente = coral. */
 function ReqList({ c, p, phase, future }: { c: Ctx; p: Patient; phase: number; future?: boolean }) {
@@ -44,7 +44,8 @@ export function PhaseReqs({ c, p }: { c: Ctx; p: Patient; compact?: boolean }) {
   return <ReqList c={c} p={p} phase={Math.min(p.done + 1, 5)} />
 }
 
-/** Las 5 fases desplegables: la actual abierta; al tocar cualquiera, se ven todos sus tests e hitos. */
+/** Las 5 fases: las superadas y la actual se despliegan con sus tests e hitos.
+ *  Las siguientes están bloqueadas: se abren al llegar a esa fase. */
 export function PhasesAccordion({ c, p }: { c: Ctx; p: Patient }) {
   const cur = Math.min(p.done + 1, 5)
   const rec = p.done >= 5
@@ -58,7 +59,7 @@ export function PhasesAccordion({ c, p }: { c: Ctx; p: Patient }) {
         const isOpen = open === f
         return (
           <li key={f} className={`${st} ${isOpen ? 'open' : ''}`}>
-            <button className="phacc-h" onClick={() => setOpen(isOpen ? null : f)} aria-expanded={isOpen}>
+            <button className="phacc-h" disabled={st === 'next'} onClick={() => st !== 'next' && setOpen(isOpen ? null : f)} aria-expanded={isOpen}>
               <span className="n">{st === 'ok' ? <IcCheck /> : f}</span>
               <span className="t">
                 <b>{nm}</b>
@@ -67,7 +68,7 @@ export function PhasesAccordion({ c, p }: { c: Ctx; p: Patient }) {
                     ? `Superada${p.phaseAt[f] ? ' el ' + fDM(parseD(p.phaseAt[f])) : ''}`
                     : st === 'cur'
                       ? `En curso · ${q.okN} de ${q.total} conseguidos`
-                      : 'Próximamente'}
+                      : 'Se desbloquea al llegar a esta fase'}
                 </small>
               </span>
               {st === 'cur' && (
@@ -75,13 +76,11 @@ export function PhasesAccordion({ c, p }: { c: Ctx; p: Patient }) {
                   <i style={{ width: `${q.total ? (q.okN / q.total) * 100 : 0}%` }} />
                 </span>
               )}
-              <span className="chev">
-                <IcChevron />
-              </span>
+              <span className="chev">{st === 'next' ? <IcLock /> : <IcChevron />}</span>
             </button>
-            {isOpen && (
+            {isOpen && st !== 'next' && (
               <div className="phacc-b">
-                <ReqList c={c} p={p} phase={f} future={st === 'next'} />
+                <ReqList c={c} p={p} phase={f} />
               </div>
             )}
           </li>

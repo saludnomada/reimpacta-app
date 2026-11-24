@@ -4,6 +4,9 @@ import { accessOf, compliance, currentPhase, recovered, weekNo } from '../../dom
 import { PHASES } from '../../domain/model'
 import { fShort } from '../../domain/dates'
 import { VideoLab } from './VideoLab'
+import { Routines } from './Routines'
+import { Programs } from './Programs'
+import { Billing } from './Billing'
 import { TaskList, VoiceButton } from './VoiceTask'
 import { Logo } from '../../ui/icons'
 import { PhaseBadge } from '../../ui/PhaseBadge'
@@ -51,16 +54,19 @@ export function JoneApp() {
           <h1>{tab === 'pacientes' ? 'Tus pacientes' : TABS.find((t) => t[0] === tab)![1]}</h1>
         </div>
       </div>
-      {tab !== 'videos' && tab !== 'tareas' && (
+      {!['videos', 'tareas', 'rutinas', 'programas', 'factura'].includes(tab) && (
         <section className="card">
           <p className="muted" style={{ margin: 0 }}>
-            Tu panel llega en los bloques 3 y 4. Ya puedes probar: <b>Vídeos y clases</b> (buscador con 1.200 vídeos), <b>Tareas</b> y el
+            Tu panel llega en los bloques 3 y 4. Ya puedes probar: <b>Vídeos y clases</b>, <b>Rutinas</b>, <b>Programas</b>, <b>Facturación</b>, <b>Tareas</b> y el
             micrófono de abajo a la derecha para dictar tareas.
           </p>
         </section>
       )}
       {tab === 'videos' && <VideoLab />}
       {tab === 'tareas' && <TaskList />}
+      {tab === 'rutinas' && <Routines />}
+      {tab === 'programas' && <Programs />}
+      {tab === 'factura' && <Billing />}
       <VoiceButton />
       {tab === 'pacientes' && (
         <div className="grid">

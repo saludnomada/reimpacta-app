@@ -179,3 +179,40 @@ export function updateVideo(id: string, patch: Partial<Video>) {
     else d.videos.push({ id, title: '', url: '', keywords: [], type: 'reps', week: null, vis: 'visible', ...patch })
   })
 }
+
+/* ---------- RUTINAS Y PROGRAMAS ---------- */
+import type { Program, Routine } from '../domain/model'
+export const newId = (p: string) => p + Math.random().toString(36).slice(2, 8)
+export function saveRoutine(r: Routine) {
+  getStore().change({ kind: 'library' }, (d) => {
+    const i = d.routines.findIndex((x) => x.id === r.id)
+    if (i >= 0) d.routines[i] = r
+    else d.routines.push(r)
+  })
+}
+export function deleteRoutine(id: string) {
+  getStore().change({ kind: 'library' }, (d) => {
+    d.routines = d.routines.filter((x) => x.id !== id)
+  })
+}
+export function saveProgram(pr: Program) {
+  getStore().change({ kind: 'library' }, (d) => {
+    const i = d.programs.findIndex((x) => x.id === pr.id)
+    if (i >= 0) d.programs[i] = pr
+    else d.programs.push(pr)
+  })
+}
+
+/* ---------- PAGOS Y ACCESO ---------- */
+export function setPaid(pid: string, i: number, paid: boolean) {
+  getStore().change({ kind: 'patient', patientId: pid }, (d) => {
+    const p = d.patients.find((x) => x.id === pid)
+    if (p?.pay) p.pay.paid[i] = paid
+  })
+}
+export function setAccess(pid: string, patch: { until?: string; paused?: boolean }) {
+  getStore().change({ kind: 'patient', patientId: pid }, (d) => {
+    const p = d.patients.find((x) => x.id === pid)
+    if (p) p.access = { ...p.access, ...patch }
+  })
+}

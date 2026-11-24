@@ -19,6 +19,7 @@ import {
   House,
   Medal,
   MagnifyingGlass,
+  LockSimple,
   Microphone,
   Stop,
   PersonSimpleRun,
@@ -70,3 +71,4 @@ export const IcTarget = mk(Target, 20)
 export const IcMic = mk(Microphone, 26, 'fill')
 export const IcStop = mk(Stop, 24, 'fill')
 export const IcSearch = mk(MagnifyingGlass, 18)
+export const IcLock = mk(LockSimple, 16)

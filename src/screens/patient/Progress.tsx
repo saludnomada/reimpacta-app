@@ -207,7 +207,7 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
           <h2 className="pg-h">Tus fases</h2>
           <Info>
             Tu recuperación tiene 5 fases. Para superar cada una tienes que cumplir sus hitos y superar sus tests (los grabas en vídeo y yo los
-            reviso). Toca una fase para ver todo lo que incluye. Verde: conseguido. Coral: pendiente.
+            reviso). Toca una fase superada o la actual para ver sus tests e hitos; las siguientes se desbloquean al llegar a ellas. Verde: conseguido. Coral: pendiente.
           </Info>
         </div>
         <PhasesAccordion c={c} p={p} />
