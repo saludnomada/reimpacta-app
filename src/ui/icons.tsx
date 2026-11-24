@@ -22,6 +22,7 @@ import {
   PersonSimpleTaiChi,
   Phone,
   Play,
+  Target,
   TrendDown,
   VideoCamera,
   type Icon,
@@ -62,3 +63,4 @@ export const IcFlag = mk(Flag, 18)
 export const IcCalendar = mk(CalendarCheck, 18)
 export const IcDown = mk(TrendDown, 18)
 export const IcMedal = mk(Medal, 18)
+export const IcTarget = mk(Target, 20)

@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { fDM, parseD, WD } from '../../domain/dates'
-import { compliance, currentPhase, painOk, painSeries, recovered, recOf, streak, testsToAsk, videoById, type Ctx } from '../../domain/logic'
+import { compliance, currentPhase, painOk, painSeries, recovered, streak, type Ctx } from '../../domain/logic'
 import type { Patient } from '../../domain/model'
 import { PHASES } from '../../domain/model'
 import { bestStreak, improvements, muscleWork, totals, trainingDays, weeksGrid, type DayKind } from '../../domain/progress'
 import { complianceTone, confidenceTone, painTone } from '../../domain/scales'
 import { CONF_BANDS, PAIN_BANDS, TrendChart } from '../../ui/charts'
-import { IcCheck } from '../../ui/icons'
+import { IcCheck, IcTarget } from '../../ui/icons'
+import { PhaseReqs } from '../../ui/PhaseReqs'
 import { Info } from '../../ui/Info'
 import { TaskIcon } from '../../ui/TaskIcon'
 
@@ -36,17 +37,11 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
   const imp = improvements(p)
   const ph = currentPhase(p)
   const rec = recovered(p)
-  const goals = p.goals[ph] || []
   const t = totals(c, p)
   const days = trainingDays(c, p)
   const grid = weeksGrid(c, p, 6)
   const mus = muscleWork(c, p, 28)
   const musMax = Math.max(1, ...mus.map((m) => m.sets))
-  const r = recOf(p, ph)
-  const phaseTests = [
-    ...(r.tests || []).map((v) => ({ v, st: (r.passed || {})[v] ? 'ok' : r.files.find((f) => f.id === v) ? 'rev' : 'rec' })),
-    ...testsToAsk(c, p).map((v) => ({ v, st: 'soon' })),
-  ]
   const lifeImp = imp.find((x) => x.key === 'painLife')
 
   return (
@@ -236,47 +231,18 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
           })}
         </ol>
 
-        {!rec && (
-          <div className="pg-nextphase">
-            <h3>
-              {ph < 5 ? `Para pasar a la fase ${ph + 1}` : 'Para terminar el programa'}
-              <span>
-                {goals.filter((g) => g.ok).length + phaseTests.filter((x) => x.st === 'ok').length} de {goals.length + phaseTests.length}
-              </span>
-            </h3>
-            <span className="pg-sub2">Objetivos</span>
-            <ul className="pg-goals">
-              {goals.map((g, i) => (
-                <li key={i} className={g.ok ? 'ok' : ''}>
-                  <span>{g.ok ? <IcCheck /> : null}</span>
-                  {g.t}
-                </li>
-              ))}
-            </ul>
-            {phaseTests.length > 0 && (
-              <>
-                <span className="pg-sub2">Tests que te quedan por superar</span>
-                <ul className="pg-goals">
-                  {phaseTests.map((x) => (
-                    <li key={x.v} className={x.st === 'ok' ? 'ok' : ''}>
-                      <span>{x.st === 'ok' ? <IcCheck /> : null}</span>
-                      {(videoById(c, x.v)?.title || '').replace('TEST: ', '').toLowerCase().replace(/^./, (m) => m.toUpperCase())}
-                      <em className={`st-${x.st}`}>
-                        {x.st === 'ok' ? 'Superado' : x.st === 'rev' ? 'Jone lo está revisando' : x.st === 'rec' ? 'Por grabar' : 'Te lo pediré pronto'}
-                      </em>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </div>
-        )}
+        {!rec && <PhaseReqs c={c} p={p} />}
       </section>
 
       {p.objective && (
-        <section className="pg-goal">
-          <span className="x-over">Tu meta</span>
-          <p>{p.objective}</p>
+        <section className="pg-goal goal-ic">
+          <i>
+            <IcTarget />
+          </i>
+          <div>
+            <span className="x-over">Tu meta</span>
+            <p>{p.objective}</p>
+          </div>
         </section>
       )}
     </>

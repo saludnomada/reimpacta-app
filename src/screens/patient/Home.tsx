@@ -7,7 +7,8 @@ import { currentPhase } from '../../domain/logic'
 import { PHASES } from '../../domain/model'
 import { PhaseBadge } from '../../ui/PhaseBadge'
 import { weeksGrid } from '../../domain/progress'
-import { IcCheck, IcChevron, IcClock, IcPlay } from '../../ui/icons'
+import { IcCheck, IcChevron, IcClock, IcPlay, IcTarget } from '../../ui/icons'
+import { PhaseReqs } from '../../ui/PhaseReqs'
 import { TaskIcon } from '../../ui/TaskIcon'
 import { Ring } from '../../ui/Ring'
 import { VideoThumb } from '../../ui/VideoThumb'
@@ -93,7 +94,7 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
         </ul>
       )}
 
-      <PhaseLine p={p} />
+      <PhaseLine c={c} p={p} />
       <ThisWeek c={c} p={p} />
       <InstallBanner />
     </>
@@ -198,21 +199,33 @@ function greeting(now: number) {
 }
 
 /** Su fase actual y su meta, en una tarjeta discreta. */
-function PhaseLine({ p }: { p: Patient }) {
+function PhaseLine({ c, p }: { c: Ctx; p: Patient }) {
   const nav = useNavigate()
   const rec = recovered(p)
   const ph = currentPhase(p)
-  const goals = p.goals[ph] || []
-  const ok = goals.filter((g) => g.ok).length
   return (
     <button className="h5-phase" onClick={() => nav('/progreso')}>
       <PhaseBadge p={p} size={52} />
       <span className="h5-ph">
-        <small>{rec ? 'Programa completado' : `Fase ${ph} de 5 · ${ok} de ${goals.length} objetivos`}</small>
+        <small>{rec ? "Programa completado" : `Fase ${ph} de 5`}</small>
         <b>{rec ? 'Te has recuperado' : PHASES[ph - 1]}</b>
-        {p.objective && <span>Tu meta: {p.objective}</span>}
+
       </span>
       <IcChevron />
+      <span className="h5-reqs">
+        <PhaseReqs c={c} p={p} compact />
+      </span>
+      {p.objective && (
+        <span className="h5-goal">
+          <i>
+            <IcTarget />
+          </i>
+          <span>
+            <small>Tu meta</small>
+            {p.objective}
+          </span>
+        </span>
+      )}
     </button>
   )
 }

@@ -784,3 +784,29 @@ svg.ph{fill:currentColor!important;stroke:none!important}
 .h5-ph b{font-size:15.5px;font-weight:700}
 .h5-ph span{font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .fin-phrase{margin:-4px 0 4px;font-size:15px;color:var(--text);line-height:1.45}
+
+/* ===== Para superar esta fase · tests y hitos ===== */
+.preq{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--hair);padding-top:12px;margin-top:6px}
+.preq-h{display:flex;justify-content:space-between;align-items:baseline}
+.preq-h b{font-size:15.5px;font-weight:700}
+.preq-h span{font-size:12.5px;font-weight:700;color:var(--muted)}
+.preq-sub{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-top:6px}
+.preq ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.preq li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;font-size:14px;line-height:1.35}
+.preq li i{width:22px;height:22px;border-radius:50%;border:2px solid var(--hair);display:grid;place-items:center;color:#0A140D}
+.preq li.ok i{background:var(--lime);border-color:var(--lime)}
+.preq li.ok span{color:var(--muted)}
+.preq em{font-style:normal;font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 8px;background:var(--card2);color:var(--muted);white-space:nowrap}
+.preq em.st-rec{background:color-mix(in srgb,var(--coral) 18%,transparent);color:var(--text)}
+.preq em.st-ok{background:var(--lime);color:#0A140D}
+.preq.compact li{font-size:13.5px}
+.preq.compact em{font-size:11px}
+/* tarjeta de fase en Hoy, con requisitos y meta debajo */
+.h5-phase{grid-template-columns:52px 1fr auto;grid-template-areas:"badge ph go" "reqs reqs reqs" "goal goal goal";row-gap:0;cursor:pointer}
+.h5-phase>.pbadge{grid-area:badge}.h5-phase>.h5-ph{grid-area:ph}.h5-phase>svg{grid-area:go}
+.h5-reqs{grid-area:reqs;display:block}
+.h5-goal{grid-area:goal;display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--card2);font-size:14px;font-weight:600;line-height:1.35;color:var(--text)}
+.h5-goal small{display:block;font-size:11.5px;font-weight:700;color:var(--muted)}
+.h5-goal i,.goal-ic>i{width:32px;height:32px;border-radius:10px;background:var(--ink);color:var(--lime);display:grid;place-items:center;flex-shrink:0}
+.goal-ic{display:flex;gap:12px;align-items:flex-start}
+.goal-ic p{margin:2px 0 0}

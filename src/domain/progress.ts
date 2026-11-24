@@ -152,3 +152,31 @@ export function milestones(c: Ctx, p: Patient): Milestone[] {
   if (t.painDrop && t.painDrop >= 50) out.push({ id: 'half', icon: 'down', title: 'Dolor a la mitad' })
   return out.reverse() // lo más reciente/grande primero
 }
+
+/** Lo que falta para superar la fase actual: primero los tests, después los hitos (objetivos). */
+export function phaseRequirements(c: Ctx, p: Patient) {
+  const ph = Math.min(p.done + 1, 5)
+  const r = p.recs[ph] || { tests: [], files: [], at: null }
+  const asked = (r.tests || []).map((v) => ({
+    id: v,
+    label: titleOf(c, v),
+    st: ((r.passed || {})[v] ? 'ok' : r.files.find((f) => f.id === v) ? 'rev' : 'rec') as 'ok' | 'rev' | 'rec' | 'soon',
+  }))
+  const soon = (c.st.phaseTests[ph] || [])
+    .filter((v) => !(r.tests || []).includes(v) && videoById(c, v))
+    .map((v) => ({ id: v, label: titleOf(c, v), st: 'soon' as const }))
+  const tests = [...asked, ...soon]
+  const goals = (p.goals[ph] || []).map((g) => ({ t: g.t, ok: g.ok }))
+  const okN = tests.filter((x) => x.st === 'ok').length + goals.filter((g) => g.ok).length
+  return { ph, tests, goals, okN, total: tests.length + goals.length }
+}
+const titleOf = (c: Ctx, v: string) => {
+  const t = (videoById(c, v)?.title || '').replace(/^TEST:\s*/i, '').toLowerCase()
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
+export const TEST_STATUS: Record<'ok' | 'rev' | 'rec' | 'soon', string> = {
+  ok: 'Superado',
+  rev: 'Jone lo está revisando',
+  rec: 'Por grabar',
+  soon: 'Te lo pediré pronto',
+}
