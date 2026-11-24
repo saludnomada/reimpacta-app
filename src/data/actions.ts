@@ -169,3 +169,13 @@ export function toggleTask(id: string) {
     if (t) t.done = !t.done
   })
 }
+
+/* ---------- BIBLIOTECA ---------- */
+import type { Video } from '../domain/model'
+export function updateVideo(id: string, patch: Partial<Video>) {
+  getStore().change({ kind: 'library' }, (d) => {
+    const v = d.videos.find((x) => x.id === id)
+    if (v) Object.assign(v, patch)
+    else d.videos.push({ id, title: '', url: '', keywords: [], type: 'reps', week: null, vis: 'visible', ...patch })
+  })
+}

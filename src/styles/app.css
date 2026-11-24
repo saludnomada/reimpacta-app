@@ -1073,3 +1073,18 @@ html .pg-grow i.miss,html[data-theme] .h5-day.miss i,html .h5-day.miss i{backgro
 .pg-legend2 .d svg{background:var(--lime)}
 .pg-legend2 .m svg{background:var(--coral)}
 .pg-legend2 .m{color:var(--muted)}
+
+/* Ficha del vídeo (panel) y descripción en el ejercicio */
+.ved{max-width:640px;max-height:90dvh;overflow:auto;gap:14px}
+.ved label,.ved-block{display:flex;flex-direction:column;gap:6px}
+.ved label>span,.ved-block>span{font-size:13px;font-weight:700;color:var(--muted)}
+.ved textarea{font:inherit;font-size:15px;line-height:1.5;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg);color:var(--text)}
+.ved-row{display:flex;gap:12px;align-items:flex-end}
+.ved-row img{border-radius:8px;object-fit:cover}
+.ved-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ved-chips .chip{font-size:12.5px;padding:5px 11px;cursor:pointer}
+.ved-chips input{flex:1;min-width:140px;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--text);font:inherit;padding:6px 2px}
+.ved-chips.sugg small{color:var(--dim);font-size:12px}
+.vl-desc{display:block;font-size:12.5px;color:var(--muted);margin:-2px 0 5px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.vl-desc.none{color:var(--coral);opacity:.8}
+.se-how{margin:8px 0 0;font-size:15px;line-height:1.55}

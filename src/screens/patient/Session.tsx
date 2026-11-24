@@ -249,6 +249,7 @@ function Exercise({ c, p, day, i, onBack, onNext }: { c: Ctx; p: Patient; day: s
           {itemName(c, it)}
         </h1>
         <span className="se-dose">{doseText(it)}</span>
+        {v?.desc && <p className="se-how">{v.desc}</p>}
         {it.note && <p className="se-note">{it.note}</p>}
       </div>
 

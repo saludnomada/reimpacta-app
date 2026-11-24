@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
+import { updateVideo } from '../../data/actions'
 import { useCtx } from '../../data/store'
-import type { Video, VideoType } from '../../domain/model'
+import { MUSCLES, TYPES, type Video, type VideoType } from '../../domain/model'
 import { IcSearch } from '../../ui/icons'
 import { ytId } from '../../ui/VideoBox'
 import { VideoThumb } from '../../ui/VideoThumb'
@@ -70,8 +71,8 @@ function demoLibrary(): Video[] {
   return out.slice(0, 1200)
 }
 
-/** Índice de búsqueda: título + etiquetas, ya sin tildes. */
-const indexOf = (v: Video, extra: string[]) => norm([v.title, ...v.keywords, ...extra].join(' '))
+/** Índice de búsqueda: título, descripción y etiquetas, ya sin tildes. */
+const indexOf = (v: Video, extra: string[]) => norm([v.title, v.desc || '', ...v.keywords, ...extra].join(' '))
 
 /** BIBLIOTECA (simulación): buscar entre 1.200 vídeos, etiquetar muchos de golpe y añadir uno de YouTube. */
 export function VideoLab() {
@@ -82,6 +83,7 @@ export function VideoLab() {
   const [sel, setSel] = useState<Set<string>>(new Set())
   const [tag, setTag] = useState('')
   const [shown, setShown] = useState(40)
+  const [edit, setEdit] = useState<string | null>(null)
   const idx = useMemo(() => new Map(all.map((v) => [v.id, indexOf(v, extra[v.id] || [])])), [all, extra])
 
   const t0 = performance.now()
@@ -109,6 +111,10 @@ export function VideoLab() {
     <div className="vl">
       <section className="card vl-explain">
         <span className="lbl">Simulación con 1.200 vídeos</span>
+        <p className="muted" style={{ margin: 0 }}>
+          Toca un vídeo para editar su título, enlace, palabras clave y la descripción que verá el paciente. Marca la casilla para etiquetar varios
+          a la vez.
+        </p>
         <p className="muted" style={{ margin: 0 }}>
           Los vídeos siguen en tu canal de YouTube (ocultos). La app solo guarda el enlace, el título y las etiquetas. Prueba a escribir{' '}
           <b>"talon escalon"</b>, <b>"isometrico rodilla"</b> o <b>"banda cadera"</b>: busca sin tildes y por trozos de palabra.
@@ -160,11 +166,12 @@ export function VideoLab() {
         {res.slice(0, shown).map((v) => {
           const tags = [...v.keywords, ...(extra[v.id] || [])]
           return (
-            <li key={v.id} className={sel.has(v.id) ? 'on' : ''} onClick={() => toggle(v.id)}>
-              <input type="checkbox" checked={sel.has(v.id)} readOnly aria-label="Seleccionar" />
+            <li key={v.id} className={sel.has(v.id) ? 'on' : ''} onClick={() => setEdit(v.id)}>
+              <input type="checkbox" checked={sel.has(v.id)} onClick={(e) => e.stopPropagation()} onChange={() => toggle(v.id)} aria-label="Seleccionar" />
               <VideoThumb v={v} w={72} />
               <div>
                 <b>{v.title}</b>
+                {v.desc ? <span className="vl-desc">{v.desc}</span> : <span className="vl-desc none">Sin descripción</span>}
                 <span className="vl-tags">
                   {tags.map((t) => (
                     <i key={t} className={(extra[v.id] || []).includes(t) ? 'new' : ''}>
@@ -177,6 +184,22 @@ export function VideoLab() {
           )
         })}
       </ul>
+      {edit && (
+        <Editor
+          v={all.find((x) => x.id === edit)!}
+          extra={extra[edit] || []}
+          popular={popular(all)}
+          onClose={() => setEdit(null)}
+          onSave={(nv) => {
+            setAll(all.map((x) => (x.id === nv.id ? nv : x)))
+            const n = { ...extra }
+            delete n[nv.id]
+            setExtra(n)
+            if (c.st.videos.some((x) => x.id === nv.id) || nv.id.startsWith('y')) updateVideo(nv.id, nv)
+            setEdit(null)
+          }}
+        />
+      )}
       {res.length > shown && (
         <button className="btn ghost" onClick={() => setShown(shown + 80)}>
           Ver más ({res.length - shown})
@@ -210,7 +233,7 @@ function AddYoutube({ onAdd }: { onAdd: (v: Video) => void }) {
               className="btn small"
               disabled={!title.trim()}
               onClick={() => {
-                onAdd({ id: 'y' + id, title: title.trim(), url, keywords: tags, type: 'reps', week: null, vis: 'visible' })
+                { const nv: Video = { id: 'y' + id, title: title.trim(), url, keywords: tags, type: 'reps', week: null, vis: 'visible' }; onAdd(nv); updateVideo(nv.id, nv) }
                 setUrl('')
                 setTitle('')
               }}
@@ -221,5 +244,102 @@ function AddYoutube({ onAdd }: { onAdd: (v: Video) => void }) {
         </div>
       )}
     </section>
+  )
+}
+
+/** Las etiquetas más usadas, para ponerlas con un toque */
+function popular(all: Video[]) {
+  const n = new Map<string, number>()
+  all.forEach((v) => v.keywords.forEach((k) => n.set(k, (n.get(k) || 0) + 1)))
+  return [...n.entries()].sort((a, b) => b[1] - a[1]).slice(0, 18).map(([k]) => k)
+}
+
+/** Ficha de un vídeo: título, enlace, tipo, palabras clave, músculos y la descripción que ve el paciente. */
+function Editor({ v, extra, popular, onClose, onSave }: { v: Video; extra: string[]; popular: string[]; onClose: () => void; onSave: (v: Video) => void }) {
+  const [d, setD] = useState<Video>({ ...v, keywords: [...new Set([...v.keywords, ...extra])], muscles: v.muscles || [] })
+  const [kw, setKw] = useState('')
+  const id = ytId(d.url)
+  const addKw = (k: string) => {
+    const t = k.trim().toLowerCase()
+    if (t && !d.keywords.includes(t)) setD({ ...d, keywords: [...d.keywords, t] })
+    setKw('')
+  }
+  const sugg = [...new Set([...autoTags(d.title), ...popular])].filter((k) => !d.keywords.includes(k)).slice(0, 12)
+  const mus = d.muscles || []
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="sheet ved" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        <span className="lbl">Ficha del vídeo</span>
+        <label>
+          <span>Título</span>
+          <input className="search" value={d.title} onChange={(e) => setD({ ...d, title: e.target.value.toUpperCase() })} />
+        </label>
+        <div className="ved-row">
+          <label style={{ flex: 1 }}>
+            <span>Enlace de YouTube</span>
+            <input className="search" value={d.url} placeholder="youtu.be/…" onChange={(e) => setD({ ...d, url: e.target.value })} />
+          </label>
+          {id && <img src={`https://i.ytimg.com/vi/${id}/mqdefault.jpg`} alt="" width={112} height={63} />}
+        </div>
+        <label>
+          <span>Tipo</span>
+          <select className="search" value={d.type} onChange={(e) => setD({ ...d, type: e.target.value as VideoType })}>
+            {(Object.keys(TYPES) as VideoType[]).map((t) => (
+              <option key={t} value={t}>
+                {TYPES[t]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="ved-block">
+          <span>Palabras clave (para encontrarlo)</span>
+          <div className="ved-chips">
+            {d.keywords.map((k) => (
+              <button key={k} className="chip on" onClick={() => setD({ ...d, keywords: d.keywords.filter((x) => x !== k) })}>
+                {k} ×
+              </button>
+            ))}
+            <input
+              value={kw}
+              placeholder="Escribe y pulsa Intro"
+              onChange={(e) => setKw(e.target.value)}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ',') && (e.preventDefault(), addKw(kw))}
+            />
+          </div>
+          {sugg.length > 0 && (
+            <div className="ved-chips sugg">
+              <small>Sugerencias:</small>
+              {sugg.map((k) => (
+                <button key={k} className="chip" onClick={() => addKw(k)}>
+                  + {k}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="ved-block">
+          <span>Músculos que trabaja</span>
+          <div className="ved-chips">
+            {MUSCLES.map((m) => (
+              <button key={m} className={`chip ${mus.includes(m) ? 'on' : ''}`} onClick={() => setD({ ...d, muscles: mus.includes(m) ? mus.filter((x) => x !== m) : [...mus, m] })}>
+                {m}
+              </button>
+            ))}
+          </div>
+        </div>
+        <label>
+          <span>Descripción: cómo se hace (la ve el paciente debajo del vídeo)</span>
+          <textarea rows={4} value={d.desc || ''} placeholder="Ej.: Con la punta del pie en el borde de un escalón, sube en 1 segundo y baja despacio en 3…" onChange={(e) => setD({ ...d, desc: e.target.value })} />
+        </label>
+        <div className="row">
+          <button className="btn" onClick={() => onSave({ ...d, desc: d.desc?.trim() || undefined })}>
+            Guardar
+          </button>
+          <button className="btn ghost" onClick={onClose}>
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
