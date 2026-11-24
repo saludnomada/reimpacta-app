@@ -91,7 +91,7 @@ export function Week({ c, p }: { c: Ctx; p: Patient }) {
                   <IcChevron />
                 </button>
               ) : (
-                <span className="wk-rest">Descanso</span>
+                <span className="wk-rest">Día libre</span>
               )}
               {fri && (
                 <span className={`wk-extra ${fri}`}>

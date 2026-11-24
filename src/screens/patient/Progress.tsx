@@ -142,7 +142,7 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
         <div className="pg-hrow">
           <h2 className="pg-h">Días de entreno</h2>
           <Info>
-            Tus últimas semanas, de lunes a domingo. Cuadro verde: hecha. Icono coral: sin hacer. Gris: por venir. Punto: descanso. <b>Seguidas</b> son las sesiones que llevas sin fallar ninguna (los descansos no cuentan); tu mejor marca es{' '}
+            Tus últimas semanas, de lunes a domingo. Cuadro verde: hecha. Icono coral: sin hacer. Gris: por venir. Punto: día libre. <b>Seguidas</b> son las sesiones que llevas sin fallar ninguna (los descansos no cuentan); tu mejor marca es{' '}
             {bestStreak(c, p)}.
           </Info>
         </div>
@@ -167,7 +167,7 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
         <div className="pg-legend2">
           <span className="d"><TaskIcon k="fuerza" /> Hecha</span>
           <span className="m"><TaskIcon k="fuerza" /> Sin hacer</span>
-          <span><i className="r" /> Descanso</span>
+          <span><i className="r" /> Día libre</span>
         </div>
         {streak(c, p) > 0 && (
           <p className="pg-note">

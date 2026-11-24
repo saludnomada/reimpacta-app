@@ -1,3 +1,4 @@
+import { BrandIcon } from '../../ui/BrandIcon'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
@@ -53,8 +54,14 @@ export function Session({ c, p }: { c: Ctx; p: Patient }) {
   if (!r)
     return (
       <div className="phone">
-        <Bar title="Sin sesión" onBack={() => nav('/')} />
-        <p className="muted">Este día no tienes sesión.</p>
+        <Bar title="Día libre" onBack={() => nav('/')} />
+        <section className="h5-rest rest-ic">
+          <BrandIcon k="recuperar" size={44} />
+          <div>
+            <b>Día libre</b>
+            <span>Aprovecha para desconectar, disfrutar, descansar y recargar energía. Tu cuerpo también se recupera hoy.</span>
+          </div>
+        </section>
       </div>
     )
 

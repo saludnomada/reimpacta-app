@@ -68,9 +68,12 @@ export function Home({ c, p }: { c: Ctx; p: Patient }) {
       {main ? (
         <SessionCard x={main} r={routineFor(c, p, c.today)} c={c} onClick={() => nav(goPath(main.go))} />
       ) : (
-        <section className="h5-rest">
-          <b>Hoy descansas</b>
-          <span>El descanso también es parte del tratamiento. Camina, muévete a tu ritmo y mañana seguimos.</span>
+        <section className="h5-rest rest-ic">
+          <BrandIcon k="recuperar" size={44} />
+          <div>
+            <b>Día libre</b>
+            <span>Aprovecha para desconectar, disfrutar, descansar y recargar energía. Tu cuerpo también se recupera hoy.</span>
+          </div>
         </section>
       )}
 

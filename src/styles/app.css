@@ -1002,3 +1002,7 @@ html .pg-grow i.done,html[data-theme] .h5-day.done i,html .h5-day.done i{backgro
 .guide-bar i{display:block;height:100%;background:var(--lime);transition:width .25s linear}
 .guide-btns{display:flex;flex-direction:column;gap:10px}
 .guide .se-ghost{color:#fff;border-color:rgba(255,255,255,.25)}
+
+/* Día libre */
+.h5-rest.rest-ic{display:flex;flex-direction:row;align-items:center;gap:14px}
+.h5-rest.rest-ic>div{display:flex;flex-direction:column;gap:4px}
