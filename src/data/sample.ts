@@ -296,7 +296,9 @@ export function sampleState(T: Date = todayReal()): AppState {
       const status = x < 0.08 ? null : x < 0.16 ? 'partial' : 'done'
       if (!status) continue
       const wk = Math.floor(i / 7)
+      const runMin = r.items.reduce((a, it) => a + (it.kind === 'caco' ? it.sets * +it.run : 0), 0)
       p.sessions[isoD(d)] = {
+        ...(runMin && status === 'done' ? { run: { km: Math.round(runMin * (0.15 + rnd() * 0.03) * 10) / 10, min: Math.round(runMin * 1.3), source: 'manual' as const } } : {}),
         status,
         startedAt: +d + 9 * 36e5,
         elapsed: Math.round(estMin(r) * 6e4 * (0.85 + rnd() * 0.4)),

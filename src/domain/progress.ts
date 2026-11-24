@@ -180,3 +180,23 @@ export const TEST_STATUS: Record<'ok' | 'rev' | 'rec' | 'soon', string> = {
   rec: 'Por grabar',
   soon: 'Te lo pediré pronto',
 }
+
+/** Resumen de entrenamiento: sesiones de fuerza y movilidad, y km corridos. */
+export function trainingSummary(c: Ctx, p: Patient) {
+  let fuerza = 0,
+    movilidad = 0,
+    runs = 0,
+    km = 0
+  Object.entries(p.sessions).forEach(([k, s]) => {
+    if (s.status !== 'done') return
+    const r = routineFor(c, p, parseD(k))
+    if (!r) return
+    const t = sType(r)
+    if (t === 'movilidad') movilidad++
+    else if (t === 'caco' || t === 'correr') {
+      runs++
+      km += s.run?.km || 0
+    } else fuerza++
+  })
+  return { fuerza, movilidad, runs, km: Math.round(km * 10) / 10 }
+}

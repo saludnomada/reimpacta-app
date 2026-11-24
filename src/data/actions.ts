@@ -137,3 +137,15 @@ export function leaveSession(pid: string, day: string) {
   })
 }
 export const todayISO = () => _iso(getStore().today())
+
+/** Guardar la salida a correr (km y minutos) y marcar la sesión como hecha */
+export function saveRun(pid: string, day: string, km: number | undefined, min: number | undefined) {
+  withSession(pid, day, (s) => {
+    const now = getStore().now()
+    if (!s.startedAt) s.startedAt = now
+    s.run = { km, min, source: 'manual' }
+    s.ex.forEach((e) => (e.done = true))
+    s.elapsed = min ? min * 6e4 : now - s.startedAt
+    s.status = 'done'
+  })
+}

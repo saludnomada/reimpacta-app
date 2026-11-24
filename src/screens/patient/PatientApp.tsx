@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Route, Routes, useNavigate } from 'react-router-dom'
-import { isoD } from '../../domain/dates'
-import { weekNo, type Ctx } from '../../domain/logic'
+import { NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom'
+import { isoD, parseD } from '../../domain/dates'
+import { routineFor, sType, weekNo, type Ctx } from '../../domain/logic'
 import type { Patient } from '../../domain/model'
 import { notices, type Notice } from '../../domain/patientHome'
 import { useCtx } from '../../data/store'
@@ -11,6 +11,7 @@ import { BrandIcon } from '../../ui/BrandIcon'
 import { Progress } from './Progress'
 import { Week } from './Week'
 import { Session } from './Session'
+import { RunSession } from './RunSession'
 import { goPath } from './goPath'
 import { Home } from './Home'
 import { InstallGuide } from './InstallGuide'
@@ -229,5 +230,9 @@ function Soon({ title }: { title: string }) {
 
 function SessionRoute({ p }: { p: Patient }) {
   const c = useCtx()
+  const { day = '' } = useParams()
+  const r = routineFor(c, p, parseD(day))
+  const t = r && sType(r)
+  if (t === 'caco' || t === 'correr') return <RunSession c={c} p={p} day={day} />
   return <Session c={c} p={p} />
 }

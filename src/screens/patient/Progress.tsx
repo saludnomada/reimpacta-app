@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { addD, fDM, parseD, WD } from '../../domain/dates'
 import { compliance, currentPhase, endOf, painOk, painSeries, recovered, routineFor, streak, type Ctx } from '../../domain/logic'
 import type { Patient } from '../../domain/model'
-import { bestStreak, improvements, muscleWork, totals, trainingDays, weeksGrid, type DayKind } from '../../domain/progress'
+import { bestStreak, improvements, totals, trainingSummary, weeksGrid } from '../../domain/progress'
 import { complianceTone, confidenceTone, painTone, toneVar } from '../../domain/scales'
 import { CONF_BANDS, PAIN_BANDS, TrendChart } from '../../ui/charts'
 import { BrandIcon } from '../../ui/BrandIcon'
@@ -15,11 +15,6 @@ const METRICS: ['painEx' | 'painLife' | 'mind', string][] = [
   ['painLife', 'Dolor día a día'],
   ['painEx', 'Dolor en ejercicios'],
   ['mind', 'Confianza'],
-]
-const KINDS: [DayKind, string][] = [
-  ['fuerza', 'Fuerza'],
-  ['movilidad', 'Movilidad'],
-  ['correr', 'Correr'],
 ]
 
 /**
@@ -41,10 +36,8 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
   const ph = currentPhase(p)
   const rec = recovered(p)
   const t = totals(c, p)
-  const days = trainingDays(c, p)
   const grid = weeksGrid(c, p, 6)
-  const mus = muscleWork(c, p, 28)
-  const musMax = Math.max(1, ...mus.map((m) => m.sets))
+  const sum = trainingSummary(c, p)
   const lifeImp = imp.find((x) => x.key === 'painLife')
   // sesiones previstas en todo el programa (para el anillo de sesiones)
   const end = endOf(p)
@@ -149,18 +142,9 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
         <div className="pg-hrow">
           <h2 className="pg-h">Días de entreno</h2>
           <Info>
-            Cuántos días has hecho de cada tipo y tus últimas semanas, de lunes a domingo. Relleno: hecho. Contorno: sin hacer. Punto:
-            descanso. <b>Seguidas</b> son las sesiones que llevas sin fallar ninguna (los descansos no cuentan); tu mejor marca es{' '}
+            Tus últimas semanas, de lunes a domingo. Cuadro verde: hecha. Icono coral: sin hacer. Gris: por venir. Punto: descanso. <b>Seguidas</b> son las sesiones que llevas sin fallar ninguna (los descansos no cuentan); tu mejor marca es{' '}
             {bestStreak(c, p)}.
           </Info>
-        </div>
-        <div className="pg-kinds">
-          {KINDS.map(([k, l]) => (
-            <div key={k}>
-              <b>{days[k]}</b>
-              <span>{l}</span>
-            </div>
-          ))}
         </div>
         <div className="pg-grid">
           <div className="pg-grow head">
@@ -192,26 +176,30 @@ export function Progress({ c, p }: { c: Ctx; p: Patient }) {
         )}
       </section>
 
-      {/* Músculos */}
-      {mus.length > 0 && (
-        <section className="pg-card">
-          <div className="pg-hrow">
-            <h2 className="pg-h">Músculos trabajados</h2>
-            <Info>Número de series que has hecho en las últimas 4 semanas para cada grupo muscular, según los ejercicios de tu plan.</Info>
+      {/* Tu entrenamiento: sesiones y km */}
+      <section className="pg-card">
+        <div className="pg-hrow">
+          <h2 className="pg-h">Tu entrenamiento</h2>
+          <Info>Todo lo que llevas hecho desde que empezaste: sesiones de fuerza, sesiones de movilidad y kilómetros corriendo (los que apuntas al terminar cada salida).</Info>
+        </div>
+        <div className="pg-sum">
+          <div>
+            <BrandIcon k="fuerza" size={40} />
+            <b>{sum.fuerza}</b>
+            <span>{sum.fuerza === 1 ? 'sesión' : 'sesiones'} de fuerza</span>
           </div>
-          <div className="pg-bars">
-            {mus.map((m) => (
-              <div key={m.name}>
-                <span>{m.name}</span>
-                <i>
-                  <em style={{ width: `${(m.sets / musMax) * 100}%` }} />
-                </i>
-                <b>{m.sets}</b>
-              </div>
-            ))}
+          <div>
+            <BrandIcon k="movilidad" size={40} />
+            <b>{sum.movilidad}</b>
+            <span>{sum.movilidad === 1 ? 'sesión' : 'sesiones'} de movilidad</span>
           </div>
-        </section>
-      )}
+          <div>
+            <BrandIcon k="correr" size={40} />
+            <b>{String(sum.km).replace('.', ',')}</b>
+            <span>km corriendo{sum.runs ? ` · ${sum.runs} ${sum.runs === 1 ? 'salida' : 'salidas'}` : ''}</span>
+          </div>
+        </div>
+      </section>
 
       {/* Fases desplegables */}
       <section className="pg-card" id="fase">

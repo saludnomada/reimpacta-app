@@ -78,6 +78,8 @@ export interface SessionLog {
   painSession?: number | null
   comment?: string
   ex: ExerciseLog[]
+  /** salida a correr: km y minutos (los apunta el paciente o llegan de Strava) */
+  run?: { km?: number; min?: number; source?: 'manual' | 'strava' }
 }
 
 export interface FridayForm {

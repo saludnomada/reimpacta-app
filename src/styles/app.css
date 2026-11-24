@@ -946,3 +946,59 @@ html[data-theme="light"] .h5-day.k-fuerza i{background:none!important;box-shadow
 .h5-day.next i,.h5-day.future i{color:#9AA79E!important}
 .h5-day.now i{color:var(--text)!important;background:color-mix(in srgb,var(--lime) 45%,transparent)!important;border-radius:10px}
 .h5-leg{display:none}
+
+/* ===== Calendarios v3: hecho = cuadradito lima con el icono oscuro
+   sin hacer = solo el icono en coral · por venir = icono gris ===== */
+html .pg-grow i.done,html[data-theme] .h5-day.done i,html .h5-day.done i{background:var(--lime)!important;color:#0A140D!important;border-radius:10px!important;box-shadow:none!important}
+.pg-grow i.done{max-height:34px}
+.pg-grow i.done svg.ph{width:20px;height:20px}
+.h5-day.done i{width:34px;height:34px}
+.h5-day.done i svg{width:19px!important;height:19px!important}
+.pg-legend2 .d svg{background:var(--lime);color:#0A140D;border-radius:5px;padding:2px}
+
+/* ===== Tu entrenamiento (Progreso) ===== */
+.pg-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pg-sum>div{display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:var(--card2);border-radius:14px;padding:12px}
+.pg-sum b{font-size:26px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.pg-sum span{font-size:12px;color:var(--muted);line-height:1.3}
+
+/* ===== Sesión de correr ===== */
+.run-hero{background:var(--ink,#101F16);color:#fff;border-radius:var(--r-card,20px);padding:18px;display:flex;flex-direction:column;gap:14px}
+.run-top{display:flex;gap:12px;align-items:center}
+.run-top small{display:block;font-size:12px;color:rgba(255,255,255,.6);font-weight:600}
+.run-top b{font-size:17px;font-weight:800}
+.run-total{display:flex;align-items:baseline;gap:8px}
+.run-total b{font-size:44px;font-weight:800;line-height:1;color:var(--lime);font-variant-numeric:tabular-nums}
+.run-total span{font-size:13px;color:rgba(255,255,255,.7)}
+.run-bar{display:flex;gap:3px;height:28px}
+.run-bar i{border-radius:6px;min-width:4px}
+.run-bar i.run,.run-leg i.run{background:var(--lime)}
+.run-bar i.walk,.run-leg i.walk{background:rgba(255,255,255,.22)}
+.run-leg{display:flex;gap:16px;font-size:12.5px;color:rgba(255,255,255,.75)}
+.run-leg span{display:inline-flex;align-items:center;gap:6px}
+.run-leg i{width:12px;height:12px;border-radius:4px;display:inline-block}
+.run-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.run-steps li{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--hair);border-radius:16px;padding:14px;font-size:14px;line-height:1.5}
+.run-steps .n{flex:none;min-width:36px;height:36px;border-radius:10px;background:var(--lime);color:#0A140D;font-weight:800;display:grid;place-items:center}
+.run-result{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.run-result div{background:var(--card);border:1px solid var(--hair);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.run-result b{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.run-result span{font-size:12px;color:var(--muted)}
+.run-log{display:flex;flex-direction:column;gap:14px}
+.run-log label{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px}
+.run-log input{font:inherit;font-size:20px;font-weight:700;padding:12px 14px;border-radius:12px;border:1px solid var(--hair);background:var(--bg);color:var(--text)}
+.run-log small{font-weight:500;color:var(--muted);font-size:12.5px}
+.guide{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;justify-content:space-between;padding:20px 20px calc(24px + env(safe-area-inset-bottom));background:#0A140D;color:#fff;transition:background .4s}
+.guide.run{background:#0A140D}
+.guide.walk{background:#1C2A21}
+.guide-top{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:rgba(255,255,255,.7);font-weight:600}
+.guide-top button{background:none;border:0;color:#fff;font:inherit;font-weight:700;cursor:pointer;padding:6px 0}
+.guide-mid{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.guide-kind{font-size:28px;font-weight:800}
+.guide.run .guide-kind{color:var(--lime)}
+.guide-time{font-size:96px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.guide-next{font-size:15px;color:rgba(255,255,255,.65)}
+.guide-bar{height:8px;border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden}
+.guide-bar i{display:block;height:100%;background:var(--lime);transition:width .25s linear}
+.guide-btns{display:flex;flex-direction:column;gap:10px}
+.guide .se-ghost{color:#fff;border-color:rgba(255,255,255,.25)}
