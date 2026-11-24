@@ -154,6 +154,8 @@ export interface Patient {
   overrides?: Record<DayISO, string | null> // sesiones cambiadas de día
   notes: CallNote[]
   pay?: Payment
+  /** acceso a la app: hasta qué día y si Jone la ha pausado a mano */
+  access?: { until?: DayISO; paused?: boolean }
   follow: FollowUp
   settings: PatientSettings
 }

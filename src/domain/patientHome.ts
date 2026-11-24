@@ -151,8 +151,8 @@ export function notices(c: Ctx, p: Patient): Notice[] {
     const bd = new Date(b.at)
     const mins = (+bd - c.now) / 6e4
     const tomorrow = isoD(bd) === isoD(addD(tt, 1))
-    if (mins <= 60 && p.settings.callHour !== false)
-      out.unshift({ icon: 'llamada', title: 'Tu llamada con Jone es en ' + Math.max(1, Math.round(mins)) + ' min', body: `A las ${fTime(bd)}`, go: { to: 'call' } })
+    if (mins > 0 && mins <= 120 && p.settings.callHour !== false)
+      out.unshift({ icon: 'llamada', title: mins > 60 ? 'Hoy tienes llamada con Jone' : 'Tu llamada con Jone es en ' + Math.max(1, Math.round(mins)) + ' min', body: `A las ${fTime(bd)}`, go: { to: 'call' } })
     else if (tomorrow && p.settings.callDay !== false) out.unshift({ icon: 'llamada', title: 'Mañana tienes llamada con Jone', body: `A las ${fTime(bd)}`, go: { to: 'call' } })
     else out.push({ icon: 'llamada', title: 'Llamada con Jone', body: fShort(bd) + ' a las ' + fTime(bd), go: { to: 'call' } })
   }

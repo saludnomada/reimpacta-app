@@ -149,3 +149,23 @@ export function saveRun(pid: string, day: string, km: number | undefined, min: n
     s.status = 'done'
   })
 }
+
+/** Comentario de la sesión de ese día (dudas, cómo ha ido) */
+export function setSessionComment(pid: string, day: string, comment: string) {
+  withSession(pid, day, (s) => {
+    s.comment = comment
+  })
+}
+
+/* ---------- TAREAS DE JONE ---------- */
+export function addTask(text: string, patient: string | null = null, src?: 'voz') {
+  getStore().change({ kind: 'jone' }, (d) => {
+    d.tasks.unshift({ id: Math.random().toString(36).slice(2, 10), text, patient, due: null, done: false, src })
+  })
+}
+export function toggleTask(id: string) {
+  getStore().change({ kind: 'jone' }, (d) => {
+    const t = d.tasks.find((x) => x.id === id)
+    if (t) t.done = !t.done
+  })
+}

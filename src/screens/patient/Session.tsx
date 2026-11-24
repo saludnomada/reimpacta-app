@@ -7,6 +7,7 @@ import {
   openSession,
   setExerciseComment,
   setExerciseVideo,
+  setSessionComment,
   setPain,
   setSessionPain,
   setSetValue,
@@ -17,7 +18,7 @@ import { fShort, parseD } from '../../domain/dates'
 import { doseText, estMin, painOk, painZone, routineFor, sessName, sessStats, sType, videoById, type Ctx } from '../../domain/logic'
 import type { Patient, RoutineItem } from '../../domain/model'
 import { painTone, toneVar } from '../../domain/scales'
-import { IcCheck, IcChevron, IcClock } from '../../ui/icons'
+import { IcCheck, IcChevron, IcCamera, IcClock } from '../../ui/icons'
 import { TaskIcon } from '../../ui/TaskIcon'
 import { VideoBox } from '../../ui/VideoBox'
 import { VideoThumb } from '../../ui/VideoThumb'
@@ -122,6 +123,13 @@ export function Session({ c, p }: { c: Ctx; p: Patient }) {
                   {e?.pain && e.lvl != null && (
                     <em className={`tchip t-${painTone(e.lvl, painOk(p))}`}>Dolor {e.lvl}/10</em>
                   )}
+                  {(e?.comment || e?.video) && (
+                    <em className="se-sent">
+                      {e.comment ? 'Comentario' : ''}
+                      {e.comment && e.video ? ' · ' : ''}
+                      {e.video ? 'Vídeo enviado' : ''}
+                    </em>
+                  )}
                 </span>
                 <span className={`se-check ${e?.done ? 'on' : ''}`} aria-label={e?.done ? 'Hecho' : 'Sin hacer'}>
                   {e?.done ? <IcCheck /> : <IcChevron />}
@@ -131,6 +139,8 @@ export function Session({ c, p }: { c: Ctx; p: Patient }) {
           )
         })}
       </ul>
+
+      {!future && <Doubts c={c} p={p} day={day} />}
 
       {!future && s?.status !== 'done' && (
         <button
@@ -145,6 +155,53 @@ export function Session({ c, p }: { c: Ctx; p: Patient }) {
       )}
       {fin && <FinishSheet c={c} p={p} day={day} onClose={() => (setFin(false), nav('/'))} />}
     </div>
+  )
+}
+
+/** ¿Dudas con la sesión de hoy? Comentario del día y vídeo de un ejercicio que no han entendido. */
+function Doubts({ c, p, day }: { c: Ctx; p: Patient; day: string }) {
+  const r = routineFor(c, p, parseD(day))!
+  const s = p.sessions[day]
+  const [txt, setTxt] = useState(s?.comment || '')
+  const [pick, setPick] = useState(0)
+  const sent = s?.ex.map((e, i) => (e.video ? i : -1)).filter((i) => i >= 0) || []
+  return (
+    <section className="se-card doubts">
+      <div className="doubts-h">
+        <BrandIcon k="grabar" size={40} />
+        <div>
+          <b>¿Alguna duda con esta sesión?</b>
+          <span>Cuéntamela o grábate haciendo el ejercicio y te respondo.</span>
+        </div>
+      </div>
+      <textarea
+        rows={2}
+        value={txt}
+        placeholder="Cómo te ha ido, qué no has entendido…"
+        onChange={(ev) => setTxt(ev.target.value)}
+        onBlur={() => txt.trim() !== (s?.comment || '') && setSessionComment(p.id, day, txt.trim())}
+      />
+      <div className="doubts-rec">
+        <select value={pick} onChange={(ev) => setPick(+ev.target.value)} aria-label="Ejercicio">
+          {r.items.map((it, i) => (
+            <option key={i} value={i}>
+              {i + 1}. {itemName(c, it)}
+            </option>
+          ))}
+        </select>
+        <label className="se-ghost">
+          <IcCamera /> Grabarme
+          <input
+            type="file"
+            accept="video/*"
+            capture="environment"
+            hidden
+            onChange={(ev) => ev.target.files?.[0] && setExerciseVideo(p.id, day, pick, { name: ev.target.files[0].name, size: ev.target.files[0].size })}
+          />
+        </label>
+      </div>
+      {sent.length > 0 && <p className="se-note">Vídeo enviado: {sent.map((i) => itemName(c, r.items[i])).join(', ')}</p>}
+    </section>
   )
 }
 

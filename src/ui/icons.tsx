@@ -18,6 +18,9 @@ import {
   GraduationCap,
   House,
   Medal,
+  MagnifyingGlass,
+  Microphone,
+  Stop,
   PersonSimpleRun,
   PersonSimpleTaiChi,
   Phone,
@@ -64,3 +67,6 @@ export const IcCalendar = mk(CalendarCheck, 18)
 export const IcDown = mk(TrendDown, 18)
 export const IcMedal = mk(Medal, 18)
 export const IcTarget = mk(Target, 20)
+export const IcMic = mk(Microphone, 26, 'fill')
+export const IcStop = mk(Stop, 24, 'fill')
+export const IcSearch = mk(MagnifyingGlass, 18)

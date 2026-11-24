@@ -247,6 +247,17 @@ export function endOf(p: Patient): Date | null {
   if (p.pay && p.pay.plan === 'seguimiento') return null
   return addD(parseD(p.start), 91)
 }
+/** Días de margen para pagar un plazo antes de que la app se bloquee */
+export const PAY_GRACE = 3
+/** ¿Puede usar la app? Se bloquea si Jone la pausa, si pasó su fecha de acceso o si tiene un plazo sin pagar. */
+export function accessOf(c: Ctx, p: Patient): { ok: boolean; reason?: 'paused' | 'expired' | 'unpaid'; until: Date | null } {
+  const until = p.access?.until ? parseD(p.access.until) : endOf(p)
+  if (p.access?.paused) return { ok: false, reason: 'paused', until }
+  const late = payPlan(p).find((x) => !x.paid && addD(x.due, PAY_GRACE) < c.today)
+  if (late) return { ok: false, reason: 'unpaid', until }
+  if (until && c.today > until) return { ok: false, reason: 'expired', until }
+  return { ok: true, until }
+}
 export function daysLeft(c: Ctx, p: Patient) {
   const e = endOf(p)
   return e ? diffDays(c.today, e) : null

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { isoD, parseD } from '../../domain/dates'
-import { routineFor, sType, weekNo, type Ctx } from '../../domain/logic'
+import { accessOf, routineFor, sType, weekNo, type Ctx } from '../../domain/logic'
 import type { Patient } from '../../domain/model'
 import { notices, type Notice } from '../../domain/patientHome'
 import { useCtx } from '../../data/store'
@@ -20,6 +20,9 @@ import { useApplyTheme } from '../../ui/theme'
 
 export function PatientApp({ p }: { p: Patient }) {
   useApplyTheme(p.settings.theme)
+  const c = useCtx()
+  const acc = accessOf(c, p)
+  if (!acc.ok) return <Locked p={p} reason={acc.reason!} />
   return (
     <Routes>
       <Route path="/instalar" element={<InstallGuide />} />
@@ -235,4 +238,35 @@ function SessionRoute({ p }: { p: Patient }) {
   const t = r && sType(r)
   if (t === 'caco' || t === 'correr') return <RunSession c={c} p={p} day={day} />
   return <Session c={c} p={p} />
+}
+
+/** App en pausa: sin pago al día, acceso caducado o pausada por Jone. No ven su programa. */
+function Locked({ p, reason }: { p: Patient; reason: 'paused' | 'expired' | 'unpaid' }) {
+  const c = useCtx()
+  const wa = `https://wa.me/${(c.st.whatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent('Hola Jone, quiero volver a activar mi app REIMPACTA')}`
+  const txt =
+    reason === 'unpaid'
+      ? 'Tienes un pago pendiente. En cuanto esté al día, tu programa vuelve a estar aquí, tal como lo dejaste.'
+      : reason === 'expired'
+        ? 'Tu programa ha terminado. Si quieres seguir con un seguimiento, escríbeme y lo vemos.'
+        : 'Tu acceso está en pausa. Escríbeme y lo vemos.'
+  return (
+    <div className="phone lock">
+      <div className="brandm">
+        <span className="mark">
+          <Logo />
+        </span>
+        <span>REIMPACTA</span>
+      </div>
+      <section className="lock-card">
+        <BrandIcon k="fase" size={56} />
+        <h1 className="x-title">Hola, {p.name}</h1>
+        <p>{txt}</p>
+        <p className="lock-note">Tus datos y tu progreso siguen guardados.</p>
+        <a className="x-cta" href={wa} target="_blank" rel="noopener">
+          Escríbeme al WhatsApp
+        </a>
+      </section>
+    </div>
+  )
 }

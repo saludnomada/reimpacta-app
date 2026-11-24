@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { useCtx } from '../../data/store'
-import { compliance, currentPhase, recovered, weekNo } from '../../domain/logic'
+import { accessOf, compliance, currentPhase, recovered, weekNo } from '../../domain/logic'
 import { PHASES } from '../../domain/model'
+import { fShort } from '../../domain/dates'
+import { VideoLab } from './VideoLab'
+import { TaskList, VoiceButton } from './VoiceTask'
 import { Logo } from '../../ui/icons'
 import { PhaseBadge } from '../../ui/PhaseBadge'
 import { useApplyTheme } from '../../ui/theme'
@@ -48,12 +51,17 @@ export function JoneApp() {
           <h1>{tab === 'pacientes' ? 'Tus pacientes' : TABS.find((t) => t[0] === tab)![1]}</h1>
         </div>
       </div>
-      <section className="card">
-        <p className="muted" style={{ margin: 0 }}>
-          Tu panel llega en los bloques 3 y 4: alertas, checklist, fichas, tareas, biblioteca rápida, rutinas y programas. De momento puedes ver
-          a tus pacientes de ejemplo.
-        </p>
-      </section>
+      {tab !== 'videos' && tab !== 'tareas' && (
+        <section className="card">
+          <p className="muted" style={{ margin: 0 }}>
+            Tu panel llega en los bloques 3 y 4. Ya puedes probar: <b>Vídeos y clases</b> (buscador con 1.200 vídeos), <b>Tareas</b> y el
+            micrófono de abajo a la derecha para dictar tareas.
+          </p>
+        </section>
+      )}
+      {tab === 'videos' && <VideoLab />}
+      {tab === 'tareas' && <TaskList />}
+      <VoiceButton />
       {tab === 'pacientes' && (
         <div className="grid">
           {pts.map((p) => {
@@ -79,6 +87,14 @@ export function JoneApp() {
                   </div>
                   <div className="row" style={{ marginTop: 8, gap: 5 }}>
                     <span className="pill ph">{recovered(p) ? 'Recuperado/a' : `F${ph} · ${PHASES[ph - 1]}`}</span>
+                    {(() => {
+                      const a = accessOf(c, p)
+                      return a.ok ? (
+                        <span className="pill">{a.until ? `App hasta el ${fShort(a.until)}` : 'App sin fecha de fin'}</span>
+                      ) : (
+                        <span className="pill lockpill">{a.reason === 'unpaid' ? 'App bloqueada: pago pendiente' : a.reason === 'expired' ? 'App caducada' : 'App en pausa'}</span>
+                      )
+                    })()}
                   </div>
                   <div className="stats">
                     <span>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { sampleState } from '../data/sample'
 import { addD, isoD, monday, parseD } from './dates'
-import { compliance, earliestCall, endOf, goodDay, missedAdvice, painZone, routineFor, strengthNear, type Ctx } from './logic'
+import { accessOf, compliance, earliestCall, endOf, goodDay, missedAdvice, painZone, routineFor, strengthNear, type Ctx } from './logic'
 import { notices, todayItems } from './patientHome'
 
 const MON = parseD('2026-11-23') // lunes
@@ -140,5 +140,25 @@ describe('colores por valor (iguales en toda la app)', () => {
   it('confianza: >7 lima, 5-7 amarillo, <5 coral', async () => {
     const { confidenceTone } = await import('./scales')
     expect([8, 7, 5, 4].map(confidenceTone)).toEqual(['good', 'mid', 'mid', 'bad'])
+  })
+})
+
+describe('acceso a la app según pagos', () => {
+  it('se bloquea con un plazo sin pagar pasados 3 días, y al pagar vuelve', () => {
+    const c = ctx(MON)
+    const p = c.st.patients.find((x) => x.id === 'a1')!
+    p.start = isoD(addD(MON, -34)) // 2º plazo vencido hace 4 días
+    p.pay = { plan: 'reimpacta', price: 397, n: 3, paid: [true, false, false] }
+    expect(accessOf(c, p)).toMatchObject({ ok: false, reason: 'unpaid' })
+    p.pay.paid[1] = true
+    expect(accessOf(c, p).ok).toBe(true)
+  })
+  it('caduca después de su fecha de acceso y Jone puede pausarla', () => {
+    const c = ctx(MON)
+    const p = c.st.patients.find((x) => x.id === 'a2')!
+    p.access = { until: isoD(addD(MON, -1)) }
+    expect(accessOf(c, p).reason).toBe('expired')
+    p.access = { paused: true }
+    expect(accessOf(c, p).reason).toBe('paused')
   })
 })

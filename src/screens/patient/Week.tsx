@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { addD, dow, fTime, isoD, monday, parseD } from '../../domain/dates'
+import { addD, fTime, isoD, monday, parseD } from '../../domain/dates'
 import { estMin, routineFor, sessName, sType, weekNo, type Ctx } from '../../domain/logic'
 import type { Patient } from '../../domain/model'
 import { IcCheck, IcChevron } from '../../ui/icons'
@@ -12,13 +12,13 @@ const DAY = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'D
 
 /**
  * SEMANA: la agenda de la semana, día a día. Se puede mirar atrás;
- * la semana que viene se abre el domingo (como en el prototipo).
+ * siempre se puede ver la semana que viene (plan a semana vista).
  */
 export function Week({ c, p }: { c: Ctx; p: Patient }) {
   const nav = useNavigate()
   const thisMon = monday(c.today)
   const [off, setOff] = useState(0)
-  const maxOff = dow(c.today) === 6 ? 1 : 0 // el domingo ya ven la semana siguiente
+  const maxOff = 1 // siempre ven la semana siguiente (plan a semana vista)
   const start = monday(parseD(p.start))
   const mon = addD(thisMon, off * 7)
   const canBack = addD(mon, -7) >= start
@@ -59,7 +59,7 @@ export function Week({ c, p }: { c: Ctx; p: Patient }) {
           ›
         </button>
         <Info>
-          Tu plan día a día. Toca un día para ver su sesión. La semana siguiente aparece el domingo, cuando Jone la deja preparada.
+          Tu plan día a día. Toca un día para ver su sesión. También puedes ver la semana que viene para organizarte.
         </Info>
       </div>
 
