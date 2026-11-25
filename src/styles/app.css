@@ -1247,3 +1247,18 @@ html .pg-grow i.miss,html[data-theme] .h5-day.miss i,html .h5-day.miss i{backgro
 .au-draft{color:#C4471C;font-weight:700}
 .np-err{color:#FF9A70;font-size:12px}
 .ahead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+
+/* Por responder (panel) y envío de vídeos */
+.ib{gap:10px}
+.ib-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.ib-it{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.ib-it.urgent{border-color:rgba(229,40,27,.6)}
+.ib-it.done{opacity:.55}
+.ib-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ib-top .btn{margin-left:auto}
+.ib-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}
+.ib-lab{font-weight:700;color:var(--muted);font-size:13px}
+.ib-tx{font-style:italic}
+.ib-line em{font-style:normal}
+.se-ghost.busy{opacity:.6;pointer-events:none}
+.vs-err{margin:6px 0 0;grid-column:1/-1}

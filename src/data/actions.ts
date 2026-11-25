@@ -98,7 +98,7 @@ export function setExerciseComment(pid: string, day: string, i: number, comment:
     s.ex[i].comment = comment
   })
 }
-export function setExerciseVideo(pid: string, day: string, i: number, file: { name: string; size: number } | null) {
+export function setExerciseVideo(pid: string, day: string, i: number, file: { name: string; size: number; path?: string } | null) {
   withSession(pid, day, (s) => {
     start(s)
     if (file) s.ex[i].video = file

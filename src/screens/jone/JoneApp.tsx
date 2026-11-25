@@ -9,6 +9,7 @@ import { Programs } from './Programs'
 import { Billing } from './Billing'
 import { Method } from './Method'
 import { NewPatient } from './NewPatient'
+import { Inbox } from './Inbox'
 import { mode } from '../../data'
 import { sb } from '../../data/supabase'
 import { TestSheet } from './TestSheet'
@@ -76,6 +77,7 @@ export function JoneApp() {
         </div>
       </div>
       {newP && <NewPatient onClose={() => setNewP(false)} />}
+      {tab === 'pacientes' && pts.length > 0 && <Inbox />}
       {tab === 'pacientes' && !pts.length && (
         <section className="card">
           <p style={{ margin: 0 }}>Aún no tienes pacientes. Pulsa <b>+ Nuevo paciente</b>: con su email podrá entrar en la app.</p>

@@ -18,10 +18,11 @@ import { fShort, parseD } from '../../domain/dates'
 import { doseText, estMin, painOk, painZone, routineFor, sessName, sessStats, sType, videoById, type Ctx } from '../../domain/logic'
 import type { Patient, RoutineItem } from '../../domain/model'
 import { painTone, toneVar } from '../../domain/scales'
-import { IcCheck, IcChevron, IcCamera, IcClock } from '../../ui/icons'
+import { IcCheck, IcChevron, IcClock } from '../../ui/icons'
 import { TaskIcon } from '../../ui/TaskIcon'
 import { VideoBox } from '../../ui/VideoBox'
 import { VideoThumb } from '../../ui/VideoThumb'
+import { VideoSend } from '../../ui/VideoSend'
 import { sentence } from './Home'
 import { finishPhrase } from '../../domain/patientHome'
 import { getStore } from '../../data/store'
@@ -189,16 +190,7 @@ function Doubts({ c, p, day }: { c: Ctx; p: Patient; day: string }) {
             </option>
           ))}
         </select>
-        <label className="se-ghost">
-          <IcCamera /> Grabarme
-          <input
-            type="file"
-            accept="video/*"
-            capture="environment"
-            hidden
-            onChange={(ev) => ev.target.files?.[0] && setExerciseVideo(p.id, day, pick, { name: ev.target.files[0].name, size: ev.target.files[0].size })}
-          />
-        </label>
+        <VideoSend pid={p.id} day={day} i={pick} />
       </div>
       {sent.length > 0 && <p className="se-note">Vídeo enviado: {sent.map((i) => itemName(c, r.items[i])).join(', ')}</p>}
     </section>
@@ -317,10 +309,7 @@ function Exercise({ c, p, day, i, onBack, onNext }: { c: Ctx; p: Patient; day: s
               Vídeo enviado · cambiar
             </button>
           ) : (
-            <label className="se-ghost">
-              Enviar vídeo a Jone
-              <input type="file" accept="video/*" capture="environment" hidden onChange={(ev) => ev.target.files?.[0] && setExerciseVideo(p.id, day, i, { name: ev.target.files[0].name, size: ev.target.files[0].size })} />
-            </label>
+            <VideoSend pid={p.id} day={day} i={i} label="Enviar vídeo a Jone" />
           )}
         </div>
       )}
