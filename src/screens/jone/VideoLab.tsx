@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { updateVideo } from '../../data/actions'
 import { useCtx } from '../../data/store'
-import { MUSCLES, TYPES, type Video, type VideoType } from '../../domain/model'
+import { MUSCLES, PHASES, TYPES, WORK_CATS, ZONES, type Video, type VideoType, type WorkCat } from '../../domain/model'
 import { IcSearch } from '../../ui/icons'
 import { ytId } from '../../ui/VideoBox'
 import { VideoThumb } from '../../ui/VideoThumb'
@@ -80,6 +80,7 @@ export function VideoLab() {
   const [all, setAll] = useState<Video[]>(() => [...c.st.videos, ...demoLibrary()])
   const [extra, setExtra] = useState<Record<string, string[]>>({}) // etiquetas añadidas a mano
   const [q, setQ] = useState('')
+  const [ph, setPh] = useState<number | 'none' | null>(null)
   const [sel, setSel] = useState<Set<string>>(new Set())
   const [tag, setTag] = useState('')
   const [shown, setShown] = useState(40)
@@ -88,7 +89,8 @@ export function VideoLab() {
 
   const t0 = performance.now()
   const words = norm(q).split(/\s+/).filter(Boolean)
-  const res = words.length ? all.filter((v) => words.every((w) => idx.get(v.id)!.includes(w))) : all
+  const byPh = ph == null ? all : all.filter((v) => (ph === 'none' ? !v.phases?.length && v.type !== 'clase' : v.phases?.includes(ph)))
+  const res = words.length ? byPh.filter((v) => words.every((w) => idx.get(v.id)!.includes(w))) : byPh
   const ms = performance.now() - t0
 
   const toggle = (id: string) => {
@@ -136,6 +138,19 @@ export function VideoLab() {
           autoFocus
         />
       </div>
+      <div className="row">
+        <button className={`chip ${ph == null ? 'on' : ''}`} onClick={() => setPh(null)}>
+          Todas
+        </button>
+        {PHASES.map((nm, i) => (
+          <button key={i} className={`chip ${ph === i + 1 ? 'on' : ''}`} onClick={() => setPh(i + 1)} title={nm}>
+            Fase {i + 1}
+          </button>
+        ))}
+        <button className={`chip ${ph === 'none' ? 'on' : ''}`} onClick={() => setPh('none')}>
+          Sin fase
+        </button>
+      </div>
       <div className="vl-meta">
         <span>
           <b>{res.length}</b> de {all.length} vídeos · encontrado en {ms < 1 ? 'menos de 1' : Math.round(ms)} ms
@@ -152,10 +167,25 @@ export function VideoLab() {
           <span>
             <b>{sel.size}</b> seleccionados
           </span>
-          <input value={tag} onChange={(e) => setTag(e.target.value)} placeholder="Etiqueta para todos (ej.: fase 2)" onKeyDown={(e) => e.key === 'Enter' && applyTag()} />
+          <input value={tag} onChange={(e) => setTag(e.target.value)} placeholder="Etiqueta para todos (ej.: aquiles)" onKeyDown={(e) => e.key === 'Enter' && applyTag()} />
           <button className="btn small" onClick={applyTag}>
             Añadir a todos
           </button>
+          <span className="vl-bulk-ph">
+            Poner en:
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                className="chip"
+                onClick={() => {
+                  setAll(all.map((v) => (sel.has(v.id) ? { ...v, phases: [...new Set([...(v.phases || []), n])].sort() } : v)))
+                  setSel(new Set())
+                }}
+              >
+                Fase {n}
+              </button>
+            ))}
+          </span>
           <button className="btn ghost small" onClick={() => setSel(new Set())}>
             Quitar selección
           </button>
@@ -173,6 +203,11 @@ export function VideoLab() {
                 <b>{v.title}</b>
                 {v.desc ? <span className="vl-desc">{v.desc}</span> : <span className="vl-desc none">Sin descripción</span>}
                 <span className="vl-tags">
+                  {(v.phases || []).map((n) => (
+                    <i key={'f' + n} className="ph">
+                      Fase {n}
+                    </i>
+                  ))}
                   {tags.map((t) => (
                     <i key={t} className={(extra[v.id] || []).includes(t) ? 'new' : ''}>
                       {t}
@@ -316,6 +351,54 @@ function Editor({ v, extra, popular, onClose, onSave }: { v: Video; extra: strin
               ))}
             </div>
           )}
+        </div>
+        <div className="ved-block">
+          <span>Fases en las que se usa</span>
+          <div className="ved-chips">
+            {PHASES.map((nm, i) => {
+              const on = d.phases?.includes(i + 1)
+              return (
+                <button key={i} className={`chip ${on ? 'on' : ''}`} title={nm} onClick={() => setD({ ...d, phases: on ? d.phases!.filter((x) => x !== i + 1) : [...(d.phases || []), i + 1].sort() })}>
+                  Fase {i + 1}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+        <div className="ved-block">
+          <span>Zona</span>
+          <div className="ved-chips">
+            {ZONES.map((z) => {
+              const on = d.zones?.includes(z)
+              return (
+                <button key={z} className={`chip ${on ? 'on' : ''}`} onClick={() => setD({ ...d, zones: on ? d.zones!.filter((x) => x !== z) : [...(d.zones || []), z] })}>
+                  {z.charAt(0).toUpperCase() + z.slice(1)}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+        <div className="ved-row2">
+          <div className="ved-block">
+            <span>Tipo de trabajo</span>
+            <div className="ved-chips">
+              {(Object.keys(WORK_CATS) as WorkCat[]).map((k) => (
+                <button key={k} className={`chip ${d.cat === k ? 'on' : ''}`} onClick={() => setD({ ...d, cat: d.cat === k ? undefined : k })}>
+                  {WORK_CATS[k]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="ved-block">
+            <span>Nivel dentro de la fase</span>
+            <div className="ved-chips">
+              {([1, 2, 3] as const).map((n) => (
+                <button key={n} className={`chip ${d.level === n ? 'on' : ''}`} onClick={() => setD({ ...d, level: d.level === n ? undefined : n })}>
+                  {n === 1 ? '1 · Básico' : n === 2 ? '2 · Medio' : '3 · Avanzado'}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
         <div className="ved-block">
           <span>Músculos que trabaja</span>

@@ -4,7 +4,7 @@
 
 import { addD, diffDays, isoD, monday, parseD, todayReal, dow } from '../domain/dates'
 import { estMin, routineFor, type Ctx } from '../domain/logic'
-import type { AppState, Look, Patient, Program, Routine, Sex, Video, VideoType, Zone } from '../domain/model'
+import type { AppState, Look, Patient, Program, Routine, Sex, Video, VideoType, WorkCat, Zone } from '../domain/model'
 import { DEFAULT_GOALS } from '../domain/model'
 
 let seq = 0
@@ -88,6 +88,32 @@ export function sampleState(T: Date = todayReal()): AppState {
     v19: ['Isquiotibiales'],
   }
   V.forEach((v) => MUS[v.id] && (v.muscles = MUS[v.id]))
+  // Etiquetas fijas del Método (EJEMPLO): fases, zonas, tipo de trabajo y nivel
+  const TAG: Record<string, [number[], Zone[], WorkCat, 1 | 2 | 3]> = {
+    v2: [[1], ['rodilla'], 'isometrico', 1],
+    v3: [[1, 2], ['cadera', 'lumbar'], 'isometrico', 1],
+    v4: [[1, 2], ['tobillo', 'pie'], 'movilidad', 1],
+    v5: [[2], ['rodilla'], 'fuerza', 2],
+    v6: [[2, 3], ['cadera'], 'fuerza', 2],
+    v7: [[2, 3], ['tobillo'], 'fuerza', 2],
+    v8: [[2, 3], ['rodilla', 'cadera'], 'fuerza', 3],
+    v9: [[1, 2], ['lumbar'], 'isometrico', 1],
+    v10: [[1, 2], ['cadera'], 'movilidad', 1],
+    v11: [[3], ['tobillo'], 'reactivo', 1],
+    v12: [[3], ['tobillo', 'pie'], 'reactivo', 1],
+    v13: [[4, 5], ['rodilla', 'cadera'], 'tecnica', 1],
+    v14: [[4], ['rodilla', 'tobillo'], 'reactivo', 2],
+    v15: [[1], ['tobillo', 'pie'], 'isometrico', 1],
+    v16: [[1, 2], ['rodilla', 'cadera'], 'test', 1],
+    v17: [[2], ['tobillo'], 'test', 1],
+    v18: [[3, 4], ['rodilla', 'tobillo'], 'test', 1],
+    v24: [[4], ['rodilla', 'tobillo'], 'test', 1],
+    v19: [[2, 3], ['cadera'], 'fuerza', 3],
+  }
+  V.forEach((v) => {
+    const t = TAG[v.id]
+    if (t) [v.phases, v.zones, v.cat, v.level] = t
+  })
   const vt = (id: string) => V.find((v) => v.id === id)!.type
   const it = (v: string, sets: number, amount: number, kg = '') => ({
     v,
@@ -245,6 +271,36 @@ export function sampleState(T: Date = todayReal()): AppState {
     ],
     phaseTests: { 1: ['v16'], 2: ['v17', 'v16'], 3: ['v18'], 4: ['v24', 'v18'], 5: [] },
     defaultGoals: JSON.parse(JSON.stringify(DEFAULT_GOALS)),
+    // EJEMPLO para ver cómo funciona: Jone pone sus objetivos y sus valores
+    method: {
+      1: {
+        objective: 'Bajar el dolor y que el tendón vuelva a tolerar carga con isométricos.',
+        tests: { v16: { measure: 'dolor', rule: 'max', value: 3, note: 'Sentadilla a una pierna: dolor durante el gesto' } },
+        key: ['v2', 'v15', 'v3'],
+      },
+      2: {
+        objective: 'Recuperar fuerza en las dos piernas y movilidad parecida en ambos lados.',
+        tests: {
+          v17: { measure: 'reps', rule: 'lsi', value: 90, note: 'Hasta el fallo, ritmo de metrónomo' },
+          v16: { measure: 'reps', rule: 'lsi', value: 90, note: 'Repeticiones con buena técnica' },
+        },
+        key: ['v5', 'v7', 'v8'],
+      },
+      3: {
+        objective: 'Que el tendón vuelva a tolerar impactos rápidos.',
+        tests: { v18: { measure: 'reps', rule: 'lsi', value: 85, note: 'Saltos seguidos sin perder la técnica' } },
+        key: ['v11', 'v12'],
+      },
+      4: {
+        objective: 'Saltos a una pierna, aterrizajes estables y cambios de dirección.',
+        tests: {
+          v24: { measure: 'cm', rule: 'lsi', value: 90, note: 'Mejor de 3 intentos por pierna' },
+          v18: { measure: 'reps', rule: 'lsi', value: 90, note: '' },
+        },
+        key: ['v14', 'v13'],
+      },
+      5: { objective: 'Volver a correr con progresión de kilómetros sin recaídas.', tests: {}, key: ['v13'] },
+    },
     whatsapp: '',
     calLink: '',
     myEmail: '',

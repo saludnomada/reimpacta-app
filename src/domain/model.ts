@@ -21,6 +21,47 @@ export interface Video {
   desc?: string
   /** grupos musculares que trabaja (para la gráfica de Progreso) */
   muscles?: string[]
+  /** etiquetas fijas del Método: fases, zonas, tipo de trabajo y nivel dentro de la fase */
+  phases?: number[]
+  zones?: Zone[]
+  cat?: WorkCat
+  level?: 1 | 2 | 3
+}
+
+export type WorkCat = 'isometrico' | 'fuerza' | 'reactivo' | 'movilidad' | 'tecnica' | 'test'
+export const WORK_CATS: Record<WorkCat, string> = {
+  isometrico: 'Isométrico',
+  fuerza: 'Fuerza',
+  reactivo: 'Reactivo y saltos',
+  movilidad: 'Movilidad',
+  tecnica: 'Técnica de carrera',
+  test: 'Test',
+}
+
+/** Cómo se mide un test y cuándo se da por superado */
+export type TestMeasure = 'reps' | 'secs' | 'cm' | 'dolor' | 'check'
+export type TestRule = 'lsi' | 'min' | 'max' | 'check'
+export interface TestSpec {
+  measure: TestMeasure
+  /** lsi = % de la pierna lesionada frente a la sana · min = al menos · max = como mucho · check = sí/no */
+  rule: TestRule
+  value: number
+  note: string
+}
+export interface PhaseMethod {
+  objective: string
+  /** criterio de cada test (clave = id del vídeo del test) */
+  tests: Record<string, TestSpec>
+  /** ejercicios clave de la fase (ids de vídeo) */
+  key: string[]
+}
+export interface TestResult {
+  date: DayISO
+  /** pierna lesionada / sana (tests a una pierna) o un solo valor */
+  hurt?: number
+  good?: number
+  value?: number
+  ok: boolean
 }
 
 export interface ExerciseItem {
@@ -156,6 +197,8 @@ export interface Patient {
   pay?: Payment
   /** acceso a la app: hasta qué día y si Jone la ha pausado a mano */
   access?: { until?: DayISO; paused?: boolean }
+  /** resultados de los tests (clave = id del vídeo del test) */
+  testResults?: Record<string, TestResult[]>
   follow: FollowUp
   settings: PatientSettings
 }
@@ -196,6 +239,8 @@ export interface AppState {
   recFixed: RecFixed[]
   phaseTests: Record<number, string[]>
   defaultGoals: Record<number, string[]>
+  /** EL MÉTODO: objetivo, tests con criterio y ejercicios clave de cada fase */
+  method?: Record<number, PhaseMethod>
   whatsapp: string
   calLink: string
   myEmail: string

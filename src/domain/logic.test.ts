@@ -162,3 +162,17 @@ describe('acceso a la app según pagos', () => {
     expect(accessOf(c, p).reason).toBe('paused')
   })
 })
+
+import { evalTest } from './method'
+describe('tests del método', () => {
+  it('simetría: lesionada frente a sana', () => {
+    const t = { measure: 'reps', rule: 'lsi', value: 90, note: '' } as const
+    expect(evalTest(t, { hurt: 18, good: 25 })).toEqual({ ok: false, pct: 72 })
+    expect(evalTest(t, { hurt: 23, good: 25 })).toEqual({ ok: true, pct: 92 })
+  })
+  it('dolor como mucho 3 y repeticiones al menos 20', () => {
+    expect(evalTest({ measure: 'dolor', rule: 'max', value: 3, note: '' }, { value: 3 }).ok).toBe(true)
+    expect(evalTest({ measure: 'dolor', rule: 'max', value: 3, note: '' }, { value: 4 }).ok).toBe(false)
+    expect(evalTest({ measure: 'reps', rule: 'min', value: 20, note: '' }, { value: 19 }).ok).toBe(false)
+  })
+})

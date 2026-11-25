@@ -216,3 +216,25 @@ export function setAccess(pid: string, patch: { until?: string; paused?: boolean
     if (p) p.access = { ...p.access, ...patch }
   })
 }
+
+/* ---------- MÉTODO ---------- */
+import type { PhaseMethod, TestResult } from '../domain/model'
+export function saveMethod(phase: number, m: PhaseMethod, tests: string[], goals: string[]) {
+  getStore().change({ kind: 'library' }, (d) => {
+    d.method = { ...(d.method || {}), [phase]: m }
+    d.phaseTests[phase] = tests
+    d.defaultGoals[phase] = goals
+  })
+}
+/** Apunta el resultado de un test. Si lo supera, en su app sale como "Superado" en esa fase. */
+export function addTestResult(pid: string, phase: number, testId: string, r: TestResult) {
+  getStore().change({ kind: 'patient', patientId: pid }, (d) => {
+    const p = d.patients.find((x) => x.id === pid)
+    if (!p) return
+    p.testResults = p.testResults || {}
+    ;(p.testResults[testId] = p.testResults[testId] || []).push(r)
+    const rec = (p.recs[phase] = p.recs[phase] || { tests: [], files: [], at: null })
+    if (!rec.tests.includes(testId)) rec.tests.push(testId)
+    rec.passed = { ...(rec.passed || {}), [testId]: r.ok }
+  })
+}
