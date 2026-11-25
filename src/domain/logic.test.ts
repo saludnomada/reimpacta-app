@@ -217,3 +217,32 @@ describe('importar de la hoja de Apps Script', () => {
     expect(r[0].desc).toBe('Sube en 1, baja en 3')
   })
 })
+
+import { phaseRequirements } from './progress'
+import { guessProtocol, PROTOCOLS } from './protocols'
+describe('protocolos por lesión', () => {
+  it('reconoce la lesión escrita a mano', () => {
+    expect(guessProtocol('Síndrome de la cintilla iliotibial')).toBe('cintilla')
+    expect(guessProtocol('Tendinopatía de Aquiles')).toBe('aquiles')
+    expect(guessProtocol('Fascitis plantar')).toBe('fascitis')
+    expect(guessProtocol('Tendinopatía rotuliana')).toBe('rotuliana')
+    expect(guessProtocol('Tendinopatía glútea')).toBeUndefined()
+  })
+  it('cada lesión tiene 5 fases con tests e hitos, e ids de test únicos', () => {
+    Object.values(PROTOCOLS).forEach((pr) => {
+      expect(Object.keys(pr)).toHaveLength(5)
+      const ids = Object.values(pr).flatMap((ph) => ph.tests.map((t) => t.id))
+      expect(new Set(ids).size).toBe(ids.length)
+      Object.values(pr).forEach((ph) => expect(ph.goals.length).toBeGreaterThan(0))
+    })
+  })
+  it('el paciente ve "enviado" hasta que Jone lo aprueba, nunca el criterio', () => {
+    const c = ctx(MON)
+    const p = c.st.patients.find((x) => x.id === 'a2')! // Mikel, Aquiles, fase 3
+    const q = phaseRequirements(c, p, 3)
+    expect(q.tests.find((t) => t.id === 'aq3a')?.st).toBe('rev')
+    expect(JSON.stringify(q)).not.toMatch(/lsi|value|90/)
+    p.recs[3] = { ...(p.recs[3] || { tests: [], files: [], at: null }), passed: { aq3a: true } }
+    expect(phaseRequirements(c, p, 3).tests.find((t) => t.id === 'aq3a')?.st).toBe('ok')
+  })
+})

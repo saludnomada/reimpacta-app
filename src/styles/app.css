@@ -1267,3 +1267,16 @@ html .pg-grow i.miss,html[data-theme] .h5-day.miss i,html .h5-day.miss i{backgro
 .vl-imp summary::after{content:" ›";color:var(--lime)}
 .vl-chk{display:flex!important;flex-direction:row!important;gap:8px!important;align-items:center;font-size:14px}
 .vl-chk input{accent-color:#D0FB00;width:18px;height:18px}
+
+/* Protocolos por lesión */
+.me-novid{flex:none;width:64px;height:48px;border-radius:10px;border:1px dashed var(--line);display:grid;place-items:center;font-size:10.5px;color:var(--dim);text-align:center}
+.me-name{background:transparent;border:0;border-bottom:1px solid transparent;color:var(--text);font:inherit;font-weight:700;font-size:15px;padding:2px 0;width:100%}
+.me-name:focus{outline:none;border-bottom-color:var(--lime)}
+.me-pick{flex:1 1 100%;display:flex;flex-direction:column;gap:6px}
+.me-pick .search{padding:8px 10px 8px 38px;font-size:13.5px}
+.ts-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ts-head em{font-style:normal}
+.ts-dec{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
+.ts-dec>span{flex:1;font-size:13px;min-width:160px}
+.preq li em{white-space:normal;max-width:150px;text-align:center;line-height:1.25;flex:none}
+.preq li>span{flex:1;min-width:0}

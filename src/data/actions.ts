@@ -218,7 +218,7 @@ export function setAccess(pid: string, patch: { until?: string; paused?: boolean
 }
 
 /* ---------- MÉTODO ---------- */
-import type { PhaseMethod, TestResult } from '../domain/model'
+import type { InjuryKey, PhaseMethod, ProtoPhase, TestResult } from '../domain/model'
 export function saveMethod(phase: number, m: PhaseMethod, tests: string[], goals: string[]) {
   getStore().change({ kind: 'library' }, (d) => {
     d.method = { ...(d.method || {}), [phase]: m }
@@ -235,7 +235,25 @@ export function addTestResult(pid: string, phase: number, testId: string, r: Tes
     ;(p.testResults[testId] = p.testResults[testId] || []).push(r)
     const rec = (p.recs[phase] = p.recs[phase] || { tests: [], files: [], at: null })
     if (!rec.tests.includes(testId)) rec.tests.push(testId)
-    rec.passed = { ...(rec.passed || {}), [testId]: r.ok }
+  })
+}
+/** Jone decide: superado o todavía no (es lo único que ve el paciente) */
+export function approveTest(pid: string, phase: number, testId: string, ok: boolean | null) {
+  getStore().change({ kind: 'patient', patientId: pid }, (d) => {
+    const p = d.patients.find((x) => x.id === pid)
+    if (!p) return
+    const rec = (p.recs[phase] = p.recs[phase] || { tests: [], files: [], at: null })
+    const passed = { ...(rec.passed || {}) }
+    if (ok == null) delete passed[testId]
+    else passed[testId] = ok
+    rec.passed = passed
+  })
+}
+/** Guardar una fase del protocolo de una lesión */
+export function saveProtocolPhase(injury: InjuryKey, phase: number, data: ProtoPhase) {
+  getStore().change({ kind: 'library' }, (d) => {
+    d.protocols = d.protocols || {}
+    d.protocols[injury] = { ...(d.protocols[injury] || {}), [phase]: data }
   })
 }
 

@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { addPatient, newId } from '../../data/actions'
 import { useCtx } from '../../data/store'
 import { addD, isoD, monday } from '../../domain/dates'
-import { PLANS, ZONES, type Patient, type PlanKey, type Sex, type Zone } from '../../domain/model'
+import { INJURIES, PLANS, ZONES, type InjuryKey, type Patient, type PlanKey, type Sex, type Zone } from '../../domain/model'
+import { guessProtocol } from '../../domain/protocols'
 
 /** Dar de alta a un paciente: con su email podrá entrar en la app. */
 export function NewPatient({ onClose }: { onClose: () => void }) {
@@ -13,6 +14,7 @@ export function NewPatient({ onClose }: { onClose: () => void }) {
     sex: 'chica' as Sex,
     zone: 'rodilla' as Zone,
     injury: '',
+    protocol: '' as InjuryKey | '',
     start: isoD(addD(monday(c.today), 7)),
     program: c.st.programs[0]?.id || '',
     objective: '',
@@ -25,7 +27,8 @@ export function NewPatient({ onClose }: { onClose: () => void }) {
   const valid = f.name.trim() && /\S+@\S+\.\S+/.test(f.email) && f.program && !dup
   const save = () => {
     const goals: Patient['goals'] = {}
-    Object.entries(c.st.defaultGoals).forEach(([ph, gs]) => (goals[+ph] = gs.map((t) => ({ t, ok: false }))))
+    const pr = f.protocol ? c.st.protocols?.[f.protocol] : undefined
+    for (let ph = 1; ph <= 5; ph++) goals[ph] = (pr?.[ph]?.goals || c.st.defaultGoals[ph] || []).map((t) => ({ t, ok: false }))
     addPatient({
       id: newId('pt'),
       name: f.name.trim(),
@@ -34,6 +37,7 @@ export function NewPatient({ onClose }: { onClose: () => void }) {
       look: f.sex === 'chica' ? 'chica-morena' : 'chico-moreno',
       zone: f.zone,
       injury: f.injury.trim(),
+      protocol: f.protocol || undefined,
       start: f.start,
       program: f.program,
       objective: f.objective.trim(),
@@ -88,7 +92,23 @@ export function NewPatient({ onClose }: { onClose: () => void }) {
         </div>
         <label>
           <span>Lesión</span>
-          <input className="search" value={f.injury} placeholder="Ej.: tendinopatía de Aquiles" onChange={(e) => set({ injury: e.target.value })} />
+          <input
+            className="search"
+            value={f.injury}
+            placeholder="Ej.: tendinopatía de Aquiles"
+            onChange={(e) => set({ injury: e.target.value, protocol: guessProtocol(e.target.value) || f.protocol })}
+          />
+        </label>
+        <label>
+          <span>Protocolo (sus tests e hitos por fase)</span>
+          <select className="search" value={f.protocol} onChange={(e) => set({ protocol: e.target.value as InjuryKey | '' })}>
+            <option value="">Sin protocolo de lesión (tests generales)</option>
+            {(Object.keys(INJURIES) as InjuryKey[]).map((k) => (
+              <option key={k} value={k}>
+                {INJURIES[k]}
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           <span>Su meta</span>

@@ -55,6 +55,35 @@ export interface PhaseMethod {
   /** ejercicios clave de la fase (ids de vídeo) */
   key: string[]
 }
+/** Protocolos por lesión */
+export type InjuryKey = 'cintilla' | 'aquiles' | 'fascitis' | 'rotuliana'
+export const INJURIES: Record<InjuryKey, string> = {
+  cintilla: 'Cintilla iliotibial',
+  aquiles: 'Tendinopatía de Aquiles',
+  fascitis: 'Fascitis plantar',
+  rotuliana: 'Tendinopatía rotuliana',
+}
+/** Un test del protocolo (los criterios y resultados solo los ve Jone) */
+export interface ProtoTest {
+  id: string
+  name: string
+  /** cómo se hace (para Jone y, si quiere, para el paciente al grabarse) */
+  how: string
+  spec: TestSpec
+  /** vídeo de la biblioteca que explica el test (opcional) */
+  video?: string
+}
+export interface ProtoPhase {
+  objective: string
+  /** qué se trabaja en esta fase */
+  work: string
+  tests: ProtoTest[]
+  goals: string[]
+  /** ejercicios clave (ids de vídeo) */
+  key: string[]
+}
+export type Protocols = Partial<Record<InjuryKey, Record<number, ProtoPhase>>>
+
 export interface TestResult {
   date: DayISO
   /** pierna lesionada / sana (tests a una pierna) o un solo valor */
@@ -201,6 +230,8 @@ export interface Patient {
   access?: { until?: DayISO; paused?: boolean }
   /** resultados de los tests (clave = id del vídeo del test) */
   testResults?: Record<string, TestResult[]>
+  /** protocolo de su lesión (marca sus tests y fases) */
+  protocol?: InjuryKey
   follow: FollowUp
   settings: PatientSettings
 }
@@ -243,6 +274,8 @@ export interface AppState {
   defaultGoals: Record<number, string[]>
   /** EL MÉTODO: objetivo, tests con criterio y ejercicios clave de cada fase */
   method?: Record<number, PhaseMethod>
+  /** protocolos por lesión: fases, tests con criterio e hitos */
+  protocols?: Protocols
   whatsapp: string
   calLink: string
   myEmail: string

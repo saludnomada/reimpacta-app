@@ -6,6 +6,7 @@ import { addD, diffDays, isoD, monday, parseD, todayReal, dow } from '../domain/
 import { estMin, routineFor, type Ctx } from '../domain/logic'
 import type { AppState, Look, Patient, Program, Routine, Sex, Video, VideoType, WorkCat, Zone } from '../domain/model'
 import { DEFAULT_GOALS } from '../domain/model'
+import { guessProtocol, protocolsSeed } from '../domain/protocols'
 
 let seq = 0
 export const uid = () => Math.random().toString(36).slice(2, 9) + (seq++).toString(36)
@@ -346,6 +347,25 @@ export function sampleState(T: Date = todayReal()): AppState {
   p7.recs[2].passed = { v17: true }
   p7.recs[3].passed = { v18: true }
   p7.recs[4].passed = { v24: true }
+
+  // Protocolos por lesión (propuesta inicial) y su progreso de ejemplo
+  st.protocols = protocolsSeed()
+  pts.forEach((p) => {
+    p.protocol = guessProtocol(p.injury)
+    const pr = p.protocol && st.protocols![p.protocol]
+    if (!pr) return
+    for (let f = 1; f <= 5; f++) {
+      const old = p.goals[f] || []
+      p.goals[f] = pr[f].goals.map((t, i) => ({ t, ok: f <= p.done || !!old[i]?.ok }))
+      if (f <= p.done) {
+        const r = (p.recs[f] = p.recs[f] || { tests: [], files: [], at: null })
+        r.tests = pr[f].tests.map((x) => x.id)
+        r.passed = Object.fromEntries(r.tests.map((id) => [id, true]))
+      }
+    }
+  })
+  // Mikel ha enviado el test de saltitos de su fase 3: Jone lo tiene que revisar
+  p1.testResults = { aq3a: [{ date: isoD(addD(T, -1)), value: 40, ok: true }] }
 
   const c: Ctx = { st, today: T, now: +T }
   const G: Record<string, { ex: number[]; life: number[]; mind: number[]; c?: string[] }> = {

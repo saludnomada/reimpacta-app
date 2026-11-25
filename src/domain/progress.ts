@@ -157,6 +157,18 @@ export function milestones(c: Ctx, p: Patient): Milestone[] {
 export function phaseRequirements(c: Ctx, p: Patient, phase?: number) {
   const ph = phase ?? Math.min(p.done + 1, 5)
   const r = p.recs[ph] || { tests: [], files: [], at: null }
+  // Con protocolo de su lesión: sus tests salen de ahí. El paciente nunca ve criterios ni resultados.
+  const proto = p.protocol ? c.st.protocols?.[p.protocol]?.[ph] : undefined
+  if (proto) {
+    const tests = proto.tests.map((x) => {
+      const pass = (r.passed || {})[x.id]
+      const sent = r.files.some((f) => f.id === x.id) || !!p.testResults?.[x.id]?.length
+      return { id: x.id, label: x.name, st: (pass ? 'ok' : sent && pass !== false ? 'rev' : 'rec') as 'ok' | 'rev' | 'rec' | 'soon' }
+    })
+    const goals = (p.goals[ph] || []).map((g) => ({ t: g.t, ok: g.ok }))
+    const okN = tests.filter((x) => x.st === 'ok').length + goals.filter((g) => g.ok).length
+    return { ph, tests, goals, okN, total: tests.length + goals.length }
+  }
   const asked = (r.tests || []).map((v) => ({
     id: v,
     label: titleOf(c, v),
@@ -176,7 +188,7 @@ const titleOf = (c: Ctx, v: string) => {
 }
 export const TEST_STATUS: Record<'ok' | 'rev' | 'rec' | 'soon', string> = {
   ok: 'Superado',
-  rev: 'Jone lo está revisando',
+  rev: 'Enviado · te respondo en 24 h',
   rec: 'Por grabar',
   soon: 'Te lo pediré pronto',
 }

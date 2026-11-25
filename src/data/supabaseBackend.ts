@@ -8,13 +8,14 @@ import type { AppState, Patient } from '../domain/model'
 import type { Backend, Op } from './backend'
 import { sampleState } from './sample'
 import { sb } from './supabase'
+import { protocolsSeed } from '../domain/protocols'
 
 export interface Who {
   role: 'jone' | 'paciente'
   patientId: string | null
 }
 
-const LIB_KEYS = ['videos', 'routines', 'programs', 'method', 'phaseTests', 'defaultGoals', 'recFixed', 'whatsapp', 'calLink'] as const
+const LIB_KEYS = ['videos', 'routines', 'programs', 'method', 'protocols', 'phaseTests', 'defaultGoals', 'recFixed', 'whatsapp', 'calLink'] as const
 const JONE_KEYS = ['tasks', 'tasksDone', 'painOv', 'myEmail'] as const
 const LOG_KEYS = ['sessions', 'fridays', 'recs', 'settings', 'introSeen', 'medalsSeen', 'consentAt'] as const
 
@@ -84,6 +85,10 @@ export class SupabaseBackend implements Backend {
     let library = (lib?.data as Json) || {}
     if (isJ && !Array.isArray(library.videos)) {
       library = starterLibrary()
+      ok(await sb.from('library').upsert({ id: 1, data: library, updated_at: new Date().toISOString() }))
+    } else if (isJ && !library.protocols) {
+      // la primera vez después de añadir los protocolos por lesión
+      library = { ...library, protocols: protocolsSeed() }
       ok(await sb.from('library').upsert({ id: 1, data: library, updated_at: new Date().toISOString() }))
     }
     const pts = ok(await sb.from('patients').select('id,email,admin')) as { id: string; email: string | null; admin: Json }[]
