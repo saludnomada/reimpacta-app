@@ -1262,3 +1262,8 @@ html .pg-grow i.miss,html[data-theme] .h5-day.miss i,html .h5-day.miss i{backgro
 .ib-line em{font-style:normal}
 .se-ghost.busy{opacity:.6;pointer-events:none}
 .vs-err{margin:6px 0 0;grid-column:1/-1}
+.vl-imp summary{cursor:pointer;list-style:none}
+.vl-imp summary::-webkit-details-marker{display:none}
+.vl-imp summary::after{content:" ›";color:var(--lime)}
+.vl-chk{display:flex!important;flex-direction:row!important;gap:8px!important;align-items:center;font-size:14px}
+.vl-chk input{accent-color:#D0FB00;width:18px;height:18px}

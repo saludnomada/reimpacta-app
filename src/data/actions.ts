@@ -245,3 +245,16 @@ export function addPatient(p: Patient) {
     d.patients.push(p)
   })
 }
+
+/** Guarda varios vídeos de una vez (importar de YouTube, etiquetar en bloque) */
+export function saveVideos(list: Video[]) {
+  if (!list.length) return
+  getStore().change({ kind: 'library' }, (d) => {
+    const byId = new Map(d.videos.map((v, i) => [v.id, i]))
+    list.forEach((v) => {
+      const i = byId.get(v.id)
+      if (i != null) d.videos[i] = v
+      else d.videos.push(v)
+    })
+  })
+}

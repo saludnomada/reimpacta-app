@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
-import { updateVideo } from '../../data/actions'
+import { saveVideos, updateVideo } from '../../data/actions'
+import { mode } from '../../data'
+import { readTakeout, toVideo, type YtRow } from '../../domain/youtubeImport'
 import { useCtx } from '../../data/store'
 import { MUSCLES, PHASES, TYPES, WORK_CATS, ZONES, type Video, type VideoType, type WorkCat } from '../../domain/model'
 import { IcSearch } from '../../ui/icons'
@@ -77,7 +79,13 @@ const indexOf = (v: Video, extra: string[]) => norm([v.title, v.desc || '', ...v
 /** BIBLIOTECA (simulación): buscar entre 1.200 vídeos, etiquetar muchos de golpe y añadir uno de YouTube. */
 export function VideoLab() {
   const c = useCtx()
-  const [all, setAll] = useState<Video[]>(() => [...c.st.videos, ...demoLibrary()])
+  const [all, setAll] = useState<Video[]>(() => (mode === 'ejemplo' ? [...c.st.videos, ...demoLibrary()] : c.st.videos))
+  /** los vídeos de prueba (id "d…") no se guardan; los demás sí */
+  const commit = (next: Video[], ids: Iterable<string>) => {
+    setAll(next)
+    const set = new Set(ids)
+    saveVideos(next.filter((v) => set.has(v.id) && !/^d\d/.test(v.id)))
+  }
   const [extra, setExtra] = useState<Record<string, string[]>>({}) // etiquetas añadidas a mano
   const [q, setQ] = useState('')
   const [ph, setPh] = useState<number | 'none' | null>(null)
@@ -105,6 +113,10 @@ export function VideoLab() {
     const n = { ...extra }
     sel.forEach((id) => (n[id] = [...new Set([...(n[id] || []), t])]))
     setExtra(n)
+    commit(
+      all.map((v) => (sel.has(v.id) ? { ...v, keywords: [...new Set([...v.keywords, t])] } : v)),
+      sel,
+    )
     setTag('')
     setSel(new Set())
   }
@@ -112,17 +124,26 @@ export function VideoLab() {
   return (
     <div className="vl">
       <section className="card vl-explain">
-        <span className="lbl">Simulación con 1.200 vídeos</span>
+        <span className="lbl">{mode === 'ejemplo' ? 'Simulación con 1.200 vídeos' : `Tu biblioteca · ${all.length} vídeos`}</span>
         <p className="muted" style={{ margin: 0 }}>
           Toca un vídeo para editar su título, enlace, palabras clave y la descripción que verá el paciente. Marca la casilla para etiquetar varios
           a la vez.
         </p>
         <p className="muted" style={{ margin: 0 }}>
-          Los vídeos siguen en tu canal de YouTube (ocultos). La app solo guarda el enlace, el título y las etiquetas. Prueba a escribir{' '}
-          <b>"talon escalon"</b>, <b>"isometrico rodilla"</b> o <b>"banda cadera"</b>: busca sin tildes y por trozos de palabra.
+          Los vídeos siguen en tu canal de YouTube (ocultos). La app solo guarda el enlace, el título y las etiquetas. Busca sin tildes y por
+          trozos de palabra: por ejemplo <b>"talon escalon"</b> o <b>"isometrico rodilla"</b>.
         </p>
       </section>
 
+      <YoutubeImport
+        have={new Set(all.map((v) => v.id))}
+        onImport={(list) =>
+          commit(
+            [...list, ...all],
+            list.map((v) => v.id),
+          )
+        }
+      />
       <AddYoutube onAdd={(v) => setAll([v, ...all])} />
 
       <div className="vl-search">
@@ -178,7 +199,10 @@ export function VideoLab() {
                 key={n}
                 className="chip"
                 onClick={() => {
-                  setAll(all.map((v) => (sel.has(v.id) ? { ...v, phases: [...new Set([...(v.phases || []), n])].sort() } : v)))
+                  commit(
+                    all.map((v) => (sel.has(v.id) ? { ...v, phases: [...new Set([...(v.phases || []), n])].sort() } : v)),
+                    sel,
+                  )
                   setSel(new Set())
                 }}
               >
@@ -226,11 +250,13 @@ export function VideoLab() {
           popular={popular(all)}
           onClose={() => setEdit(null)}
           onSave={(nv) => {
-            setAll(all.map((x) => (x.id === nv.id ? nv : x)))
+            commit(
+              all.map((x) => (x.id === nv.id ? nv : x)),
+              [nv.id],
+            )
             const n = { ...extra }
             delete n[nv.id]
             setExtra(n)
-            if (c.st.videos.some((x) => x.id === nv.id) || nv.id.startsWith('y')) updateVideo(nv.id, nv)
             setEdit(null)
           }}
         />
@@ -424,5 +450,80 @@ function Editor({ v, extra, popular, onClose, onSave }: { v: Video; extra: strin
         </div>
       </div>
     </div>
+  )
+}
+
+/** Importar todos los vídeos del canal desde el archivo de Google Takeout */
+function YoutubeImport({ have, onImport }: { have: Set<string>; onImport: (list: Video[]) => void }) {
+  const [rows, setRows] = useState<YtRow[] | null>(null)
+  const [pub, setPub] = useState(false)
+  const [err, setErr] = useState('')
+  const [done, setDone] = useState(0)
+  const fresh = (rows || []).filter((r) => !have.has('yt' + r.id))
+  const pick = fresh.filter((r) => r.privacy === 'oculto' || (pub && r.privacy === 'publico'))
+  const count = (p: YtRow['privacy']) => (rows || []).filter((r) => r.privacy === p).length
+  return (
+    <details className="card vl-imp" open={!rows ? undefined : true}>
+      <summary className="lbl">Importar todos tus vídeos de YouTube</summary>
+      {!rows && (
+        <>
+          <p style={{ margin: 0 }}>
+            Sube el archivo <b>.csv</b> con la lista de tus vídeos: el de tu hoja de Google (Apps Script) o el de Google Takeout. La app pone
+            sola el enlace, el título, la descripción y las etiquetas.
+          </p>
+          <label className="btn small" style={{ alignSelf: 'flex-start' }}>
+            Elegir el archivo .csv
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              multiple
+              hidden
+              onChange={async (e) => {
+                setErr('')
+                const files = [...(e.target.files || [])]
+                const all = (await Promise.all(files.map((f) => f.text()))).flatMap(readTakeout)
+                const uniq = [...new Map(all.map((r) => [r.id, r])).values()]
+                if (!uniq.length) setErr('No encuentro vídeos en ese archivo. Tiene que ser el .csv de "metadatos de vídeo".')
+                else setRows(uniq)
+              }}
+            />
+          </label>
+          {err && <p className="np-err">{err}</p>}
+        </>
+      )}
+      {rows && !done && (
+        <>
+          <p style={{ margin: 0 }}>
+            He encontrado <b>{rows.length}</b> vídeos: <b>{count('oculto')}</b> ocultos, {count('publico')} públicos y {count('privado')} privados.{' '}
+            {rows.length - fresh.length > 0 && `${rows.length - fresh.length} ya estaban en tu biblioteca.`}
+          </p>
+          <label className="vl-chk">
+            <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} /> Importar también los públicos
+          </label>
+          <p className="muted me-hint">Los privados no se importan: tus pacientes no podrían verlos.</p>
+          <div className="row">
+            <button
+              className="btn"
+              disabled={!pick.length}
+              onClick={() => {
+                onImport(pick.map((r) => toVideo(r, autoTags)))
+                setDone(pick.length)
+              }}
+            >
+              Importar {pick.length} vídeos
+            </button>
+            <button className="btn ghost" onClick={() => setRows(null)}>
+              Cancelar
+            </button>
+          </div>
+        </>
+      )}
+      {done > 0 && (
+        <p style={{ margin: 0 }}>
+          Listo: <b>{done}</b> vídeos importados con su enlace, título, descripción y etiquetas automáticas. Ahora fíltralos por <b>Sin fase</b>{' '}
+          y ponles fase y zona en bloque.
+        </p>
+      )}
+    </details>
   )
 }

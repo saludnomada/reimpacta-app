@@ -191,3 +191,29 @@ describe('guardar en Supabase', () => {
     expect(back).toEqual(JSON.parse(JSON.stringify(p)))
   })
 })
+
+import { readTakeout } from './youtubeImport'
+describe('importar de YouTube (Takeout)', () => {
+  it('lee el CSV en español con comillas y saltos de línea, y distingue ocultos', () => {
+    const csv =
+      '﻿ID del vídeo,Duración aproximada (ms),Título del vídeo (original),Descripción del vídeo (original),Privacidad\n' +
+      'abc123DEF45,30000,"Sentadilla búlgara, con mancuerna","Baja despacio\nsube rápido",Oculto\n' +
+      'zzz999YYY00,20000,Plancha lateral,,Público\n'
+    const r = readTakeout(csv)
+    expect(r).toHaveLength(2)
+    expect(r[0]).toEqual({ id: 'abc123DEF45', title: 'Sentadilla búlgara, con mancuerna', desc: 'Baja despacio\nsube rápido', privacy: 'oculto' })
+    expect(r[1].privacy).toBe('publico')
+  })
+  it('lee el CSV en inglés', () => {
+    const r = readTakeout('Video ID,Video Title (Original),Privacy\nabc123DEF45,Pogo jumps,Unlisted\n')
+    expect(r[0]).toMatchObject({ title: 'Pogo jumps', privacy: 'oculto' })
+  })
+})
+
+describe('importar de la hoja de Apps Script', () => {
+  it('lee Video ID, Title, Description, Privacy (unlisted = oculto)', () => {
+    const r = readTakeout('Video ID,Title,Description,Privacy\nabc123DEF45,ELEVACIÓN DE TALONES,"Sube en 1, baja en 3",unlisted\nqwe456RTY78,Clase 1,,private\n')
+    expect(r.map((x) => x.privacy)).toEqual(['oculto', 'privado'])
+    expect(r[0].desc).toBe('Sube en 1, baja en 3')
+  })
+})
