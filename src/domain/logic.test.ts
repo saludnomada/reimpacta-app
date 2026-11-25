@@ -176,3 +176,18 @@ describe('tests del método', () => {
     expect(evalTest({ measure: 'reps', rule: 'min', value: 20, note: '' }, { value: 19 }).ok).toBe(false)
   })
 })
+
+import { joinPatient, splitPatient } from '../data/supabaseBackend'
+describe('guardar en Supabase', () => {
+  it('ficha + diario vuelven a dar el mismo paciente, y el "superado" va en la ficha', () => {
+    const c = ctx(MON)
+    const p = c.st.patients.find((x) => x.id === 'a2')!
+    p.recs[3] = { tests: ['v18'], files: [], at: null, passed: { v18: true } }
+    const { admin, log } = splitPatient(p)
+    expect(JSON.stringify(log)).not.toContain('passed')
+    expect(admin).not.toHaveProperty('sessions')
+    expect(admin).not.toHaveProperty('notes')
+    const back = joinPatient(p.id, p.email ?? null, JSON.parse(JSON.stringify(admin)), JSON.parse(JSON.stringify(log)), p.notes)
+    expect(back).toEqual(JSON.parse(JSON.stringify(p)))
+  })
+})

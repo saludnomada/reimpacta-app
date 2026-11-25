@@ -8,6 +8,9 @@ import { Routines } from './Routines'
 import { Programs } from './Programs'
 import { Billing } from './Billing'
 import { Method } from './Method'
+import { NewPatient } from './NewPatient'
+import { mode } from '../../data'
+import { sb } from '../../data/supabase'
 import { TestSheet } from './TestSheet'
 import { TaskList, VoiceButton } from './VoiceTask'
 import { Logo } from '../../ui/icons'
@@ -33,6 +36,7 @@ export function JoneApp() {
   const c = useCtx()
   const [tab, setTab] = useState('pacientes')
   const [test, setTest] = useState<string | null>(null)
+  const [newP, setNewP] = useState(false)
   const testFor = c.st.patients.find((x) => x.id === test)
   // de menos a más semanas
   const pts = c.st.patients.slice().sort((a, b) => b.start.localeCompare(a.start) || a.name.localeCompare(b.name))
@@ -58,7 +62,25 @@ export function JoneApp() {
           <span className="lbl">Hola, Jone</span>
           <h1>{tab === 'pacientes' ? 'Tus pacientes' : TABS.find((t) => t[0] === tab)![1]}</h1>
         </div>
+        <div className="row">
+          {tab === 'pacientes' && (
+            <button className="btn small" onClick={() => setNewP(true)}>
+              + Nuevo paciente
+            </button>
+          )}
+          {mode === 'real' && (
+            <button className="btn ghost small" onClick={() => sb.auth.signOut()}>
+              Salir
+            </button>
+          )}
+        </div>
       </div>
+      {newP && <NewPatient onClose={() => setNewP(false)} />}
+      {tab === 'pacientes' && !pts.length && (
+        <section className="card">
+          <p style={{ margin: 0 }}>Aún no tienes pacientes. Pulsa <b>+ Nuevo paciente</b>: con su email podrá entrar en la app.</p>
+        </section>
+      )}
       {!['videos', 'tareas', 'rutinas', 'programas', 'factura', 'metodo'].includes(tab) && (
         <section className="card">
           <p className="muted" style={{ margin: 0 }}>

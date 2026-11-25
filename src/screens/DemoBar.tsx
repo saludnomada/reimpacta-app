@@ -1,3 +1,4 @@
+import { setAppMode } from '../data/supabase'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { backend, store } from '../data'
@@ -84,6 +85,9 @@ export function DemoBar() {
         }}
       >
         Reiniciar datos de ejemplo
+      </button>
+      <button className="linkbtn" onClick={() => setAppMode('real')}>
+        Salir de la demostración
       </button>
     </div>
   )

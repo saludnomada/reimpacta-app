@@ -1,3 +1,5 @@
+import { mode } from '../../data'
+import { sb } from '../../data/supabase'
 import { useNavigate } from 'react-router-dom'
 import { setPatientSetting } from '../../data/actions'
 import type { Patient } from '../../domain/model'
@@ -37,6 +39,16 @@ export function Settings({ p }: { p: Patient }) {
           Los avisos, tu corredor/a y el resto de ajustes llegan en el bloque 2.
         </p>
       </section>
+      {mode === 'real' && (
+        <section className="card">
+          <a href="/privacidad" target="_blank" rel="noopener" className="muted">
+            Política de privacidad
+          </a>
+          <button className="se-ghost" onClick={() => sb.auth.signOut()}>
+            Cerrar sesión
+          </button>
+        </section>
+      )}
     </div>
   )
 }

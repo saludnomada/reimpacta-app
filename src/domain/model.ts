@@ -187,6 +187,8 @@ export interface Patient {
   medalsSeen: number
   painOk?: number // dolor permitido en ejercicios (por defecto 3)
   introSeen?: boolean
+  /** fecha y hora en que dio su consentimiento explícito (RGPD) */
+  consentAt?: string
   goals: Record<number, Goal[]>
   phaseAt: Record<number, DayISO>
   sessions: Record<DayISO, SessionLog>

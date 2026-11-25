@@ -238,3 +238,10 @@ export function addTestResult(pid: string, phase: number, testId: string, r: Tes
     rec.passed = { ...(rec.passed || {}), [testId]: r.ok }
   })
 }
+
+/* ---------- ALTA DE PACIENTES ---------- */
+export function addPatient(p: Patient) {
+  getStore().change({ kind: 'patient', patientId: p.id }, (d) => {
+    d.patients.push(p)
+  })
+}
