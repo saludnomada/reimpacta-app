@@ -84,6 +84,28 @@ export interface ProtoPhase {
 }
 export type Protocols = Partial<Record<InjuryKey, Record<number, ProtoPhase>>>
 
+/** LABORATORIO: tests en vídeo que Jone pide (en orden) */
+export interface LabRequest {
+  id: string
+  label: string // "Inicio", "Semana 4", "Final"…
+  at: DayISO
+  tests: string[] // ids del catálogo, en el orden que eligió Jone
+}
+export interface LabFile {
+  name: string
+  size: number
+  path?: string
+  at: string
+}
+/** Lo que Jone mide en un fotograma: puntos corregidos y valores (solo para Jone) */
+export interface LabMark {
+  t: number
+  side: 'd' | 'i' | '-'
+  pts: Record<string, [number, number]>
+  values: Record<string, number>
+  note?: string
+}
+
 export interface TestResult {
   date: DayISO
   /** pierna lesionada / sana (tests a una pierna) o un solo valor */
@@ -232,6 +254,14 @@ export interface Patient {
   testResults?: Record<string, TestResult[]>
   /** protocolo de su lesión (marca sus tests y fases) */
   protocol?: InjuryKey
+  /** laboratorio: tests en vídeo pedidos (Jone) */
+  lab?: LabRequest[]
+  /** laboratorio: vídeos enviados (clave "pedido|test|lado") */
+  labFiles?: Record<string, LabFile>
+  /** laboratorio: medidas de Jone por vídeo */
+  labMarks?: Record<string, LabMark[]>
+  /** permiso para usar sus vídeos o datos de forma anónima como caso de éxito */
+  mediaOk?: boolean
   follow: FollowUp
   settings: PatientSettings
 }
@@ -276,6 +306,8 @@ export interface AppState {
   method?: Record<number, PhaseMethod>
   /** protocolos por lesión: fases, tests con criterio e hitos */
   protocols?: Protocols
+  /** laboratorio: vídeo de demostración de cada test del catálogo */
+  labVideos?: Record<string, string>
   whatsapp: string
   calLink: string
   myEmail: string

@@ -15,6 +15,8 @@ export default defineConfig({
       filename: 'sw.ts',
       registerType: 'autoUpdate',
       injectRegister: false,
+      // el modelo del muñequito (MediaPipe) se descarga solo cuando se usa, no al instalar la app
+      injectManifest: { globIgnores: ['**/mediapipe/**'] },
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
         name: 'REIMPACTA · Salud Nómada',

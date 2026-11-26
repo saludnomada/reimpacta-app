@@ -1,3 +1,4 @@
+import { labProgress } from './lab'
 // Qué ve la paciente en "Hoy" y en sus avisos.
 //
 // Regla de pendientes (decidida con Jone): lo no hecho NO se va acumulando.
@@ -31,6 +32,7 @@ export type Go =
   | { to: 'recordings' }
   | { to: 'call' }
   | { to: 'classes' }
+  | { to: 'lab' }
 
 export type IconKey = SessionType | 'viernes' | 'grabar' | 'llamada' | 'recuperar'
 
@@ -87,6 +89,11 @@ export function todayItems(c: Ctx, p: Patient): TodoItem[] {
   // 4. grabarse
   const chk = pendingRec(c, p)
   if (chk) items.push({ icon: 'grabar', co: true, go: { to: 'recordings' }, title: `Vídeos de la fase ${chk.ph}`, sub: `${recItems(c, p, chk.ph).length} vídeos cortos` })
+
+  // 4b. tests en vídeo que ha pedido Jone (laboratorio)
+  const lab = labProgress(p)
+  if (lab && lab.done < lab.total)
+    items.push({ icon: 'grabar', go: { to: 'lab' }, title: 'Tus tests en vídeo', sub: lab.done ? `${lab.done} de ${lab.total} grabados` : `${lab.total} vídeos cortos, en orden` })
 
   // 5. llamada
   const bk = myBooking(c, p)

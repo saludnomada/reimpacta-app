@@ -12,6 +12,7 @@ import { Progress } from './Progress'
 import { Week } from './Week'
 import { Session } from './Session'
 import { RunSession } from './RunSession'
+import { LabTests } from './LabTests'
 import { goPath } from './goPath'
 import { Home } from './Home'
 import { InstallGuide } from './InstallGuide'
@@ -27,6 +28,7 @@ export function PatientApp({ p }: { p: Patient }) {
     <Routes>
       <Route path="/instalar" element={<InstallGuide />} />
       <Route path="/sesion/:day" element={<SessionRoute p={p} />} />
+      <Route path="/tests" element={<LabTests c={c} p={p} />} />
       <Route path="/viernes" element={<Soon title="Cuestionario del viernes" />} />
       <Route path="/grabarte" element={<Soon title="Grábate" />} />
       <Route path="/ajustes" element={<Settings p={p} />} />

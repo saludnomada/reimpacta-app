@@ -364,6 +364,27 @@ export function sampleState(T: Date = todayReal()): AppState {
       }
     }
   })
+  // Laboratorio de ejemplo (Mikel): tests al inicio con medidas, y un pedido nuevo a medias
+  const L0 = isoD(addD(parseD(p1.start), 3))
+  const L1 = isoD(addD(T, -2))
+  p1.lab = [
+    { id: 'labA', label: 'Inicio', at: L0, tests: ['tob-fd', 'sal-alto1', 'dec1'] },
+    { id: 'labB', label: 'Semana 10', at: L1, tests: ['tob-fd', 'sal-alto1', 'dec1', 'car-lado'] },
+  ]
+  const lf = (_k: string, d: string) => ({ name: 'video.mov', size: 2e7, at: d })
+  p1.labFiles = {
+    'labA|tob-fd|d': lf('', L0), 'labA|tob-fd|i': lf('', L0), 'labA|sal-alto1|d': lf('', L0), 'labA|sal-alto1|i': lf('', L0), 'labA|dec1|d': lf('', L0), 'labA|dec1|i': lf('', L0),
+    'labB|tob-fd|d': lf('', L1), 'labB|tob-fd|i': lf('', L1), 'labB|sal-alto1|d': lf('', L1),
+  }
+  const mk1 = (side: 'd' | 'i', values: Record<string, number>) => [{ t: 1.2, side, pts: {}, values }]
+  p1.labMarks = {
+    'labA|tob-fd|d': mk1('d', { 'Inclinación de la tibia': 28 }), 'labA|tob-fd|i': mk1('i', { 'Inclinación de la tibia': 41 }),
+    'labA|sal-alto1|d': mk1('d', { 'Flexión de rodilla': 118, 'Altura de salto (cm)': 9.8 }), 'labA|sal-alto1|i': mk1('i', { 'Flexión de rodilla': 112, 'Altura de salto (cm)': 14.6 }),
+    'labA|dec1|d': mk1('d', { 'Ángulo de rodilla de frente (valgo)': 158, 'Inclinación de la pelvis': 7 }),
+    'labB|tob-fd|d': mk1('d', { 'Inclinación de la tibia': 37 }), 'labB|tob-fd|i': mk1('i', { 'Inclinación de la tibia': 42 }),
+    'labB|sal-alto1|d': mk1('d', { 'Flexión de rodilla': 114, 'Altura de salto (cm)': 13.9 }),
+  }
+  p1.mediaOk = true
   // Mikel ha enviado el test de saltitos de su fase 3: Jone lo tiene que revisar
   p1.testResults = { aq3a: [{ date: isoD(addD(T, -1)), value: 40, ok: true }] }
 

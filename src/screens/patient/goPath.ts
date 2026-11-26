@@ -13,5 +13,7 @@ export function goPath(g: Go): string {
       return '/jone'
     case 'classes':
       return '/clases'
+    case 'lab':
+      return '/tests'
   }
 }

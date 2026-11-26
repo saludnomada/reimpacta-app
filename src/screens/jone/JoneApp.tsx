@@ -8,6 +8,7 @@ import { Routines } from './Routines'
 import { Programs } from './Programs'
 import { Billing } from './Billing'
 import { Method } from './Method'
+import { Lab } from './Lab'
 import { NewPatient } from './NewPatient'
 import { Inbox } from './Inbox'
 import { mode } from '../../data'
@@ -22,6 +23,7 @@ import { complianceTone } from '../../domain/scales'
 const TABS: [string, string][] = [
   ['pacientes', 'Pacientes'],
   ['metodo', 'Método'],
+  ['lab', 'Laboratorio'],
   ['tareas', 'Tareas'],
   ['videos', 'Vídeos y clases'],
   ['rutinas', 'Rutinas'],
@@ -83,7 +85,7 @@ export function JoneApp() {
           <p style={{ margin: 0 }}>Aún no tienes pacientes. Pulsa <b>+ Nuevo paciente</b>: con su email podrá entrar en la app.</p>
         </section>
       )}
-      {!['videos', 'tareas', 'rutinas', 'programas', 'factura', 'metodo'].includes(tab) && (
+      {!['videos', 'tareas', 'rutinas', 'programas', 'factura', 'metodo', 'lab'].includes(tab) && (
         <section className="card">
           <p className="muted" style={{ margin: 0 }}>
             Tu panel llega en los bloques 3 y 4. Ya puedes probar: <b>Vídeos y clases</b>, <b>Rutinas</b>, <b>Programas</b>, <b>Facturación</b>, <b>Tareas</b> y el
@@ -97,6 +99,7 @@ export function JoneApp() {
       {tab === 'programas' && <Programs />}
       {tab === 'factura' && <Billing />}
       {tab === 'metodo' && <Method />}
+      {tab === 'lab' && <Lab />}
       {testFor && <TestSheet p={testFor} onClose={() => setTest(null)} />}
       <VoiceButton />
       {tab === 'pacientes' && (

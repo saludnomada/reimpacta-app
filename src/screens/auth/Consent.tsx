@@ -9,10 +9,14 @@ import { useApplyTheme } from '../../ui/theme'
 export function Consent({ p }: { p: Patient }) {
   useApplyTheme('claro')
   const [ok, setOk] = useState(false)
+  const [media, setMedia] = useState(false)
   const accept = () =>
     getStore().change({ kind: 'patient', patientId: p.id }, (d) => {
       const x = d.patients.find((y) => y.id === p.id)
-      if (x) x.consentAt = new Date().toISOString()
+      if (x) {
+        x.consentAt = new Date().toISOString()
+        x.mediaOk = media
+      }
     })
   return (
     <div className="phone au">
@@ -41,6 +45,13 @@ export function Consent({ p }: { p: Patient }) {
               política de privacidad
             </a>{' '}
             y doy mi consentimiento explícito para que se traten mis datos de salud con este fin.
+          </span>
+        </label>
+        <label className="au-check">
+          <input type="checkbox" checked={media} onChange={(e) => setMedia(e.target.checked)} />
+          <span>
+            <b>Opcional:</b> me parece bien que Jone use mis vídeos o resultados <b>sin mi cara ni mi nombre</b> como ejemplo en redes o casos de
+            éxito. Lo puedo retirar cuando quiera.
           </span>
         </label>
         <button className="x-cta" disabled={!ok} onClick={accept}>

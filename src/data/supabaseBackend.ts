@@ -15,9 +15,9 @@ export interface Who {
   patientId: string | null
 }
 
-const LIB_KEYS = ['videos', 'routines', 'programs', 'method', 'protocols', 'phaseTests', 'defaultGoals', 'recFixed', 'whatsapp', 'calLink'] as const
+const LIB_KEYS = ['videos', 'routines', 'programs', 'method', 'protocols', 'labVideos', 'phaseTests', 'defaultGoals', 'recFixed', 'whatsapp', 'calLink'] as const
 const JONE_KEYS = ['tasks', 'tasksDone', 'painOv', 'myEmail'] as const
-const LOG_KEYS = ['sessions', 'fridays', 'recs', 'settings', 'introSeen', 'medalsSeen', 'consentAt'] as const
+const LOG_KEYS = ['sessions', 'fridays', 'recs', 'settings', 'introSeen', 'medalsSeen', 'consentAt', 'labFiles', 'mediaOk'] as const
 
 type Json = Record<string, unknown>
 const pick = (o: object, keys: readonly string[]) => Object.fromEntries(keys.filter((k) => k in o).map((k) => [k, (o as Json)[k]]))

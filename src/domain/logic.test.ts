@@ -246,3 +246,19 @@ describe('protocolos por lesión', () => {
     expect(phaseRequirements(c, p, 3).tests.find((t) => t.id === 'aq3a')?.st).toBe('ok')
   })
 })
+
+import { jumpHeight, LAB_TESTS, measureValue } from './lab'
+describe('laboratorio', () => {
+  it('ángulo de rodilla de 90° y segmento vertical de 0°', () => {
+    const pts = { trocanter_d: [0.5, 0.2], condilo_d: [0.5, 0.5], maleolo_d: [0.8, 0.5] } as Record<string, [number, number]>
+    expect(measureValue({ name: 'r', kind: 'angle', pts: ['trocanter_{s}', 'condilo_{s}', 'maleolo_{s}'] }, 'd', pts)).toBe(90)
+    expect(measureValue({ name: 't', kind: 'vert', pts: ['trocanter_{s}', 'condilo_{s}'] }, 'd', pts)).toBe(0)
+  })
+  it('altura de salto por tiempo de vuelo (0,5 s ≈ 30,7 cm; a cámara lenta ×8 igual)', () => {
+    expect(jumpHeight(0.5)).toBe(30.7)
+    expect(jumpHeight(4, 8)).toBe(30.7)
+  })
+  it('catálogo numerado del 1 al 23 sin repetir', () => {
+    expect(LAB_TESTS.map((t) => t.n)).toEqual([...Array(23)].map((_, i) => i + 1))
+  })
+})

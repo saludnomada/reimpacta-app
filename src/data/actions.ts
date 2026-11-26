@@ -276,3 +276,45 @@ export function saveVideos(list: Video[]) {
     })
   })
 }
+
+/* ---------- LABORATORIO ---------- */
+import type { LabFile, LabMark } from '../domain/model'
+export function requestLab(pid: string, label: string, tests: string[], at: string) {
+  getStore().change({ kind: 'patient', patientId: pid }, (d) => {
+    const p = d.patients.find((x) => x.id === pid)
+    if (!p) return
+    p.lab = [...(p.lab || []), { id: newId('lab'), label, at, tests }]
+  })
+}
+export function deleteLabRequest(pid: string, id: string) {
+  getStore().change({ kind: 'patient', patientId: pid }, (d) => {
+    const p = d.patients.find((x) => x.id === pid)
+    if (p) p.lab = (p.lab || []).filter((r) => r.id !== id)
+  })
+}
+export function setLabFile(pid: string, key: string, f: LabFile) {
+  getStore().change({ kind: 'patient', patientId: pid }, (d) => {
+    const p = d.patients.find((x) => x.id === pid)
+    if (p) p.labFiles = { ...(p.labFiles || {}), [key]: f }
+  })
+}
+export function saveLabMarks(pid: string, key: string, marks: LabMark[]) {
+  getStore().change({ kind: 'patient', patientId: pid }, (d) => {
+    const p = d.patients.find((x) => x.id === pid)
+    if (p) p.labMarks = { ...(p.labMarks || {}), [key]: marks }
+  })
+}
+export function setLabVideo(testId: string, videoId: string | null) {
+  getStore().change({ kind: 'library' }, (d) => {
+    const m = { ...(d.labVideos || {}) }
+    if (videoId) m[testId] = videoId
+    else delete m[testId]
+    d.labVideos = m
+  })
+}
+export function setMediaOk(pid: string, ok: boolean) {
+  getStore().change({ kind: 'patient', patientId: pid }, (d) => {
+    const p = d.patients.find((x) => x.id === pid)
+    if (p) p.mediaOk = ok
+  })
+}
