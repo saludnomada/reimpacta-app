@@ -1380,3 +1380,18 @@ html[data-theme="light"] .admin .bi-app input{color-scheme:light}
 html[data-theme="light"] .vfab{box-shadow:0 10px 24px -10px rgba(10,20,13,.35)}
 .lab-ex-sel{max-width:320px}
 .lab-ex .btn.busy{opacity:.6;pointer-events:none}
+
+/* Analizador v2 */
+.an-box{cursor:pointer}
+.an-box line{stroke:#D0FB00;stroke-width:4;vector-effect:non-scaling-stroke;stroke-linecap:round}
+.an-box line.free{stroke:#4FC3F7}
+.an-pt.free i{box-shadow:0 0 0 2px #0A140D,0 0 0 4px #4FC3F7}
+.an-bigplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:rgba(10,20,13,.6);color:#fff;display:grid;place-items:center;pointer-events:none;backdrop-filter:blur(4px)}
+.an-bigplay svg{width:26px;height:26px}
+.an-scrub{width:100%;margin-top:8px;accent-color:#9DBF00}
+.an-play{min-width:72px}
+.an-rate button{padding:0 10px;height:32px;font-size:13px}
+.an-mode button{flex:1;height:40px}
+.an-vals span small{display:block;color:var(--muted);font-size:12px;font-weight:500}
+.an-bigplay{left:auto;top:auto;right:12px;bottom:12px;transform:none;width:48px;height:48px}
+.an-bigplay svg{width:20px;height:20px}

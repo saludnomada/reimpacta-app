@@ -253,6 +253,9 @@ describe('laboratorio', () => {
     const pts = { trocanter_d: [0.5, 0.2], condilo_d: [0.5, 0.5], maleolo_d: [0.8, 0.5] } as Record<string, [number, number]>
     expect(measureValue({ name: 'r', kind: 'angle', pts: ['trocanter_{s}', 'condilo_{s}', 'maleolo_{s}'] }, 'd', pts)).toBe(90)
     expect(measureValue({ name: 't', kind: 'vert', pts: ['trocanter_{s}', 'condilo_{s}'] }, 'd', pts)).toBe(0)
+    // ángulo libre entre dos líneas que no se tocan: vertical y horizontal = 90°
+    const fr = { libre1_a: [0.1, 0.1], libre1_b: [0.1, 0.5], libre1_c: [0.3, 0.3], libre1_d: [0.7, 0.3] } as Record<string, [number, number]>
+    expect(measureValue({ name: 'l', kind: 'lines', pts: ['libre1_a', 'libre1_b', 'libre1_c', 'libre1_d'] }, 'd', fr)).toBe(90)
   })
   it('altura de salto por tiempo de vuelo (0,5 s ≈ 30,7 cm; a cámara lenta ×8 igual)', () => {
     expect(jumpHeight(0.5)).toBe(30.7)

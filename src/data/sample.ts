@@ -378,11 +378,11 @@ export function sampleState(T: Date = todayReal()): AppState {
   }
   const mk1 = (side: 'd' | 'i', values: Record<string, number>) => [{ t: 1.2, side, pts: {}, values }]
   p1.labMarks = {
-    'labA|tob-fd|d': mk1('d', { 'Inclinación de la tibia': 28 }), 'labA|tob-fd|i': mk1('i', { 'Inclinación de la tibia': 41 }),
-    'labA|sal-alto1|d': mk1('d', { 'Flexión de rodilla': 118, 'Altura de salto (cm)': 9.8 }), 'labA|sal-alto1|i': mk1('i', { 'Flexión de rodilla': 112, 'Altura de salto (cm)': 14.6 }),
-    'labA|dec1|d': mk1('d', { 'Ángulo de rodilla de frente (valgo)': 158, 'Inclinación de la pelvis': 7 }),
-    'labB|tob-fd|d': mk1('d', { 'Inclinación de la tibia': 37 }), 'labB|tob-fd|i': mk1('i', { 'Inclinación de la tibia': 42 }),
-    'labB|sal-alto1|d': mk1('d', { 'Flexión de rodilla': 114, 'Altura de salto (cm)': 13.9 }),
+    'labA|tob-fd|d': mk1('d', { 'Tibia respecto a la vertical': 28 }), 'labA|tob-fd|i': mk1('i', { 'Tibia respecto a la vertical': 41 }),
+    'labA|sal-alto1|d': mk1('d', { 'Ángulo de rodilla (fémur–tibia)': 118, 'Altura de salto (cm)': 9.8 }), 'labA|sal-alto1|i': mk1('i', { 'Ángulo de rodilla (fémur–tibia)': 112, 'Altura de salto (cm)': 14.6 }),
+    'labA|dec1|d': mk1('d', { 'Ángulo fémur–tibia de frente (valgo)': 158, 'Inclinación de la pelvis': 7 }),
+    'labB|tob-fd|d': mk1('d', { 'Tibia respecto a la vertical': 37 }), 'labB|tob-fd|i': mk1('i', { 'Tibia respecto a la vertical': 42 }),
+    'labB|sal-alto1|d': mk1('d', { 'Ángulo de rodilla (fémur–tibia)': 114, 'Altura de salto (cm)': 13.9 }),
   }
   p1.mediaOk = true
   // Mikel ha enviado el test de saltitos de su fase 3: Jone lo tiene que revisar

@@ -7,6 +7,7 @@ import { cameraTip, CAMERA_LABEL, labKey, labProgress, labTest, SIDE_LABEL, side
 import type { Patient } from '../../domain/model'
 import { IcCamera, IcCheck } from '../../ui/icons'
 import { PoseVideo } from '../../ui/PoseVideo'
+import { prewarm } from '../../ui/pose'
 import { VideoBox } from '../../ui/VideoBox'
 
 /** TUS TESTS EN VÍDEO: la lista que ha elegido Jone, en orden. Ver cómo se hace, grabarse y ver el muñequito.
@@ -17,6 +18,7 @@ export function LabTests({ c, p }: { c: Ctx; p: Patient }) {
   const [local, setLocal] = useState<Record<string, string>>({}) // vídeos recién grabados (en este móvil)
   const [open, setOpen] = useState<string | null>(null)
   useEffect(() => () => Object.values(local).forEach((u) => URL.revokeObjectURL(u)), [local])
+  useEffect(() => prewarm(), [])
 
   if (!lab)
     return (
