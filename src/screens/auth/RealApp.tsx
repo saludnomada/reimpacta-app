@@ -148,8 +148,6 @@ function Login() {
 
 function Unknown({ email }: { email: string }) {
   useApplyTheme('claro')
-  const [copied, setCopied] = useState(false)
-  const sql = `insert into public.staff (user_id) select id from auth.users where email = '${email}' on conflict do nothing;`
   return (
     <div className="phone au">
       <Brand />
@@ -162,14 +160,6 @@ function Unknown({ email }: { email: string }) {
           Salir y probar con otro email
         </button>
       </section>
-      <details className="au-admin">
-        <summary>¿Eres Jone?</summary>
-        <p>Para que este email sea el tuyo de administradora, pega esta línea en Supabase → SQL Editor → Run, y luego recarga esta página:</p>
-        <code>{sql}</code>
-        <button className="se-ghost" onClick={() => navigator.clipboard?.writeText(sql).then(() => setCopied(true))}>
-          {copied ? 'Copiada' : 'Copiar la línea'}
-        </button>
-      </details>
     </div>
   )
 }
