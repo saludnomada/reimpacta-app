@@ -56,12 +56,16 @@ export interface PhaseMethod {
   key: string[]
 }
 /** Protocolos por lesión */
-export type InjuryKey = 'cintilla' | 'aquiles' | 'fascitis' | 'rotuliana'
+export type InjuryKey = 'cintilla' | 'aquiles' | 'fascitis' | 'rotuliana' | 'periostitis' | 'isquios' | 'patelofemoral' | 'tibialpost'
 export const INJURIES: Record<InjuryKey, string> = {
   cintilla: 'Cintilla iliotibial',
   aquiles: 'Tendinopatía de Aquiles',
   fascitis: 'Fascitis plantar',
   rotuliana: 'Tendinopatía rotuliana',
+  periostitis: 'Periostitis tibial',
+  isquios: 'Tendinopatía isquiotibial',
+  patelofemoral: 'Dolor patelofemoral',
+  tibialpost: 'Tendinopatía tibial posterior',
 }
 /** Un test del protocolo (los criterios y resultados solo los ve Jone) */
 export interface ProtoTest {

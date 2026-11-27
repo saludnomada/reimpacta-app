@@ -24,8 +24,7 @@ export function Method() {
   return (
     <div className="jl">
       <p className="muted" style={{ margin: 0 }}>
-        Tu método por lesión. Cada paciente sigue el protocolo de su lesión: sus tests y sus hitos salen de aquí. Los criterios y los resultados
-        <b> solo los ves tú</b>. Lo que hay es una <b>propuesta inicial basada en la evidencia</b>: ajusta los valores a tu forma de trabajar.
+        Propuesta inicial basada en la evidencia. Criterios y resultados: <b>solo para ti</b>.
       </p>
       <div className="row">
         {KEYS.map((k) => (

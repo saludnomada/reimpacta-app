@@ -2,7 +2,7 @@ import type { AppState } from '../domain/model'
 import type { Backend } from './backend'
 import { sampleState } from './sample'
 
-const KEY = 'reimpacta-ejemplo-v9'
+const KEY = 'reimpacta-ejemplo-v10'
 
 /** Backend de ejemplo: datos inventados guardados solo en este navegador. */
 export class SampleBackend implements Backend {

@@ -86,10 +86,15 @@ export class SupabaseBackend implements Backend {
     if (isJ && !Array.isArray(library.videos)) {
       library = starterLibrary()
       ok(await sb.from('library').upsert({ id: 1, data: library, updated_at: new Date().toISOString() }))
-    } else if (isJ && !library.protocols) {
-      // la primera vez después de añadir los protocolos por lesión
-      library = { ...library, protocols: protocolsSeed() }
-      ok(await sb.from('library').upsert({ id: 1, data: library, updated_at: new Date().toISOString() }))
+    } else if (isJ) {
+      // añadir las lesiones nuevas que aún no estén (sin tocar las que Jone ya ha editado)
+      const cur = (library.protocols as Record<string, unknown>) || {}
+      const seed = protocolsSeed() as Record<string, unknown>
+      const missing = Object.keys(seed).filter((k) => !cur[k])
+      if (missing.length) {
+        library = { ...library, protocols: { ...cur, ...Object.fromEntries(missing.map((k) => [k, seed[k]])) } }
+        ok(await sb.from('library').upsert({ id: 1, data: library, updated_at: new Date().toISOString() }))
+      }
     }
     const pts = ok(await sb.from('patients').select('id,email,admin')) as { id: string; email: string | null; admin: Json }[]
     const logs = ok(await sb.from('patient_logs').select('patient_id,data')) as { patient_id: string; data: Json }[]

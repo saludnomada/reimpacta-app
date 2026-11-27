@@ -91,7 +91,6 @@ function PatientLab({ p }: { p: Patient }) {
             Pedir {sel.length ? `${sel.length} tests (${sel.map((id) => labTest(id)!.n).join(', ')})` : 'tests'}
           </button>
         </div>
-        <p className="muted me-hint">Le saldrán en este orden en su app, con el vídeo de cómo se hace (lo eliges en Catálogo de tests).</p>
       </section>
 
       {reqs.map((r) => (
@@ -283,7 +282,7 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
           if (k++ % 4 === 0) setPts((old) => ({ ...Object.fromEntries(Object.entries(old).filter(([kk]) => kk.startsWith('libre'))), ...P }))
         }
       } catch {
-        setErr('No he podido cargar el muñequito en este navegador.')
+        setErr('No he podido cargar el detector de puntos en este navegador.')
       }
       busyF = false
       setScan(Math.min(1, el.currentTime / total))
@@ -382,7 +381,7 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
             })
           }
         } catch {
-          setErr('No he podido cargar el muñequito en este navegador.')
+          setErr('No he podido cargar el detector de puntos en este navegador.')
         }
         busyF = false
       }
@@ -408,7 +407,7 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
         setPts((old) => ({ ...Object.fromEntries(Object.entries(old).filter(([kk]) => kk.startsWith('libre'))), ...toPoints(lm, pointsFor(t, sd2)) }))
       }
     } catch {
-      setErr('No he podido cargar el muñequito en este navegador.')
+      setErr('No he podido cargar el detector de puntos en este navegador.')
     }
     setBusy(false)
   }
@@ -606,7 +605,6 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
                     ))}
                   </select>
                 </div>
-                <p className="muted me-hint">Toca el vídeo para play/pausa. En el ordenador: barra espaciadora, y flechas para ir fotograma a fotograma.</p>
               </>
             )}
           </div>
@@ -638,8 +636,8 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
             </div>
             <p className="muted me-hint">
               {auto
-                ? 'Dale a Play: los puntos siguen el movimiento y verás los ángulos en vivo, con su mínimo y su máximo. Ideal para la carrera.'
-                : 'Pausa donde quieras medir, pon los puntos y arrástralos para corregirlos.'}
+                ? 'Play: los puntos siguen el movimiento.'
+                : 'Pausa, pon los puntos y arrástralos.'}
             </p>
             {(
               <div className="seg2">
@@ -721,16 +719,12 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
                 <button className="btn ghost small" disabled={!src || scan != null} onClick={scanVideo}>
                   {scan != null ? `Contando… ${Math.round(scan * 100)} %` : 'Contarlas en todo el vídeo'}
                 </button>
-                <small className="muted">Las cuento solas recorriendo el vídeo. Revísalas siempre.</small>
               </div>
             )}
 
             {isRun && (
               <div className="an-run">
                 <span className="lbl">Análisis de carrera</span>
-                <p className="muted me-hint">
-                  Indica si es cámara lenta y pulsa <b>Analizar el vídeo entero</b>: lo recorro fotograma a fotograma (tarda unos segundos).
-                </p>
                 <div className="row">
                   <select className="search an-sm" value={slow} onChange={(e) => setSlow(+e.target.value)} aria-label="Cámara lenta">
                     <option value={1}>Velocidad normal</option>
@@ -957,7 +951,7 @@ function Explore({ p, onOpen }: { p?: Patient; onOpen?: (a: { key: string; t: La
           </div>
         )}
         <button className="btn small" disabled={busy} onClick={() => setLive(true)}>
-          Grabar con el muñequito
+          Grabar con puntos
         </button>
         <label className={`btn ghost small ${busy ? 'busy' : ''}`}>
           {busy ? 'Guardando el vídeo…' : 'Subir un vídeo'}
@@ -969,7 +963,6 @@ function Explore({ p, onOpen }: { p?: Patient; onOpen?: (a: { key: string; t: La
           <input type="checkbox" checked={save} onChange={(e) => setSave(e.target.checked)} /> Guardar en la ficha de {p.name} (sale en "Antes y después")
         </label>
       )}
-      <p className="muted me-hint">Con "Grabar con el muñequito" ves las líneas mientras grabas. "Subir un vídeo" para uno de la galería o del ordenador.</p>
       {err && <p className="np-err">{err}</p>}
       {live && (
         <LiveRecorder
@@ -1001,7 +994,6 @@ function Conclusions({ p, req }: { p: Patient; req: { id: string; label: string;
           </li>
         ))}
       </ul>
-      <p className="muted me-hint">Propuesta automática con umbrales iniciales. Tú decides.</p>
     </div>
   )
 }

@@ -56,3 +56,9 @@
 - Malliaras et al. 2015 rotuliana (JOSPT): https://www.jospt.org/doi/full/10.2519/jospt.2015.5987
 - NISMAT rotuliana: https://nismat.org/education/injury-evaluation-and-treatment/lower-body/patellar-tendinopathy/
 - Physiotutors rotuliana: https://www.physiotutors.com/conditions/patellar-tendinopathy/
+
+## Añadidas (propuesta inicial, mismas reglas de dolor)
+- **Periostitis tibial (síndrome de estrés tibial medial):** bajar impacto; fuerza de gemelo/sóleo y tibiales; talón a una pierna ≥90 % y ≥25; volver a correr subiendo cadencia 5-10 % y sin subir volumen de golpe.
+- **Tendinopatía isquiotibial proximal:** evitar compresión (sentado largo, estiramientos); isométricos sin mucha flexión de cadera → fuerza (puente, peso muerto) → velocidad; puente a una pierna ≥90 % y ≥20.
+- **Dolor patelofemoral:** fuerza de cadera + cuádriceps en rangos sin dolor; step down con buena alineación; cadencia +5-10 %.
+- **Tendinopatía tibial posterior:** isométricos de inversión, descarga del arco (plantilla/calzado); talón a una pierna con el talón girando hacia dentro.

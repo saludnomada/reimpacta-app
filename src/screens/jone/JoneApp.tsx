@@ -12,7 +12,7 @@ import { Lab } from './Lab'
 import { NewPatient } from './NewPatient'
 import { Inbox } from './Inbox'
 import { mode } from '../../data'
-import { sb } from '../../data/supabase'
+import { sb, setAppMode } from '../../data/supabase'
 import { TestSheet } from './TestSheet'
 import { TaskList, VoiceButton } from './VoiceTask'
 import { IcMoon, IcSun, Logo } from '../../ui/icons'
@@ -78,6 +78,11 @@ export function JoneApp() {
           ))}
         </div>
         <div className="atools">
+          {mode === 'real' && (
+            <button className="btn ghost small" onClick={() => setAppMode('ejemplo')} title="Ver la app con pacientes de ejemplo">
+              Demostración
+            </button>
+          )}
           <button className="icon-btn" onClick={toggleTema} aria-label={tema === 'claro' ? 'Pasar a modo oscuro' : 'Pasar a modo claro'} title={tema === 'claro' ? 'Modo oscuro' : 'Modo claro'}>
             {tema === 'claro' ? <IcMoon /> : <IcSun />}
           </button>
@@ -108,11 +113,10 @@ export function JoneApp() {
           <p style={{ margin: 0 }}>Aún no tienes pacientes. Pulsa <b>+ Nuevo paciente</b>: con su email podrá entrar en la app.</p>
         </section>
       )}
-      {!['videos', 'tareas', 'rutinas', 'programas', 'factura', 'metodo', 'lab'].includes(tab) && (
+      {['agenda', 'ajustes'].includes(tab) && (
         <section className="card">
           <p className="muted" style={{ margin: 0 }}>
-            Tu panel llega en los bloques 3 y 4. Ya puedes probar: <b>Vídeos y clases</b>, <b>Rutinas</b>, <b>Programas</b>, <b>Facturación</b>, <b>Tareas</b> y el
-            micrófono de abajo a la derecha para dictar tareas.
+            Próximamente.
           </p>
         </section>
       )}

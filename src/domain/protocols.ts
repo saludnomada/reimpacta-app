@@ -147,6 +147,98 @@ export const PROTOCOLS: Record<InjuryKey, Record<number, ProtoPhase>> = {
     ]),
     5: ph('Volver a correr. Puede llevar de 6 a 12 meses.', RUN_WORK, [run30('ro5a'), next24('ro5b')], RUN_GOALS),
   },
+  periostitis: {
+    1: ph(
+      'Calmar la tibia: que caminar y el día a día no duelan.',
+      'Reducir o parar la carrera. Fuerza sin impacto: elevación de talones, sóleo con rodilla doblada, tibial anterior. Bici o elíptica si no duele.',
+      [
+        t('pe1a', 'Dolor al presionar la tibia', 'Dolor (0-10) al apretar el borde interno de la tibia', 'dolor', 'max', 3),
+        t('pe1b', 'Saltitos con los dos pies', '10 saltitos seguidos: dolor (0-10)', 'dolor', 'max', 2),
+      ],
+      ['Caminas sin dolor en la tibia', 'Te duele menos al presionar la tibia'],
+    ),
+    2: ph(
+      'Fuerza de gemelo, sóleo y tibial para que la tibia reciba menos carga.',
+      'Elevación de talón a una pierna (rodilla estirada y doblada), tibial anterior y posterior, fuerza de cadera.',
+      [
+        t('pe2a', 'Talón a una pierna hasta el fallo', 'Repeticiones, cada pierna', 'reps', 'lsi', 90, 'Y al menos 25'),
+        t('pe2b', 'Sóleo a una pierna con rodilla doblada', 'Repeticiones, cada pierna', 'reps', 'lsi', 90),
+      ],
+      ['Elevación de talón a una pierna, 3 × 15 por lado', 'Fuerza parecida en las dos piernas'],
+    ),
+    3: ph('Que la tibia vuelva a tolerar impactos.', 'Saltitos (pogo) y comba, aumentando poco a poco.', [pogo('pe3a'), comba('pe3b')], ['Saltos con los dos pies sin dolor en la tibia', 'Sin más dolor al día siguiente']),
+    4: ph('Preparar la carrera: saltos a una pierna.', 'Saltos a una pierna, saltos hacia delante, caminar rápido.', [hop1('pe4a'), walk30('pe4b')], ['Saltos a una pierna sin dolor', 'Caminas 30 min rápido sin dolor']),
+    5: ph('Volver a correr sin recaer.', RUN_WORK + ' Subir cadencia un 5-10 % y evitar subir mucho volumen de golpe.', [run30('pe5a'), next24('pe5b')], RUN_GOALS),
+  },
+  isquios: {
+    1: ph(
+      'Calmar el tendón: evitar estirar el isquio con presión (sentarse mucho, estiramientos).',
+      'Isométricos de isquios sin flexionar mucho la cadera (puente isométrico, curl isométrico). Evitar estiramientos.',
+      [
+        t('is1a', 'Dolor al estar sentado', 'Dolor (0-10) tras 30 min sentado', 'dolor', 'max', 3),
+        t('is1b', 'Puente a una pierna (isométrico)', 'Segundos aguantando, cada lado', 'secs', 'lsi', 80, 'Dolor ≤ 3/10'),
+      ],
+      ['Estás sentado 30 min sin que el dolor te frene', 'Los isométricos no te dejan más dolor al día siguiente'],
+    ),
+    2: ph(
+      'Fuerza del isquio, añadiendo poco a poco flexión de cadera.',
+      'Puente, peso muerto rumano, curl de isquios, nórdico asistido. Avanzar la flexión de cadera según el dolor.',
+      [
+        t('is2a', 'Puente a una pierna hasta el fallo', 'Repeticiones, cada lado', 'reps', 'lsi', 90, 'Y al menos 20'),
+        t('is2b', 'Peso muerto rumano a una pierna', 'Repeticiones con buena técnica', 'reps', 'lsi', 90),
+      ],
+      ['Puente a una pierna, 3 × 15 por lado', 'Peso muerto a una pierna sin dolor'],
+    ),
+    3: ph('Que el isquio tolere velocidad.', 'Isquios rápidos: puentes explosivos, skipping, zancadas dinámicas.', [t('is3a', 'Skipping alto 20 m', 'Dolor (0-10)', 'dolor', 'max', 2), pogo('is3b')], ['Skipping sin dolor', 'Sin más dolor al día siguiente']),
+    4: ph('Preparar la carrera: zancada amplia y cuestas.', 'Zancadas largas, carrera en cuesta suave, aceleraciones progresivas.', [hopH('is4a'), t('is4b', 'Aceleraciones progresivas 4 × 60 m', 'Dolor (0-10)', 'dolor', 'max', 2)], ['Aceleraciones sin dolor', 'Zancada amplia sin molestias']),
+    5: ph('Volver a correr, con ritmos y cuestas al final.', RUN_WORK + ' Cuestas y series rápidas al final.', [run30('is5a'), next24('is5b')], RUN_GOALS),
+  },
+  patelofemoral: {
+    1: ph(
+      'Calmar la rodilla: que escaleras, sentarse y agacharse duelan menos.',
+      'Reducir lo que más duele (bajar escaleras, cuestas abajo). Fuerza de cadera (abductores, rotadores) y cuádriceps en rangos sin dolor.',
+      [
+        t('pf1a', 'Bajar escaleras', 'Bajar dos pisos: dolor (0-10)', 'dolor', 'max', 3),
+        t('pf1b', 'Sentadilla a dos piernas', 'Dolor (0-10) hasta 60°', 'dolor', 'max', 3),
+      ],
+      ['Bajas escaleras sin que el dolor te frene', 'Te puedes agachar sin dolor fuerte'],
+    ),
+    2: ph(
+      'Fuerza de cuádriceps y cadera.',
+      'Sentadilla, prensa, step down, abducción y rotación externa de cadera. Aumentar el rango si no duele.',
+      [
+        t('pf2a', 'Step down de 20 cm', 'Repeticiones con buena técnica, cada pierna', 'reps', 'lsi', 90, 'Sin que la rodilla se vaya hacia dentro'),
+        t('pf2b', 'Plancha lateral', 'Segundos, cada lado', 'secs', 'lsi', 90),
+      ],
+      ['Step down controlado, 3 × 10 por lado', 'Fuerza de cadera parecida en los dos lados'],
+    ),
+    3: ph('Que la rodilla tolere impactos.', 'Saltitos, comba, saltos laterales.', [pogo('pf3a'), comba('pf3b')], ['Saltos con los dos pies sin dolor', 'Sin más dolor al día siguiente']),
+    4: ph('Preparar la carrera.', 'Saltos a una pierna, bajar escalón rápido, caminar rápido.', [hop1('pf4a'), walk30('pf4b')], ['Saltos a una pierna sin dolor', 'Caminas 30 min rápido sin dolor']),
+    5: ph('Volver a correr cuidando las bajadas.', RUN_WORK + ' Subir cadencia un 5-10 %. Bajadas al final.', [run30('pf5a'), next24('pf5b')], RUN_GOALS),
+  },
+  tibialpost: {
+    1: ph(
+      'Calmar el tendón (detrás del maléolo interno) y descargar el arco.',
+      'Isométricos de tibial posterior (llevar el pie hacia dentro contra resistencia). Valorar plantilla o calzado con soporte.',
+      [
+        t('tp1a', 'Dolor en el día a día', 'Media de la última semana (0-10)', 'dolor', 'max', 3),
+        t('tp1b', 'Elevación de talones a dos pies', '10 seguidas: dolor (0-10)', 'dolor', 'max', 3),
+      ],
+      ['Dolor del día a día de 3/10 o menos', 'Caminas sin dolor detrás del tobillo'],
+    ),
+    2: ph(
+      'Fuerza del tibial posterior y del pie.',
+      'Elevación de talón con pelota entre los talones, inversión con banda, pie corto, fuerza de cadera.',
+      [
+        t('tp2a', 'Talón a una pierna hasta el fallo', 'Repeticiones, cada pierna', 'reps', 'lsi', 90, 'El talón tiene que ir hacia dentro al subir'),
+        t('tp2b', 'Talón a una pierna: el talón gira hacia dentro', 'Lo hace bien (sí/no)', 'check', 'check', 1),
+      ],
+      ['Elevación de talón a una pierna, 3 × 15', 'El arco no se hunde al subir'],
+    ),
+    3: ph('Que el pie tolere impactos.', 'Saltitos y comba.', [pogo('tp3a'), comba('tp3b')], ['Saltos con los dos pies sin dolor', 'Sin más dolor al día siguiente']),
+    4: ph('Preparar la carrera.', 'Saltos a una pierna, saltos laterales, caminar rápido.', [hop1('tp4a'), walk30('tp4b')], ['Saltos a una pierna sin dolor', 'Caminas 30 min sin dolor']),
+    5: ph('Volver a correr.', RUN_WORK, [run30('tp5a'), next24('tp5b')], RUN_GOALS),
+  },
 }
 
 /** Qué protocolo le toca según cómo se escribió la lesión */
@@ -158,7 +250,11 @@ export function guessProtocol(injury: string): InjuryKey | undefined {
   if (/cintilla|iliotibial|itb/.test(s)) return 'cintilla'
   if (/aquiles|achilles/.test(s)) return 'aquiles'
   if (/fascia|plantar/.test(s)) return 'fascitis'
+  if (/patelofemoral|femoropatelar|condromalacia/.test(s)) return 'patelofemoral'
   if (/rotulian|patelar|patellar/.test(s)) return 'rotuliana'
+  if (/periostitis|tibial medial|mtss|shin/.test(s)) return 'periostitis'
+  if (/isquio|hamstring/.test(s)) return 'isquios'
+  if (/tibial posterior|tibialis posterior/.test(s)) return 'tibialpost'
   return undefined
 }
 

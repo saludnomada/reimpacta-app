@@ -47,7 +47,7 @@ export function PoseVideo({ src }: { src: string }) {
         <canvas ref={cv} />
       </div>
       <small className="pv-st">
-        {st === 'loading' ? 'Preparando tu muñequito…' : st === 'none' ? 'No te encuentro bien en este momento del vídeo: que se te vea entero.' : st === 'error' ? 'En este móvil no puedo dibujar el muñequito, pero el vídeo me ha llegado bien.' : 'Así se ve tu movimiento.'}
+        {st === 'loading' ? 'Cargando…' : st === 'none' ? 'Que se te vea entero' : st === 'error' ? 'Vídeo recibido' : 'Puntos detectados'}
       </small>
     </div>
   )
