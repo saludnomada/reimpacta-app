@@ -97,6 +97,20 @@ export class SupabaseBackend implements Backend {
     const jd = isJ ? ((ok(await sb.from('jone_data').select('data').maybeSingle()) as { data: Json } | null)?.data ?? {}) : {}
     const bk = ok(await sb.from('bookings').select('id,patient_id,at,meet_url')) as { id: string; patient_id: string; at: string; meet_url: string | null }[]
 
+    // El paciente solo descarga los vídeos que usa (sus rutinas, clases, tests y laboratorio), no toda la biblioteca
+    if (!isJ && Array.isArray(library.videos)) {
+      const used = new Set<string>()
+      ;((library.routines as { items: { v?: string }[] }[]) || []).forEach((r) => r.items.forEach((it) => it.v && used.add(it.v)))
+      Object.values((library.phaseTests as Record<string, string[]>) || {}).forEach((l) => l.forEach((x) => used.add(x)))
+      Object.values((library.labVideos as Record<string, string>) || {}).forEach((x) => used.add(x))
+      Object.values((library.protocols as Record<string, Record<string, { tests: { video?: string }[]; key: string[] }>>) || {}).forEach((pr) =>
+        Object.values(pr).forEach((ph) => {
+          ph.tests.forEach((t) => t.video && used.add(t.video))
+          ph.key.forEach((x) => used.add(x))
+        }),
+      )
+      library = { ...library, videos: (library.videos as { id: string; type: string }[]).filter((v) => v.type === 'clase' || used.has(v.id)) }
+    }
     const patients = pts.map((r) =>
       joinPatient(
         r.id,

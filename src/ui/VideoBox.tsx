@@ -7,6 +7,18 @@ export function ytId(url?: string | null): string | null {
   if (m) return m[1]
   return /^[A-Za-z0-9_-]{11}$/.test(String(url).trim()) ? String(url).trim() : null
 }
+/** Calienta la conexión con YouTube al acercar el dedo, para que el vídeo arranque antes */
+let warmed = false
+function warm() {
+  if (warmed) return
+  warmed = true
+  ;['https://www.youtube-nocookie.com', 'https://www.google.com', 'https://i.ytimg.com', 'https://rr1---sn.googlevideo.com'].forEach((h) => {
+    const l = document.createElement('link')
+    l.rel = 'preconnect'
+    l.href = h
+    document.head.appendChild(l)
+  })
+}
 const isShort = (url?: string) => /shorts\//.test(url || '')
 
 const Play = () => (
@@ -45,7 +57,7 @@ export function VideoBox({ v }: { v?: Video }) {
   return (
     <div className={`vbox ${sh ? 'short' : ''}`}>
       <img src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" loading="lazy" />
-      <button className="play" aria-label={`Reproducir ${v.title}`} onClick={() => setPlaying(true)}>
+      <button className="play" aria-label={`Reproducir ${v.title}`} onPointerEnter={warm} onTouchStart={warm} onClick={() => setPlaying(true)}>
         <Play />
       </button>
     </div>
