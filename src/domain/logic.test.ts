@@ -265,3 +265,40 @@ describe('laboratorio', () => {
     expect(LAB_TESTS.map((t) => t.n)).toEqual([...Array(23)].map((_, i) => i + 1))
   })
 })
+
+import { analyzeRun, countReps, type Frame } from './labInsights'
+describe('análisis de carrera y repeticiones', () => {
+  // corredor simulado de lado: avanza hacia la derecha, un apoyo cada 0,35 s (≈ 171 pasos/min)
+  const frames: Frame[] = [...Array(90)].map((_, k) => {
+    const t = k / 30
+    const lm = [...Array(33)].map(() => ({ x: 0.5, y: 0.5 }))
+    const hx = 0.2 + t * 0.2
+    const put = (i: number, x: number, y: number) => (lm[i] = { x, y })
+    put(11, hx + 0.02, 0.2); put(12, hx + 0.02, 0.2)
+    put(23, hx, 0.5); put(24, hx, 0.5)
+    ;[0, 1].forEach((s) => {
+      const ph = ((t + s * 0.35) % 0.7) / 0.7 // fase de la zancada de cada pie
+      const onGround = ph < 0.35
+      const fy = onGround ? 0.9 : 0.84
+      const ax = hx + 0.12 // tobillo por delante de la cadera (sobrezancada)
+      const [hip, knee, ankle, heel, toe] = s === 0 ? [24, 26, 28, 30, 32] : [23, 25, 27, 29, 31]
+      put(hip, hx, 0.5); put(knee, hx + 0.06, 0.7); put(ankle, ax, fy - 0.02); put(heel, ax - 0.02, fy); put(toe, ax + 0.04, fy - 0.03)
+    })
+    return { t, lm }
+  })
+  it('calcula la cadencia y detecta la sobrezancada y la pisada de talón', () => {
+    const r = analyzeRun(frames, 'lado')
+    expect(r.cadence).toBeGreaterThan(160)
+    expect(r.cadence).toBeLessThan(185)
+    expect(r.shank!).toBeGreaterThan(8)
+    expect(r.findings.some((f) => /sobrezancada/i.test(f.title) && f.level !== 'ok')).toBe(true)
+    expect(r.findings.some((f) => /talón/.test(f.title))).toBe(true)
+  })
+  it('a cámara lenta ×4 la cadencia real es 4 veces mayor', () => {
+    expect(analyzeRun(frames, 'lado', 4).cadence).toBeGreaterThan(640)
+  })
+  it('cuenta repeticiones de un ángulo que sube y baja', () => {
+    const s = [...Array(185)].map((_, i) => 120 + 30 * Math.sin(i / 10))
+    expect(countReps(s)).toBe(3)
+  })
+})

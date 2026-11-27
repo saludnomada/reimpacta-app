@@ -8,6 +8,7 @@ import { jumpHeight, LAB_TESTS, labKey, labTest, measureValue, pointLabel, point
 import { weekNo } from '../../domain/logic'
 import type { LabMark, Patient } from '../../domain/model'
 import { detect, prewarm, toPoints } from '../../ui/pose'
+import { analyzeRun, countReps, requestFindings, runNote, type Frame, type RunResult } from '../../domain/labInsights'
 import { IcPlay } from '../../ui/icons'
 import { norm } from './VideoLab'
 
@@ -130,6 +131,7 @@ function PatientLab({ p }: { p: Patient }) {
               )
             })}
           </div>
+          <Conclusions p={p} req={r} />
         </section>
       ))}
 
@@ -218,6 +220,13 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
   const drag = useRef<string | null>(null)
   const autoRef = useRef(false)
   autoRef.current = auto
+  const frames = useRef<Frame[]>([])
+  const series = useRef<number[]>([])
+  const [reps, setReps] = useState('')
+  const [autoReps, setAutoReps] = useState(0)
+  const [run, setRun] = useState<RunResult | null>(null)
+  const isRun = t.id.startsWith('car-')
+  const repTest = ['hr1', 'hr2', 'dec1', 'dec2', 'sal-bajo1', 'sal-bajo2', 'cad-ff'].includes(t.id)
 
   useEffect(() => {
     prewarm()
@@ -256,9 +265,16 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
         try {
           const lm = await detect(el)
           if (lm) {
+            const lastT = frames.current[frames.current.length - 1]?.t
+            if (lastT == null || el.currentTime > lastT) frames.current.push({ t: el.currentTime, lm: lm.map((q) => ({ x: q.x, y: q.y })) })
             const P = { ...toPoints(lm, need) }
             setPts((old) => ({ ...Object.fromEntries(Object.entries(old).filter(([kk]) => kk.startsWith('libre'))), ...P }))
             const vals = calc(P)
+            const first = vals[t.measures[0]?.name]
+            if (first != null) {
+              series.current.push(first)
+              setAutoReps(countReps(series.current))
+            }
             setRange((r) => {
               const n = { ...r }
               Object.entries(vals).forEach(([nm, x]) => (n[nm] = n[nm] ? [Math.min(n[nm][0], x), Math.max(n[nm][1], x)] : [x, x]))
@@ -332,7 +348,7 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
     ...[...Array(free)].flatMap((_, i) => [[`libre${i + 1}_a`, `libre${i + 1}_b`], [`libre${i + 1}_c`, `libre${i + 1}_d`]]),
   ]
   const shown = [...need, ...freeKeys]
-  const fmtV = (n: string, x: number) => `${x}${n.includes('cm') ? ' cm' : '°'}`
+  const fmtV = (n: string, x: number) => `${x}${n.includes('cm') ? ' cm' : /Repeticiones|Cadencia|Apoyos/.test(n) ? '' : '°'}`
 
   return (
     <div className="overlay" onClick={onClose}>
@@ -489,7 +505,23 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
 
           <div className="an-side">
             <div className="seg2 an-mode">
-              <button className={auto ? 'on' : ''} onClick={() => (setAuto(true), setRange({}))} disabled={!src}>
+              <button
+                className={auto ? 'on' : ''}
+                onClick={() => {
+                  frames.current = []
+                  series.current = []
+                  setAutoReps(0)
+                  setRun(null)
+                  setAuto(true)
+                  setRange({})
+                  if (isRun && v.current) {
+                    v.current.playbackRate = 0.25
+                    setRate(0.25)
+                    v.current.currentTime = 0
+                  }
+                }}
+                disabled={!src}
+              >
                 Automático
               </button>
               <button className={!auto ? 'on' : ''} onClick={() => setAuto(false)}>
@@ -558,8 +590,87 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
                 </>
               )}
             </div>
+            {repTest && (
+              <div className="an-reps">
+                <label>
+                  <span>Repeticiones</span>
+                  <input className="search an-sm" inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value.replace(/\D/g, ''))} />
+                </label>
+                {autoReps > 0 && (
+                  <button className="btn ghost small" onClick={() => setReps(String(autoReps))}>
+                    Contadas solas: {autoReps} · usar
+                  </button>
+                )}
+                <small className="muted">En Automático las cuento al reproducir el vídeo entero. Revísalas siempre.</small>
+              </div>
+            )}
+
+            {isRun && (
+              <div className="an-run">
+                <span className="lbl">Análisis de carrera</span>
+                <p className="muted me-hint">
+                  1) Si es cámara lenta, indícalo aquí. 2) Pon <b>Automático</b> y reproduce el vídeo entero (mejor a ×¼). 3) Pulsa Analizar.
+                </p>
+                <div className="row">
+                  <select className="search an-sm" value={slow} onChange={(e) => setSlow(+e.target.value)} aria-label="Cámara lenta">
+                    <option value={1}>Velocidad normal</option>
+                    <option value={4}>Cámara lenta ×4 (120 fps)</option>
+                    <option value={8}>Cámara lenta ×8 (240 fps)</option>
+                  </select>
+                  <button className="btn small" disabled={frames.current.length < 8} onClick={() => setRun(analyzeRun(frames.current, t.camera === 'detras' ? 'detras' : 'lado', slow, dims[0], dims[1]))}>
+                    Analizar carrera ({frames.current.length} fotogramas)
+                  </button>
+                </div>
+                {run && run.contacts === 0 && run.cadence == null && null}
+                {run && (
+                  <>
+                    <ul className="lab-find">
+                      {run.findings.map((x, i) => (
+                        <li key={i} className={x.level}>
+                          <b>{x.title}</b>
+                          <span>{x.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      className="btn small"
+                      onClick={() =>
+                        save([
+                          ...marks,
+                          {
+                            t: time,
+                            side,
+                            pts,
+                            values: Object.fromEntries(
+                              (
+                                [
+                                  ['Cadencia (pasos/min)', run.cadence],
+                                  ['Tibia al apoyar', run.shank],
+                                  ['Ángulo del pie al apoyar', run.foot],
+                                  ['Tronco', run.trunk],
+                                  ['Apoyos que cruzan', run.crossover],
+                                  ['Caída de pelvis', run.pelvicDrop],
+                                ] as [string, number | null][]
+                              ).filter(([, x]) => x != null) as [string, number][],
+                            ),
+                            note: runNote(run),
+                          },
+                        ])
+                      }
+                    >
+                      Guardar análisis de carrera
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+
             <div className="row">
-              <button className="btn" disabled={!Object.keys(values).length} onClick={() => save([...marks, { t: time, side, pts, values }])}>
+              <button
+                className="btn"
+                disabled={!Object.keys(values).length && !reps}
+                onClick={() => save([...marks, { t: time, side, pts, values: { ...values, ...(reps ? { Repeticiones: +reps } : {}) } }])}
+              >
                 Guardar este fotograma
               </button>
               {auto && Object.keys(range).length > 0 && (
@@ -738,5 +849,25 @@ function Explore({ p, onOpen }: { p?: Patient; onOpen?: (a: { key: string; t: La
       {err && <p className="np-err">{err}</p>}
       {loose && <Analyzer k="suelto" t={loose.t} side={loose.side} src0={loose.src} noSave onClose={() => setLoose(null)} />}
     </section>
+  )
+}
+
+/** CONCLUSIONES de un pedido: asimetrías, % entre piernas para pasar de fase y análisis de carrera */
+function Conclusions({ p, req }: { p: Patient; req: { id: string; label: string; at: string; tests: string[] } }) {
+  const f = requestFindings(p, req)
+  if (!f.length) return null
+  return (
+    <div className="lab-concl">
+      <span className="lbl">Conclusiones</span>
+      <ul className="lab-find">
+        {f.map((x, i) => (
+          <li key={i} className={x.level}>
+            <b>{x.title}</b>
+            <span>{x.text}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="muted me-hint">Propuesta automática con umbrales iniciales. Tú decides.</p>
+    </div>
   )
 }
