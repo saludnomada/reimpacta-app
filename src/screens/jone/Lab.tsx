@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { deleteLabRequest, requestLab, saveLabMarks, setLabVideo } from '../../data/actions'
+import { deleteLabRequest, labAdHoc, requestLab, saveLabMarks, setLabVideo } from '../../data/actions'
 import { mode } from '../../data'
 import { useCtx } from '../../data/store'
-import { videoLink } from '../../data/videos'
+import { sendLabVideo, videoLink } from '../../data/videos'
 import { fShort, isoD, parseD } from '../../domain/dates'
 import { jumpHeight, LAB_TESTS, labKey, labTest, measureValue, pointLabel, pointsFor, SIDE_LABEL, sidesOf, CAMERA_LABEL, type LabTest, type Pt, type Side } from '../../domain/lab'
 import { weekNo } from '../../domain/logic'
@@ -40,7 +40,7 @@ export function Lab() {
           </select>
         )}
       </div>
-      {tab === 'catalogo' ? <Catalog /> : p ? <PatientLab key={p.id} p={p} /> : <p className="muted">Aún no tienes pacientes.</p>}
+      {tab === 'catalogo' ? <Catalog /> : p ? <PatientLab key={p.id} p={p} /> : <Explore />}
     </div>
   )
 }
@@ -49,12 +49,13 @@ function PatientLab({ p }: { p: Patient }) {
   const c = useCtx()
   const [sel, setSel] = useState<string[]>([])
   const [label, setLabel] = useState(`Semana ${weekNo(c, p)}`)
-  const [an, setAn] = useState<{ key: string; t: LabTest; side: Side } | null>(null)
+  const [an, setAn] = useState<{ key: string; t: LabTest; side: Side; src?: string; noSave?: boolean } | null>(null)
   const reqs = (p.lab || []).slice().reverse()
   const toggle = (id: string) => setSel(sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id].sort((a, b) => labTest(a)!.n - labTest(b)!.n))
 
   return (
     <>
+      <Explore p={p} onOpen={setAn} />
       {p.mediaOk && <p className="pill ok lab-media">{p.name} permite usar sus vídeos o resultados de forma anónima como caso de éxito</p>}
 
       <section className="card">
@@ -131,7 +132,7 @@ function PatientLab({ p }: { p: Patient }) {
       ))}
 
       {reqs.length > 1 && <Compare p={p} />}
-      {an && <Analyzer p={p} k={an.key} t={an.t} side={an.side} onClose={() => setAn(null)} />}
+      {an && <Analyzer p={p} k={an.key} t={an.t} side={an.side} src0={an.src} noSave={an.noSave} onClose={() => setAn(null)} />}
     </>
   )
 }
@@ -185,13 +186,13 @@ function Compare({ p }: { p: Patient }) {
 }
 
 /** ANALIZADOR: vídeo fotograma a fotograma, muñequito, puntos que se arrastran, ángulos y altura de salto. */
-function Analyzer({ p, k, t, side: side0, onClose }: { p: Patient; k: string; t: LabTest; side: Side; onClose: () => void }) {
-  const f = p.labFiles?.[k]
-  const [src, setSrc] = useState<string | null>(null)
+function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient; k: string; t: LabTest; side: Side; src0?: string; noSave?: boolean; onClose: () => void }) {
+  const f = p?.labFiles?.[k]
+  const [src, setSrc] = useState<string | null>(src0 || null)
   const [err, setErr] = useState('')
   const [side, setSide] = useState<Side>(side0 === '-' ? 'd' : side0)
   const [pts, setPts] = useState<Record<string, Pt>>({})
-  const [marks, setMarks] = useState<LabMark[]>(p.labMarks?.[k] || [])
+  const [marks, setMarks] = useState<LabMark[]>(p?.labMarks?.[k] || [])
   const [ratio, setRatio] = useState(9 / 16)
   const [dims, setDims] = useState<[number, number]>([1, 1])
   const [fps, setFps] = useState(30)
@@ -205,7 +206,8 @@ function Analyzer({ p, k, t, side: side0, onClose }: { p: Patient; k: string; t:
   const drag = useRef<string | null>(null)
 
   useEffect(() => {
-    if (mode === 'real' && f?.path) videoLink(f.path).then(setSrc).catch(() => setErr('No he podido abrir el vídeo.'))
+    if (!src0 && mode === 'real' && f?.path) videoLink(f.path).then(setSrc).catch(() => setErr('No he podido abrir el vídeo.'))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [f?.path])
 
   const need = pointsFor(t, side)
@@ -247,7 +249,7 @@ function Analyzer({ p, k, t, side: side0, onClose }: { p: Patient; k: string; t:
   }
   const save = (list: LabMark[]) => {
     setMarks(list)
-    saveLabMarks(p.id, k, list)
+    if (p && !noSave) saveLabMarks(p.id, k, list)
   }
   const lines = t.measures.map((m) => m.pts.map((x) => x.replace('{s}', side === 'i' ? 'i' : 'd')))
 
@@ -256,7 +258,7 @@ function Analyzer({ p, k, t, side: side0, onClose }: { p: Patient; k: string; t:
       <div className="sheet an" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <div className="ib-h">
           <span className="lbl">
-            {p.name} · {t.n}. {t.name}
+            {p ? p.name : 'Vídeo suelto'} · {t.n}. {t.name}
             {side0 !== '-' && ` · ${SIDE_LABEL[side0]}`}
           </span>
           <button className="btn ghost small" onClick={onClose}>
@@ -420,7 +422,9 @@ function Analyzer({ p, k, t, side: side0, onClose }: { p: Patient; k: string; t:
                     </button>
                   </div>
                 ))}
-                <p className="muted me-hint">La primera medida de cada vídeo es la que se usa en "Antes y después".</p>
+                <p className="muted me-hint">
+                  {noSave || !p ? 'Vídeo suelto: estas medidas no se guardan.' : 'La primera medida de cada vídeo es la que se usa en "Antes y después".'}
+                </p>
               </div>
             )}
           </div>
@@ -477,6 +481,74 @@ function Catalog() {
           </div>
         )
       })}
+    </section>
+  )
+}
+
+/** Analizar un vídeo cuando quieras: grabarlo ahora o subirlo de la galería.
+ *  Con paciente: se guarda en su ficha (pedido "En consulta" de hoy). Sin paciente: solo para probar. */
+function Explore({ p, onOpen }: { p?: Patient; onOpen?: (a: { key: string; t: LabTest; side: Side; src?: string; noSave?: boolean }) => void }) {
+  const c = useCtx()
+  const [testId, setTestId] = useState(LAB_TESTS[0].id)
+  const [side, setSide] = useState<Side>('d')
+  const [save, setSave] = useState(!!p)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const [loose, setLoose] = useState<{ t: LabTest; side: Side; src: string } | null>(null)
+  const t = labTest(testId)!
+  const sd: Side = t.sides ? side : '-'
+  const open = async (file: File) => {
+    setErr('')
+    const src = URL.createObjectURL(file)
+    if (!p || !save) {
+      if (onOpen) onOpen({ key: 'suelto', t, side: sd, src, noSave: true })
+      else setLoose({ t, side: sd, src })
+      return
+    }
+    const req = labAdHoc(p.id, isoD(c.today), testId)
+    const key = labKey(req, testId, sd)
+    onOpen?.({ key, t, side: sd, src })
+    setBusy(true)
+    try {
+      await sendLabVideo(p.id, key, file)
+    } catch (e) {
+      setErr((e as Error).message)
+    }
+    setBusy(false)
+  }
+  return (
+    <section className="card lab-ex">
+      <span className="lbl">Analizar un vídeo ahora</span>
+      <div className="row">
+        <select className="search an-sm lab-ex-sel" value={testId} onChange={(e) => setTestId(e.target.value)} aria-label="Test">
+          {LAB_TESTS.map((x) => (
+            <option key={x.id} value={x.id}>
+              {x.n}. {x.name}
+            </option>
+          ))}
+        </select>
+        {t.sides && (
+          <div className="seg2">
+            {(['d', 'i'] as Side[]).map((s) => (
+              <button key={s} className={side === s ? 'on' : ''} onClick={() => setSide(s)}>
+                {s === 'd' ? 'Derecha' : 'Izquierda'}
+              </button>
+            ))}
+          </div>
+        )}
+        <label className={`btn small ${busy ? 'busy' : ''}`}>
+          {busy ? 'Guardando el vídeo…' : 'Grabar o subir un vídeo'}
+          <input type="file" accept="video/*" hidden onChange={(e) => e.target.files?.[0] && open(e.target.files[0]).finally(() => (e.target.value = ''))} />
+        </label>
+      </div>
+      {p && (
+        <label className="vl-chk">
+          <input type="checkbox" checked={save} onChange={(e) => setSave(e.target.checked)} /> Guardar en la ficha de {p.name} (sale en "Antes y después")
+        </label>
+      )}
+      <p className="muted me-hint">En el móvil te deja grabar en el momento o elegir de la galería. En el ordenador, elegir un archivo.</p>
+      {err && <p className="np-err">{err}</p>}
+      {loose && <Analyzer k="suelto" t={loose.t} side={loose.side} src0={loose.src} noSave onClose={() => setLoose(null)} />}
     </section>
   )
 }

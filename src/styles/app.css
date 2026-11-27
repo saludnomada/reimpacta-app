@@ -1361,3 +1361,22 @@ html .pg-grow i.miss,html[data-theme] .h5-day.miss i,html .h5-day.miss i{backgro
 .an-pt:hover em,.an-pt:active em{opacity:1}
 .demo-warn{position:sticky;top:0;z-index:30;background:#FF7F50;color:#0A140D;font-size:13px;text-align:center;padding:7px 12px;line-height:1.35}
 .demo-warn button{background:#0A140D;color:#fff;border:0;border-radius:99px;padding:3px 10px;font:inherit;font-weight:700;margin-left:6px;cursor:pointer}
+
+/* ===== Panel de Jone en claro: textos lima → verde oscuro legible; barras claras ===== */
+html[data-theme="light"] .admin{--lime-text:#4D6900}
+html[data-theme="light"] .admin .pill.ph,html[data-theme="light"] .admin .pill.ok{background:color-mix(in srgb,var(--lime) 35%,transparent);color:#2F4200}
+html[data-theme="light"] .admin .pill.co{background:rgba(255,127,80,.18);color:#A8401A}
+html[data-theme="light"] .admin .pill.red,html[data-theme="light"] .admin .lockpill{background:rgba(229,40,27,.12)!important;color:#B71C10!important;border-color:rgba(229,40,27,.4)!important}
+html[data-theme="light"] .admin .me-rule,html[data-theme="light"] .admin .an-vals b,html[data-theme="light"] .admin .lab-cmp-r em,html[data-theme="light"] .admin .ts-hist em.ok,html[data-theme="light"] .admin .lab-cur,html[data-theme="light"] .admin .bi-kpis b.ok,html[data-theme="light"] .admin .vl-meta b,html[data-theme="light"] .admin .vwho b,html[data-theme="light"] .admin .re-add b,html[data-theme="light"] .admin .vl-imp summary::after,html[data-theme="light"] .admin .bi-pz.paid small{color:var(--lime-text)!important}
+html[data-theme="light"] .admin .me-cov-r b.has,html[data-theme="light"] .admin .vl-tags i.ph,html[data-theme="light"] .admin .vl-tags i.new{color:#2F4200;background:color-mix(in srgb,var(--lime) 30%,transparent)}
+html[data-theme="light"] .admin .me-cov-r b{color:#A8401A}
+html[data-theme="light"] .admin .bi-kpis b.bad,html[data-theme="light"] .admin .ts-hist em.no,html[data-theme="light"] .admin .np-err{color:#C4471C}
+html[data-theme="light"] .admin .me-save,html[data-theme="light"] .admin .vl-bulk{background:var(--card);border-color:color-mix(in srgb,var(--lime) 70%,#9DBF00);color:var(--text);box-shadow:0 6px 18px -12px rgba(10,20,13,.3)}
+html[data-theme="light"] .admin .bi-pz.paid{background:color-mix(in srgb,var(--lime) 25%,transparent)}
+html[data-theme="light"] .admin .bi-pz.late{background:rgba(255,127,80,.14)}
+html[data-theme="light"] .admin .rcard-ic{color:#2F4200}
+html[data-theme="light"] .admin .pr-cell{color:#2F4200}
+html[data-theme="light"] .admin .bi-app input{color-scheme:light}
+html[data-theme="light"] .vfab{box-shadow:0 10px 24px -10px rgba(10,20,13,.35)}
+.lab-ex-sel{max-width:320px}
+.lab-ex .btn.busy{opacity:.6;pointer-events:none}

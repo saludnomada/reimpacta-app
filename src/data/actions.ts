@@ -318,3 +318,19 @@ export function setMediaOk(pid: string, ok: boolean) {
     if (p) p.mediaOk = ok
   })
 }
+/** Vídeo que sube Jone en consulta: lo guarda en un pedido "En consulta" de ese día. Devuelve el id del pedido. */
+export function labAdHoc(pid: string, at: string, testId: string): string {
+  const p = getStore().get().data?.patients.find((x) => x.id === pid)
+  const label = 'En consulta'
+  const found = p?.lab?.find((r) => r.label === label && r.at === at)
+  const id = found?.id || newId('lab')
+  getStore().change({ kind: 'patient', patientId: pid }, (d) => {
+    const q = d.patients.find((x) => x.id === pid)
+    if (!q) return
+    q.lab = q.lab || []
+    let r = q.lab.find((x) => x.id === id)
+    if (!r) q.lab.push((r = { id, label, at, tests: [] }))
+    if (!r.tests.includes(testId)) r.tests.push(testId)
+  })
+  return id
+}

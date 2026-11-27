@@ -35,7 +35,24 @@ const TABS: [string, string][] = [
 
 /** Panel de Jone. En el bloque 1 solo el esqueleto: el contenido llega en los bloques 3 y 4. */
 export function JoneApp() {
-  useApplyTheme('oscuro') // tu panel, siempre en oscuro
+  // tu panel: claro u oscuro, lo eliges tú (se recuerda en este dispositivo)
+  const [tema, setTema] = useState<'claro' | 'oscuro'>(() => {
+    try {
+      return localStorage.getItem('reimpacta-panel-tema') === 'oscuro' ? 'oscuro' : 'claro'
+    } catch {
+      return 'claro'
+    }
+  })
+  useApplyTheme(tema)
+  const toggleTema = () => {
+    const t = tema === 'claro' ? 'oscuro' : 'claro'
+    setTema(t)
+    try {
+      localStorage.setItem('reimpacta-panel-tema', t)
+    } catch {
+      /* sin almacenamiento */
+    }
+  }
   const c = useCtx()
   const [tab, setTab] = useState('pacientes')
   const [test, setTest] = useState<string | null>(null)
@@ -71,6 +88,9 @@ export function JoneApp() {
               + Nuevo paciente
             </button>
           )}
+          <button className="btn ghost small" onClick={toggleTema} aria-label="Cambiar entre claro y oscuro">
+            {tema === 'claro' ? 'Modo oscuro' : 'Modo claro'}
+          </button>
           {mode === 'real' && (
             <button className="btn ghost small" onClick={() => sb.auth.signOut()}>
               Salir
