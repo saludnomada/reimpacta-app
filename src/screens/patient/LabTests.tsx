@@ -7,6 +7,7 @@ import { cameraTip, CAMERA_LABEL, labKey, labProgress, labTest, SIDE_LABEL, side
 import type { Patient } from '../../domain/model'
 import { IcCamera, IcCheck } from '../../ui/icons'
 import { PoseVideo } from '../../ui/PoseVideo'
+import { LiveRecorder } from '../../ui/LiveRecorder'
 import { prewarm } from '../../ui/pose'
 import { VideoBox } from '../../ui/VideoBox'
 
@@ -110,6 +111,20 @@ function Rec({ p, reqId, testId, side, local, onLocal }: { p: Patient; reqId: st
   const [err, setErr] = useState('')
   const [remote, setRemote] = useState<string | null>(null)
   const src = local || remote
+  const [live, setLive] = useState(false)
+  const t = labTest(testId)
+  const tip = t ? cameraTip(t.camera) : undefined
+  const send = async (file: File) => {
+    setErr('')
+    onLocal(URL.createObjectURL(file))
+    setBusy(true)
+    try {
+      await sendLabVideo(p.id, key, file)
+    } catch (x) {
+      setErr((x as Error).message)
+    }
+    setBusy(false)
+  }
   return (
     <div className="lt-rec">
       {side !== '-' && <span className="lt-side">{SIDE_LABEL[side]}</span>}
@@ -127,30 +142,33 @@ function Rec({ p, reqId, testId, side, local, onLocal }: { p: Patient; reqId: st
           )}
         </div>
       ) : null}
-      <label className={`x-cta lt-btn ${busy ? 'busy' : ''} ${f ? 'again' : ''}`}>
-        <IcCamera /> {busy ? 'Enviando…' : f ? 'Repetir vídeo' : 'Grabarme'}
+      <button className={`x-cta lt-btn ${busy ? 'busy' : ''} ${f ? 'again' : ''}`} disabled={busy} onClick={() => setLive(true)}>
+        <IcCamera /> {busy ? 'Enviando…' : f ? 'Repetir con el muñequito' : 'Grabarme con el muñequito'}
+      </button>
+      <label className={`se-ghost lt-gal ${busy ? 'busy' : ''}`}>
+        Subir un vídeo de la galería
         <input
           type="file"
           accept="video/*"
-          capture="environment"
           hidden
           disabled={busy}
-          onChange={async (e) => {
+          onChange={(e) => {
             const file = e.target.files?.[0]
             e.target.value = ''
-            if (!file) return
-            setErr('')
-            onLocal(URL.createObjectURL(file))
-            setBusy(true)
-            try {
-              await sendLabVideo(p.id, key, file)
-            } catch (x) {
-              setErr((x as Error).message)
-            }
-            setBusy(false)
+            if (file) void send(file)
           }}
         />
       </label>
+      {live && (
+        <LiveRecorder
+          tip={tip}
+          onClose={() => setLive(false)}
+          onDone={(file) => {
+            setLive(false)
+            void send(file)
+          }}
+        />
+      )}
       {err && <p className="au-err">{err}</p>}
     </div>
   )

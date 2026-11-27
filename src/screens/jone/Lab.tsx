@@ -4,12 +4,13 @@ import { mode } from '../../data'
 import { useCtx } from '../../data/store'
 import { sendLabVideo, videoLink } from '../../data/videos'
 import { fShort, isoD, parseD } from '../../domain/dates'
-import { jumpHeight, LAB_TESTS, labKey, labTest, measureValue, pointLabel, pointsFor, SIDE_LABEL, sidesOf, CAMERA_LABEL, type LabTest, type Measure, type Pt, type Side } from '../../domain/lab'
+import { cameraTip, jumpHeight, LAB_TESTS, labKey, labTest, measureValue, pointLabel, pointsFor, SIDE_LABEL, sidesOf, CAMERA_LABEL, type LabTest, type Measure, type Pt, type Side } from '../../domain/lab'
 import { weekNo } from '../../domain/logic'
 import type { LabMark, Patient } from '../../domain/model'
-import { detect, getPose, prewarm, toPoints } from '../../ui/pose'
+import { detect, getPose, nearSide, prewarm, toPoints, type LMk } from '../../ui/pose'
 import { analyzeRun, countReps, requestFindings, runNote, type Frame, type RunResult } from '../../domain/labInsights'
 import { IcPlay } from '../../ui/icons'
+import { LiveRecorder } from '../../ui/LiveRecorder'
 import { norm } from './VideoLab'
 
 const GROUPS = [...new Set(LAB_TESTS.map((t) => t.group))]
@@ -21,7 +22,7 @@ export function Lab() {
   const [pid, setPid] = useState(pts[0]?.id || '')
   const [tab, setTab] = useState<'paciente' | 'catalogo'>('paciente')
   const p = pts.find((x) => x.id === pid)
-  useEffect(() => prewarm(), [])
+  useEffect(() => prewarm('full'), [])
   return (
     <div className="jl">
       <div className="jl-bar">
@@ -218,6 +219,16 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
   const v = useRef<HTMLVideoElement>(null)
   const box = useRef<HTMLDivElement>(null)
   const drag = useRef<string | null>(null)
+  const dragged = useRef(false) // al soltar un punto no se da a play
+  const sideTouched = useRef(false) // Jone eligió la pierna a mano
+  /** la primera vez, poner los puntos en la pierna más cercana a la cámara */
+  const pickSide = (lm: LMk[]) => {
+    if (sideTouched.current) return side
+    const s2 = nearSide(lm)
+    sideTouched.current = true
+    if (s2 !== side) setSide(s2)
+    return s2
+  }
   const autoRef = useRef(false)
   autoRef.current = auto
   const frames = useRef<Frame[]>([])
@@ -226,7 +237,7 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
   const [autoReps, setAutoReps] = useState(0)
   const [run, setRun] = useState<RunResult | null>(null)
   const isRun = t.id.startsWith('car-')
-  const getPoseReady = () => getPose().catch(() => null)
+  const getPoseReady = () => getPose('full').catch(() => null)
   const [scan, setScan] = useState<number | null>(null)
   /** Recorre el vídeo entero fotograma a fotograma (no depende de lo rápido que sea el dispositivo) */
   const scanVideo = async () => {
@@ -258,13 +269,14 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
       if (busyF) return
       busyF = true
       try {
-        const lm = await detect(el)
+        const lm = await detect(el, 'full')
         if (lm) {
           const tt = el.currentTime
           const last = frames.current[frames.current.length - 1]?.t
           if (last == null || tt > last) frames.current.push({ t: tt, lm: lm.map((q) => ({ x: q.x, y: q.y })) })
-          const P = toPoints(lm, need)
-          const vals = calc(P)
+          const sdS = pickSide(lm)
+          const P = toPoints(lm, pointsFor(t, sdS))
+          const vals = calc(P, sdS)
           const first = vals[t.measures[0]?.name]
           if (first != null) series.current.push(first)
           Object.entries(vals).forEach(([nm, x]) => (rg[nm] = rg[nm] ? [Math.min(rg[nm][0], x), Math.max(rg[nm][1], x)] : [x, x]))
@@ -281,8 +293,8 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
     // medir lo que tarda este dispositivo en un fotograma y ajustar la velocidad para no saltarse ninguno
     const t0 = performance.now()
     try {
-      await detect(el)
-      await detect(el)
+      await detect(el, 'full')
+      await detect(el, 'full')
     } catch {
       /* se verá en el bucle */
     }
@@ -310,7 +322,7 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
   const repTest = ['hr1', 'hr2', 'dec1', 'dec2', 'sal-bajo1', 'sal-bajo2', 'cad-ff'].includes(t.id)
 
   useEffect(() => {
-    prewarm()
+    prewarm('full')
     if (!src0 && mode === 'real' && f?.path) videoLink(f.path).then(setSrc).catch(() => setErr('No he podido abrir el vídeo.'))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [f?.path])
@@ -321,10 +333,10 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
     ...t.measures,
     ...[...Array(free)].map((_, i) => ({ name: `Ángulo libre ${i + 1}`, kind: 'lines' as const, pts: ['a', 'b', 'c', 'd'].map((x) => `libre${i + 1}_${x}`) })),
   ]
-  const calc = (P: Record<string, Pt>) => {
+  const calc = (P: Record<string, Pt>, sd: Side = side) => {
     const out: Record<string, number> = {}
     measures.forEach((m) => {
-      const x = measureValue(m, side, P, dims[0], dims[1])
+      const x = measureValue(m, sd, P, dims[0], dims[1])
       if (x != null) out[m.name] = x
     })
     return out
@@ -344,13 +356,20 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
       if (!busyF && el.readyState >= 2) {
         busyF = true
         try {
-          const lm = await detect(el)
+          const lm = await detect(el, 'full')
           if (lm) {
             const lastT = frames.current[frames.current.length - 1]?.t
             if (lastT == null || el.currentTime > lastT) frames.current.push({ t: el.currentTime, lm: lm.map((q) => ({ x: q.x, y: q.y })) })
-            const P = { ...toPoints(lm, need) }
-            setPts((old) => ({ ...Object.fromEntries(Object.entries(old).filter(([kk]) => kk.startsWith('libre'))), ...P }))
-            const vals = calc(P)
+            const sd2 = pickSide(lm)
+            const P = { ...toPoints(lm, pointsFor(t, sd2)) }
+            const valsS = calc(P, sd2)
+            // suavizado: los puntos no tiemblan de un fotograma a otro
+            setPts((old) => {
+              const out: Record<string, Pt> = Object.fromEntries(Object.entries(old).filter(([kk]) => kk.startsWith('libre')))
+              Object.entries(P).forEach(([kk, q]) => (out[kk] = old[kk] ? [old[kk][0] * 0.4 + q[0] * 0.6, old[kk][1] * 0.4 + q[1] * 0.6] : q))
+              return out
+            })
+            const vals = valsS
             const first = vals[t.measures[0]?.name]
             if (first != null) {
               series.current.push(first)
@@ -381,11 +400,12 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
     if (!v.current) return
     setBusy(true)
     try {
-      const lm = await detect(v.current)
+      const lm = await detect(v.current, 'full')
       if (!lm) setErr('No encuentro a la persona en este fotograma.')
       else {
         setErr('')
-        setPts((old) => ({ ...Object.fromEntries(Object.entries(old).filter(([kk]) => kk.startsWith('libre'))), ...toPoints(lm, need) }))
+        const sd2 = pickSide(lm)
+        setPts((old) => ({ ...Object.fromEntries(Object.entries(old).filter(([kk]) => kk.startsWith('libre'))), ...toPoints(lm, pointsFor(t, sd2)) }))
       }
     } catch {
       setErr('No he podido cargar el muñequito en este navegador.')
@@ -474,10 +494,17 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
                 className="an-box"
                 style={{ aspectRatio: String(ratio), width: `min(100%, calc(72vh * ${ratio}))` }}
                 onPointerMove={move}
-                onPointerUp={() => (drag.current = null)}
+                onPointerUp={() => {
+                  if (drag.current) dragged.current = true
+                  drag.current = null
+                }}
                 onPointerLeave={() => (drag.current = null)}
                 onClick={(e) => {
                   if ((e.target as HTMLElement).closest('.an-pt')) return
+                  if (dragged.current) {
+                    dragged.current = false
+                    return
+                  }
                   play()
                 }}
               >
@@ -614,10 +641,19 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
                 ? 'Dale a Play: los puntos siguen el movimiento y verás los ángulos en vivo, con su mínimo y su máximo. Ideal para la carrera.'
                 : 'Pausa donde quieras medir, pon los puntos y arrástralos para corregirlos.'}
             </p>
-            {side0 === '-' && (
+            {(
               <div className="seg2">
                 {(['d', 'i'] as Side[]).map((s) => (
-                  <button key={s} className={side === s ? 'on' : ''} onClick={() => (setSide(s), setRange({}))}>
+                  <button
+                    key={s}
+                    className={side === s ? 'on' : ''}
+                    onClick={() => {
+                      sideTouched.current = true
+                      setSide(s)
+                      setRange({})
+                      setPts((o) => Object.fromEntries(Object.entries(o).filter(([kk]) => kk.startsWith('libre'))))
+                    }}
+                  >
                     Pierna {s === 'd' ? 'derecha' : 'izquierda'}
                   </button>
                 ))}
@@ -878,6 +914,7 @@ function Explore({ p, onOpen }: { p?: Patient; onOpen?: (a: { key: string; t: La
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [loose, setLoose] = useState<{ t: LabTest; side: Side; src: string } | null>(null)
+  const [live, setLive] = useState(false)
   const t = labTest(testId)!
   const sd: Side = t.sides ? side : '-'
   const open = async (file: File) => {
@@ -919,8 +956,11 @@ function Explore({ p, onOpen }: { p?: Patient; onOpen?: (a: { key: string; t: La
             ))}
           </div>
         )}
-        <label className={`btn small ${busy ? 'busy' : ''}`}>
-          {busy ? 'Guardando el vídeo…' : 'Grabar o subir un vídeo'}
+        <button className="btn small" disabled={busy} onClick={() => setLive(true)}>
+          Grabar con el muñequito
+        </button>
+        <label className={`btn ghost small ${busy ? 'busy' : ''}`}>
+          {busy ? 'Guardando el vídeo…' : 'Subir un vídeo'}
           <input type="file" accept="video/*" hidden onChange={(e) => e.target.files?.[0] && open(e.target.files[0]).finally(() => (e.target.value = ''))} />
         </label>
       </div>
@@ -929,8 +969,18 @@ function Explore({ p, onOpen }: { p?: Patient; onOpen?: (a: { key: string; t: La
           <input type="checkbox" checked={save} onChange={(e) => setSave(e.target.checked)} /> Guardar en la ficha de {p.name} (sale en "Antes y después")
         </label>
       )}
-      <p className="muted me-hint">En el móvil te deja grabar en el momento o elegir de la galería. En el ordenador, elegir un archivo.</p>
+      <p className="muted me-hint">Con "Grabar con el muñequito" ves las líneas mientras grabas. "Subir un vídeo" para uno de la galería o del ordenador.</p>
       {err && <p className="np-err">{err}</p>}
+      {live && (
+        <LiveRecorder
+          tip={cameraTip(t.camera)}
+          onClose={() => setLive(false)}
+          onDone={(file) => {
+            setLive(false)
+            void open(file)
+          }}
+        />
+      )}
       {loose && <Analyzer k="suelto" t={loose.t} side={loose.side} src0={loose.src} noSave onClose={() => setLoose(null)} />}
     </section>
   )

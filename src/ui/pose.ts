@@ -4,19 +4,24 @@
 import type { PoseLandmarker } from '@mediapipe/tasks-vision'
 import type { Pt } from '../domain/lab'
 
-let loading: Promise<PoseLandmarker> | null = null
-let lastTs = 0
+export type PoseModel = 'lite' | 'full'
+const loading: Partial<Record<PoseModel, Promise<PoseLandmarker>>> = {}
+const lastTs: Partial<Record<PoseModel, number>> = {}
 
-export function getPose(): Promise<PoseLandmarker> {
-  if (!loading)
-    loading = (async () => {
+/** lite = rápido (para ver el muñequito en directo) · full = más preciso (para el análisis de Jone) */
+export function getPose(kind: PoseModel = 'lite'): Promise<PoseLandmarker> {
+  if (!loading[kind]) {
+    const p = (async () => {
       const { FilesetResolver, PoseLandmarker } = await import('@mediapipe/tasks-vision')
       const fs = await FilesetResolver.forVisionTasks('/mediapipe/wasm')
       const opts = (delegate: 'GPU' | 'CPU') =>
         PoseLandmarker.createFromOptions(fs, {
-          baseOptions: { modelAssetPath: '/mediapipe/pose_landmarker_lite.task', delegate },
+          baseOptions: { modelAssetPath: `/mediapipe/pose_landmarker_${kind}.task`, delegate },
           runningMode: 'VIDEO',
           numPoses: 1,
+          minPoseDetectionConfidence: 0.5,
+          minPosePresenceConfidence: 0.5,
+          minTrackingConfidence: 0.5,
         })
       try {
         return await opts('GPU')
@@ -24,23 +29,32 @@ export function getPose(): Promise<PoseLandmarker> {
         return await opts('CPU')
       }
     })()
-  loading.catch(() => (loading = null))
-  return loading
+    loading[kind] = p
+    p.catch(() => delete loading[kind])
+  }
+  return loading[kind]!
 }
 
+export type LMk = { x: number; y: number; z: number; v: number }
 /** Puntos del cuerpo en el fotograma que se ve ahora (de 0 a 1), o null si no encuentra a nadie */
-export async function detect(video: HTMLVideoElement): Promise<{ x: number; y: number; v: number }[] | null> {
+export async function detect(video: HTMLVideoElement, kind: PoseModel = 'lite'): Promise<LMk[] | null> {
   if (!video.videoWidth) return null
-  const pose = await getPose()
-  lastTs = Math.max(lastTs + 1, performance.now())
-  const r = pose.detectForVideo(video, lastTs)
+  const pose = await getPose(kind)
+  lastTs[kind] = Math.max((lastTs[kind] || 0) + 1, performance.now())
+  const r = pose.detectForVideo(video, lastTs[kind]!)
   const lm = r.landmarks?.[0]
-  return lm ? lm.map((p) => ({ x: p.x, y: p.y, v: p.visibility ?? 1 })) : null
+  return lm ? lm.map((p) => ({ x: p.x, y: p.y, z: p.z, v: p.visibility ?? 1 })) : null
+}
+
+/** La pierna más cercana a la cámara (la que se ve mejor de lado): 'd' o 'i' */
+export function nearSide(lm: LMk[]): 'd' | 'i' {
+  const score = (ids: number[]) => ids.reduce((a, i) => a + (lm[i]?.v ?? 0) - (lm[i]?.z ?? 0), 0)
+  return score([24, 26, 28, 30, 32]) >= score([23, 25, 27, 29, 31]) ? 'd' : 'i'
 }
 
 /** Empieza a cargar el muñequito en segundo plano (para que luego vaya rápido) */
-export function prewarm() {
-  const go = () => void getPose().catch(() => {})
+export function prewarm(kind: PoseModel = 'lite') {
+  const go = () => void getPose(kind).catch(() => {})
   const w = window as Window & { requestIdleCallback?: (f: () => void) => void }
   if (w.requestIdleCallback) w.requestIdleCallback(go)
   else setTimeout(go, 300)
