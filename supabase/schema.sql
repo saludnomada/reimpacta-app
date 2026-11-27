@@ -176,3 +176,8 @@ insert into public.jone_data (id) values (1) on conflict do nothing;
 -- 1) Entra una vez en la app con tu email (te llega un enlace).
 -- 2) Cambia TU_EMAIL por tu email y ejecuta SOLO esta línea:
 -- insert into public.staff (user_id) select id from auth.users where email = 'TU_EMAIL' on conflict do nothing;
+
+-- ---------- permisos de la app (las reglas RLS de arriba siguen decidiendo qué ve cada uno) ----------
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant execute on all functions in schema public to authenticated;

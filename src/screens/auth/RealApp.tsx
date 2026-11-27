@@ -29,7 +29,9 @@ export function RealApp() {
       try {
         await sb.rpc('link_me') // si es paciente y entra por primera vez, se une a su ficha
         const staff = await sb.from('staff').select('user_id').eq('user_id', u.id).maybeSingle()
+        if (staff.error) throw new Error('No puedo leer la tabla staff: ' + staff.error.message)
         const me = await sb.from('patients').select('id').eq('user_id', u.id).maybeSingle()
+        if (me.error) throw new Error('No puedo leer la tabla patients: ' + me.error.message)
         if (staff.data) {
           store.backend = new SupabaseBackend({ role: 'jone', patientId: null })
           store.setSession({ role: 'jone' })
