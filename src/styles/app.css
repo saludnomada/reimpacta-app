@@ -1410,3 +1410,7 @@ html[data-theme="light"] .vfab{box-shadow:0 10px 24px -10px rgba(10,20,13,.35)}
 .an-reps label span{font-size:12px;color:var(--muted);font-weight:600}
 .an-reps small{flex-basis:100%;font-size:12px}
 .an-run{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:12px;padding:12px}
+.atools{display:flex;gap:8px;align-items:center;margin-left:auto}
+.atools .icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--text);display:grid;place-items:center;cursor:pointer}
+.pv-bar{position:sticky;top:0;z-index:35;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;background:#0A140D;color:#fff;font-size:13px;padding:8px 12px}
+.pv-bar button{background:#D0FB00;color:#0A140D;border:0;border-radius:99px;padding:5px 12px;font:inherit;font-weight:800;cursor:pointer}

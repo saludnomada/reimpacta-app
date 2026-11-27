@@ -9,6 +9,7 @@ import { useApplyTheme } from '../../ui/theme'
 import { JoneApp } from '../jone/JoneApp'
 import { PatientApp } from '../patient/PatientApp'
 import { Consent, Privacy } from './Consent'
+import { PreviewBar } from '../../ui/PreviewBar'
 
 type Phase = { k: 'checking' } | { k: 'login' } | { k: 'loading' } | { k: 'unknown'; email: string } | { k: 'ready' } | { k: 'error'; msg: string }
 
@@ -64,7 +65,8 @@ export function RealApp() {
   return (
     <BrowserRouter>
       <SaveErrors />
-      {s.session.role === 'jone' ? <JoneApp /> : p ? p.consentAt ? <PatientApp p={p} /> : <Consent p={p} /> : <Problem msg="No encuentro tu ficha." />}
+      <PreviewBar />
+      {s.session.role === 'jone' ? <JoneApp /> : p ? p.consentAt || s.session.preview ? <PatientApp p={p} /> : <Consent p={p} /> : <Problem msg="No encuentro tu ficha." />}
     </BrowserRouter>
   )
 }

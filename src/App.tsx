@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { mode, store } from './data'
 import { RealApp } from './screens/auth/RealApp'
 import { setAppMode } from './data/supabase'
+import { PreviewBar } from './ui/PreviewBar'
 import { useStore } from './data/store'
 import { DemoBar } from './screens/DemoBar'
 import { JoneApp } from './screens/jone/JoneApp'
@@ -22,6 +23,7 @@ function DemoApp() {
   return (
     <BrowserRouter>
       <DemoBar />
+      <PreviewBar />
       <div className="demo-warn" role="status">
         Estás en la <b>DEMOSTRACIÓN</b>: lo que hagas aquí no se guarda en tu app real.{' '}
         <button onClick={() => setAppMode('real')}>Ir a mi app real</button>

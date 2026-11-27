@@ -11,6 +11,8 @@ export type Role = 'paciente' | 'jone'
 export interface SessionInfo {
   role: Role
   patientId: string | null
+  /** Jone viendo la app de un paciente desde su panel */
+  preview?: boolean
 }
 
 interface StoreState {

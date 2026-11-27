@@ -15,7 +15,8 @@ import { mode } from '../../data'
 import { sb } from '../../data/supabase'
 import { TestSheet } from './TestSheet'
 import { TaskList, VoiceButton } from './VoiceTask'
-import { Logo } from '../../ui/icons'
+import { IcMoon, IcSun, Logo } from '../../ui/icons'
+import { getStore } from '../../data/store'
 import { PhaseBadge } from '../../ui/PhaseBadge'
 import { useApplyTheme } from '../../ui/theme'
 import { complianceTone } from '../../domain/scales'
@@ -76,6 +77,16 @@ export function JoneApp() {
             </button>
           ))}
         </div>
+        <div className="atools">
+          <button className="icon-btn" onClick={toggleTema} aria-label={tema === 'claro' ? 'Pasar a modo oscuro' : 'Pasar a modo claro'} title={tema === 'claro' ? 'Modo oscuro' : 'Modo claro'}>
+            {tema === 'claro' ? <IcMoon /> : <IcSun />}
+          </button>
+          {mode === 'real' && (
+            <button className="btn ghost small" onClick={() => sb.auth.signOut()}>
+              Salir
+            </button>
+          )}
+        </div>
       </div>
       <div className="ahead">
         <div>
@@ -86,14 +97,6 @@ export function JoneApp() {
           {tab === 'pacientes' && (
             <button className="btn small" onClick={() => setNewP(true)}>
               + Nuevo paciente
-            </button>
-          )}
-          <button className="btn ghost small" onClick={toggleTema} aria-label="Cambiar entre claro y oscuro">
-            {tema === 'claro' ? 'Modo oscuro' : 'Modo claro'}
-          </button>
-          {mode === 'real' && (
-            <button className="btn ghost small" onClick={() => sb.auth.signOut()}>
-              Salir
             </button>
           )}
         </div>
@@ -161,11 +164,16 @@ export function JoneApp() {
                       Cumplimiento {sch ? <b className={`tchip t-${complianceTone(pct)}`}>{pct}%</b> : <b>–</b>}
                     </span>
                   </div>
-                  {!recovered(p) && (
-                    <button className="btn ghost small" style={{ marginTop: 10 }} onClick={() => setTest(p.id)}>
-                      Apuntar tests de la fase {ph}
+                  <div className="row" style={{ marginTop: 10 }}>
+                    {!recovered(p) && (
+                      <button className="btn ghost small" onClick={() => setTest(p.id)}>
+                        Apuntar tests de la fase {ph}
+                      </button>
+                    )}
+                    <button className="btn ghost small" onClick={() => getStore().setSession({ role: 'paciente', patientId: p.id, preview: true })}>
+                      Ver su app
                     </button>
-                  )}
+                  </div>
                 </div>
               </div>
             )

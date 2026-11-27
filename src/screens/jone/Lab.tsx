@@ -226,6 +226,51 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
   const [autoReps, setAutoReps] = useState(0)
   const [run, setRun] = useState<RunResult | null>(null)
   const isRun = t.id.startsWith('car-')
+  const [scan, setScan] = useState<number | null>(null)
+  /** Recorre el vídeo entero fotograma a fotograma (no depende de lo rápido que sea el dispositivo) */
+  const scanVideo = async () => {
+    const el = v.current
+    if (!el || !el.duration) return
+    el.pause()
+    setAuto(false)
+    frames.current = []
+    series.current = []
+    setRange({})
+    setRun(null)
+    const step = 1 / fps
+    const n = Math.floor(el.duration / step)
+    const rg: Record<string, [number, number]> = {}
+    for (let i = 0; i <= n; i++) {
+      await new Promise<void>((res) => {
+        const target = Math.min(el.duration - 0.001, i * step)
+        if (Math.abs(el.currentTime - target) < 0.0005 && el.readyState >= 2) return res()
+        const to = setTimeout(res, 1500) // por si el navegador no avisa
+        el.addEventListener('seeked', () => (clearTimeout(to), res()), { once: true })
+        el.currentTime = target
+      })
+      try {
+        const lm = await detect(el)
+        if (lm) {
+          frames.current.push({ t: el.currentTime, lm: lm.map((q) => ({ x: q.x, y: q.y })) })
+          const P = toPoints(lm, need)
+          const vals = calc(P)
+          const first = vals[t.measures[0]?.name]
+          if (first != null) series.current.push(first)
+          Object.entries(vals).forEach(([nm, x]) => (rg[nm] = rg[nm] ? [Math.min(rg[nm][0], x), Math.max(rg[nm][1], x)] : [x, x]))
+          if (i % 5 === 0) setPts((old) => ({ ...Object.fromEntries(Object.entries(old).filter(([kk]) => kk.startsWith('libre'))), ...P }))
+        }
+      } catch {
+        setErr('No he podido cargar el muñequito en este navegador.')
+        break
+      }
+      setScan((i + 1) / (n + 1))
+    }
+    setRange(rg)
+    if (location.search.includes('debug')) (window as unknown as { __labFrames: Frame[] }).__labFrames = frames.current
+    setAutoReps(countReps(series.current))
+    if (isRun) setRun(analyzeRun(frames.current, t.camera === 'detras' ? 'detras' : 'lado', slow, dims[0], dims[1]))
+    setScan(null)
+  }
   const repTest = ['hr1', 'hr2', 'dec1', 'dec2', 'sal-bajo1', 'sal-bajo2', 'cad-ff'].includes(t.id)
 
   useEffect(() => {
@@ -601,7 +646,10 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
                     Contadas solas: {autoReps} · usar
                   </button>
                 )}
-                <small className="muted">En Automático las cuento al reproducir el vídeo entero. Revísalas siempre.</small>
+                <button className="btn ghost small" disabled={!src || scan != null} onClick={scanVideo}>
+                  {scan != null ? `Contando… ${Math.round(scan * 100)} %` : 'Contarlas en todo el vídeo'}
+                </button>
+                <small className="muted">Las cuento solas recorriendo el vídeo. Revísalas siempre.</small>
               </div>
             )}
 
@@ -609,7 +657,7 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
               <div className="an-run">
                 <span className="lbl">Análisis de carrera</span>
                 <p className="muted me-hint">
-                  1) Si es cámara lenta, indícalo aquí. 2) Pon <b>Automático</b> y reproduce el vídeo entero (mejor a ×¼). 3) Pulsa Analizar.
+                  Indica si es cámara lenta y pulsa <b>Analizar el vídeo entero</b>: lo recorro fotograma a fotograma (tarda unos segundos).
                 </p>
                 <div className="row">
                   <select className="search an-sm" value={slow} onChange={(e) => setSlow(+e.target.value)} aria-label="Cámara lenta">
@@ -617,8 +665,8 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
                     <option value={4}>Cámara lenta ×4 (120 fps)</option>
                     <option value={8}>Cámara lenta ×8 (240 fps)</option>
                   </select>
-                  <button className="btn small" disabled={frames.current.length < 8} onClick={() => setRun(analyzeRun(frames.current, t.camera === 'detras' ? 'detras' : 'lado', slow, dims[0], dims[1]))}>
-                    Analizar carrera ({frames.current.length} fotogramas)
+                  <button className="btn small" disabled={!src || scan != null} onClick={scanVideo}>
+                    {scan != null ? `Analizando… ${Math.round(scan * 100)} %` : 'Analizar el vídeo entero'}
                   </button>
                 </div>
                 {run && run.contacts === 0 && run.cadence == null && null}

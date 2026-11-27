@@ -19,6 +19,8 @@ import {
   House,
   Medal,
   MagnifyingGlass,
+  Moon,
+  Sun,
   LockSimple,
   Microphone,
   Stop,
@@ -72,3 +74,5 @@ export const IcMic = mk(Microphone, 26, 'fill')
 export const IcStop = mk(Stop, 24, 'fill')
 export const IcSearch = mk(MagnifyingGlass, 18)
 export const IcLock = mk(LockSimple, 16)
+export const IcMoon = mk(Moon, 20)
+export const IcSun = mk(Sun, 20)
