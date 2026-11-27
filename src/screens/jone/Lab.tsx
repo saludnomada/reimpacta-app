@@ -7,7 +7,7 @@ import { fShort, isoD, parseD } from '../../domain/dates'
 import { jumpHeight, LAB_TESTS, labKey, labTest, measureValue, pointLabel, pointsFor, SIDE_LABEL, sidesOf, CAMERA_LABEL, type LabTest, type Measure, type Pt, type Side } from '../../domain/lab'
 import { weekNo } from '../../domain/logic'
 import type { LabMark, Patient } from '../../domain/model'
-import { detect, prewarm, toPoints } from '../../ui/pose'
+import { detect, getPose, prewarm, toPoints } from '../../ui/pose'
 import { analyzeRun, countReps, requestFindings, runNote, type Frame, type RunResult } from '../../domain/labInsights'
 import { IcPlay } from '../../ui/icons'
 import { norm } from './VideoLab'
@@ -226,47 +226,83 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
   const [autoReps, setAutoReps] = useState(0)
   const [run, setRun] = useState<RunResult | null>(null)
   const isRun = t.id.startsWith('car-')
+  const getPoseReady = () => getPose().catch(() => null)
   const [scan, setScan] = useState<number | null>(null)
   /** Recorre el vídeo entero fotograma a fotograma (no depende de lo rápido que sea el dispositivo) */
   const scanVideo = async () => {
     const el = v.current
-    if (!el || !el.duration) return
+    if (!el) return
     el.pause()
+    // algunos vídeos (webm de Android) no dicen su duración hasta leerlos enteros
+    if (!isFinite(el.duration)) {
+      await new Promise<void>((res) => {
+        const to = setTimeout(res, 4000)
+        el.addEventListener('durationchange', () => isFinite(el.duration) && (clearTimeout(to), res()))
+        el.currentTime = 1e7
+      })
+    }
+    if (!isFinite(el.duration) || !el.duration) return setErr('No puedo saber cuánto dura este vídeo. Prueba a grabarlo de nuevo.')
+    setDur(el.duration)
     setAuto(false)
     frames.current = []
     series.current = []
     setRange({})
     setRun(null)
-    const step = 1 / fps
-    const n = Math.floor(el.duration / step)
+    // reproducir muy despacio y analizar cada fotograma según pasa (mucho más rápido que saltar uno a uno)
     const rg: Record<string, [number, number]> = {}
-    for (let i = 0; i <= n; i++) {
-      await new Promise<void>((res) => {
-        const target = Math.min(el.duration - 0.001, i * step)
-        if (Math.abs(el.currentTime - target) < 0.0005 && el.readyState >= 2) return res()
-        const to = setTimeout(res, 1500) // por si el navegador no avisa
-        el.addEventListener('seeked', () => (clearTimeout(to), res()), { once: true })
-        el.currentTime = target
-      })
+    const total = el.duration
+    const vf = el as HTMLVideoElement & { requestVideoFrameCallback?: (cb: (now: number, meta: { mediaTime: number }) => void) => number }
+    let busyF = false
+    let k = 0
+    const handle = async () => {
+      if (busyF) return
+      busyF = true
       try {
         const lm = await detect(el)
         if (lm) {
-          frames.current.push({ t: el.currentTime, lm: lm.map((q) => ({ x: q.x, y: q.y })) })
+          const tt = el.currentTime
+          const last = frames.current[frames.current.length - 1]?.t
+          if (last == null || tt > last) frames.current.push({ t: tt, lm: lm.map((q) => ({ x: q.x, y: q.y })) })
           const P = toPoints(lm, need)
           const vals = calc(P)
           const first = vals[t.measures[0]?.name]
           if (first != null) series.current.push(first)
           Object.entries(vals).forEach(([nm, x]) => (rg[nm] = rg[nm] ? [Math.min(rg[nm][0], x), Math.max(rg[nm][1], x)] : [x, x]))
-          if (i % 5 === 0) setPts((old) => ({ ...Object.fromEntries(Object.entries(old).filter(([kk]) => kk.startsWith('libre'))), ...P }))
+          if (k++ % 4 === 0) setPts((old) => ({ ...Object.fromEntries(Object.entries(old).filter(([kk]) => kk.startsWith('libre'))), ...P }))
         }
       } catch {
         setErr('No he podido cargar el muñequito en este navegador.')
-        break
       }
-      setScan((i + 1) / (n + 1))
+      busyF = false
+      setScan(Math.min(1, el.currentTime / total))
     }
+    await getPoseReady()
+    el.currentTime = 0
+    // medir lo que tarda este dispositivo en un fotograma y ajustar la velocidad para no saltarse ninguno
+    const t0 = performance.now()
+    try {
+      await detect(el)
+      await detect(el)
+    } catch {
+      /* se verá en el bucle */
+    }
+    const ms = (performance.now() - t0) / 2
+    el.playbackRate = Math.max(0.0625, Math.min(0.25, (1000 / fps / Math.max(ms, 1)) * 0.85))
+    await new Promise<void>((res) => {
+      const onEnd = () => res()
+      el.addEventListener('ended', onEnd, { once: true })
+      const loop = () => {
+        if (el.ended) return
+        void handle()
+        if (vf.requestVideoFrameCallback) vf.requestVideoFrameCallback(() => loop())
+        else requestAnimationFrame(loop)
+      }
+      void el.play().then(loop).catch(() => res())
+    })
+    while (busyF) await new Promise((r) => setTimeout(r, 30))
+    el.playbackRate = rate
     setRange(rg)
-    if (location.search.includes('debug')) (window as unknown as { __labFrames: Frame[] }).__labFrames = frames.current
+    ;(window as unknown as { __labFrames: Frame[] }).__labFrames = frames.current // para revisar el análisis
     setAutoReps(countReps(series.current))
     if (isRun) setRun(analyzeRun(frames.current, t.camera === 'detras' ? 'detras' : 'lado', slow, dims[0], dims[1]))
     setScan(null)
@@ -436,7 +472,7 @@ function Analyzer({ p, k, t, side: side0, src0, noSave, onClose }: { p?: Patient
               <div
                 ref={box}
                 className="an-box"
-                style={{ aspectRatio: String(ratio) }}
+                style={{ aspectRatio: String(ratio), width: `min(100%, calc(72vh * ${ratio}))` }}
                 onPointerMove={move}
                 onPointerUp={() => (drag.current = null)}
                 onPointerLeave={() => (drag.current = null)}

@@ -33,7 +33,7 @@ export function PoseVideo({ src }: { src: string }) {
   }, [src])
   return (
     <div className="pv">
-      <div className="pv-box" style={{ aspectRatio: String(ratio) }}>
+      <div className="pv-box" style={{ aspectRatio: String(ratio), width: `min(100%, calc(70vh * ${ratio}))` }}>
         <video
           ref={v}
           src={src}

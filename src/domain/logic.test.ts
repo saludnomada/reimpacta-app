@@ -268,21 +268,20 @@ describe('laboratorio', () => {
 
 import { analyzeRun, countReps, type Frame } from './labInsights'
 describe('análisis de carrera y repeticiones', () => {
-  // corredor simulado de lado: avanza hacia la derecha, un apoyo cada 0,35 s (≈ 171 pasos/min)
+  // corredor simulado de lado que mira a la derecha: cada pie apoya cada 0,7 s (≈ 171 pasos/min),
+  // el tobillo va y viene por delante/detrás de la cadera y apoya muy adelantado (sobrezancada) y de talón
   const frames: Frame[] = [...Array(90)].map((_, k) => {
     const t = k / 30
     const lm = [...Array(33)].map(() => ({ x: 0.5, y: 0.5 }))
-    const hx = 0.2 + t * 0.2
+    const hx = 0.5
     const put = (i: number, x: number, y: number) => (lm[i] = { x, y })
     put(11, hx + 0.02, 0.2); put(12, hx + 0.02, 0.2)
-    put(23, hx, 0.5); put(24, hx, 0.5)
     ;[0, 1].forEach((s) => {
-      const ph = ((t + s * 0.35) % 0.7) / 0.7 // fase de la zancada de cada pie
-      const onGround = ph < 0.35
-      const fy = onGround ? 0.9 : 0.84
-      const ax = hx + 0.12 // tobillo por delante de la cadera (sobrezancada)
+      const ph = ((t + s * 0.35) % 0.7) / 0.7
+      const ax = hx + 0.14 * Math.cos(2 * Math.PI * ph)
+      const fy = ph < 0.4 ? 0.9 : 0.84
       const [hip, knee, ankle, heel, toe] = s === 0 ? [24, 26, 28, 30, 32] : [23, 25, 27, 29, 31]
-      put(hip, hx, 0.5); put(knee, hx + 0.06, 0.7); put(ankle, ax, fy - 0.02); put(heel, ax - 0.02, fy); put(toe, ax + 0.04, fy - 0.03)
+      put(hip, hx, 0.5); put(knee, hx + 0.05, 0.7); put(ankle, ax, fy - 0.02); put(heel, ax - 0.02, fy); put(toe, ax + 0.05, fy - 0.03)
     })
     return { t, lm }
   })
@@ -294,8 +293,11 @@ describe('análisis de carrera y repeticiones', () => {
     expect(r.findings.some((f) => /sobrezancada/i.test(f.title) && f.level !== 'ok')).toBe(true)
     expect(r.findings.some((f) => /talón/.test(f.title))).toBe(true)
   })
-  it('a cámara lenta ×4 la cadencia real es 4 veces mayor', () => {
-    expect(analyzeRun(frames, 'lado', 4).cadence).toBeGreaterThan(640)
+  it('a cámara lenta ×4 (el vídeo dura 4 veces más) la cadencia real es la misma', () => {
+    const slowMo = frames.map((f) => ({ ...f, t: f.t * 4 }))
+    const c = analyzeRun(slowMo, 'lado', 4).cadence!
+    expect(c).toBeGreaterThan(160)
+    expect(c).toBeLessThan(185)
   })
   it('cuenta repeticiones de un ángulo que sube y baja', () => {
     const s = [...Array(185)].map((_, i) => 120 + 30 * Math.sin(i / 10))

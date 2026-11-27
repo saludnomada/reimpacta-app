@@ -18,7 +18,7 @@ export const LAB_RULES = {
   cadence: { low: 160, good: 170 }, // pasos por minuto
   shank: { warn: 8, bad: 12 }, // tibia inclinada hacia delante al apoyar (sobrezancada)
   reach: { warn: 0.35, bad: 0.55 }, // tobillo por delante de la cadera al apoyar, en "fémures"
-  footStrike: { heel: 8, fore: -2 }, // ángulo del pie al apoyar: >8 talón, <-2 antepié
+  footStrike: { heel: 6, fore: -12 }, // ángulo del pie al apoyar: >6 talón, <-12 antepié (si no, mediopié)
   trunk: { min: 3, max: 15 }, // inclinación del tronco hacia delante (grados)
   pelvicDrop: { warn: 6, bad: 8 }, // caída de la pelvis al apoyar (grados)
 }
@@ -117,20 +117,57 @@ export interface RunResult {
   findings: Finding[]
 }
 
-/** Momentos en que cada pie toca el suelo (primer fotograma de cada apoyo) */
-function contactsOf(frames: Frame[], s: 0 | 1) {
-  const ys = frames.map((f) => Math.max(g(f, 'heel', s).y, g(f, 'toe', s).y))
-  const sorted = [...ys].sort((a, b) => a - b)
-  const ground = sorted[Math.floor(sorted.length * 0.95)] ?? 0
-  const body = Math.abs(g(frames[0], 'ankle', s).y - g(frames[0], 'sh', s).y) || 0.5
-  const tol = body * 0.04
+const smooth = (a: number[], k = 1) => a.map((_, i) => {
+  const w = a.slice(Math.max(0, i - k), i + k + 1)
+  return w.reduce((x, y) => x + y, 0) / w.length
+})
+
+/** Apoyos vistos DE LADO: el momento en que el tobillo está más adelantado respecto a la cadera
+ *  (justo al llegar al suelo). No depende de que la cámara se mueva arriba o abajo. */
+function contactsSide(F: Frame[], s: 0 | 1, dir: number, w: number, h: number, minGap: number) {
+  const reach = smooth(
+    F.map((f) => {
+      const hip = g(f, 'hip', s)
+      const knee = g(f, 'knee', s)
+      const ank = g(f, 'ankle', s)
+      const femur = Math.hypot((knee.x - hip.x) * w, (knee.y - hip.y) * h) || 1
+      return ((ank.x - hip.x) * w * dir) / femur
+    }),
+  )
   const out: number[] = []
-  let on = false
-  ys.forEach((y, i) => {
-    const isOn = y >= ground - tol
-    if (isOn && !on) out.push(i)
-    on = isOn
-  })
+  for (let i = 1; i < reach.length - 1; i++) {
+    if (reach[i] > 0.15 && reach[i] >= reach[i - 1] && reach[i] > reach[i + 1]) {
+      const last = out[out.length - 1]
+      if (last != null && F[i].t - F[last].t < minGap) {
+        if (reach[i] > reach[last]) out[out.length - 1] = i
+      } else out.push(i)
+    }
+  }
+  return out
+}
+
+/** Desde el pie más adelantado, el primer fotograma en que el pie está más abajo respecto a la cadera = apoyo */
+function landing(F: Frame[], from: number, s: 0 | 1, maxSecs: number) {
+  const rel = (k: number) => Math.max(g(F[k], 'heel', s).y, g(F[k], 'toe', s).y) - g(F[k], 'hip', s).y
+  let best = from
+  for (let k = from + 1; k < F.length && F[k].t - F[from].t <= maxSecs; k++) {
+    if (rel(k) > rel(best)) best = k
+    else if (rel(k) < rel(best) - 0.005) break
+  }
+  return best
+}
+
+/** Apoyos vistos DESDE DETRÁS: el momento en que un pie pasa a estar más abajo que el otro */
+function contactsBack(F: Frame[], minGap: number) {
+  const d = smooth(F.map((f) => Math.max(g(f, 'heel', 0).y, g(f, 'toe', 0).y) - Math.max(g(f, 'heel', 1).y, g(f, 'toe', 1).y)))
+  const out: { i: number; s: 0 | 1 }[] = []
+  for (let i = 1; i < d.length; i++) {
+    const s: 0 | 1 | null = d[i - 1] <= 0 && d[i] > 0 ? 0 : d[i - 1] >= 0 && d[i] < 0 ? 1 : null
+    if (s == null) continue
+    const last = out[out.length - 1]
+    if (last && F[i].t - F[last.i].t < minGap) continue
+    out.push({ i, s })
+  }
   return out
 }
 
@@ -147,16 +184,20 @@ export function analyzeRun(frames: Frame[], view: 'lado' | 'detras', slow = 1, w
     res.findings.push({ level: 'info', title: 'Pocos fotogramas', text: 'Pon el modo Automático y reproduce el vídeo entero (mejor a ×¼) para que pueda analizar varias zancadas.' })
     return res
   }
-  const ic = ([0, 1] as const).flatMap((s) => contactsOf(F, s).map((i) => ({ i, s })))
+  // hacia dónde mira el corredor: por la orientación de los pies (vale también en cinta)
+  const facing = F.reduce((acc, f) => acc + Math.sign(g(f, 'toe', 0).x - g(f, 'heel', 0).x) + Math.sign(g(f, 'toe', 1).x - g(f, 'heel', 1).x), 0)
+  const dir = Math.sign(facing) || Math.sign(g(F[F.length - 1], 'hip', 0).x - g(F[0], 'hip', 0).x) || 1
+  const minGap = 0.25 * slow // dos apoyos del mismo pie no pueden estar a menos de 0,25 s reales
+  const ic =
+    view === 'lado'
+      ? ([0, 1] as const).flatMap((s) => contactsSide(F, s, dir, w, h, minGap).map((i) => ({ i: landing(F, i, s, 0.15 * slow), s })))
+      : contactsBack(F, minGap / 2)
   ic.sort((a, b) => F[a.i].t - F[b.i].t)
   res.contacts = ic.length
   if (ic.length >= 3) {
     const span = (F[ic[ic.length - 1].i].t - F[ic[0].i].t) / slow
     if (span > 0) res.cadence = Math.round(((ic.length - 1) / span) * 60)
   }
-  // hacia dónde mira el corredor: por la orientación de los pies (vale también en cinta)
-  const facing = F.reduce((acc, f) => acc + Math.sign(g(f, 'toe', 0).x - g(f, 'heel', 0).x) + Math.sign(g(f, 'toe', 1).x - g(f, 'heel', 1).x), 0)
-  const dir = Math.sign(facing) || Math.sign(g(F[F.length - 1], 'hip', 0).x - g(F[0], 'hip', 0).x) || 1
   const X = (p: P) => p.x * w
   const Y = (p: P) => p.y * h
 
@@ -183,6 +224,14 @@ export function analyzeRun(frames: Frame[], view: 'lado' | 'detras', slow = 1, w
   } else {
     let cross = 0
     const drops: number[] = []
+    // inclinación de la pelvis en cada fotograma; la "media" del vídeo quita lo torcido que vaya el móvil
+    const tilt = (f: Frame) => {
+      const a = g(f, 'hip', 0)
+      const b = g(f, 'hip', 1)
+      return deg(Math.atan2(Y(a) - Y(b), Math.abs(X(a) - X(b)) || 1))
+    }
+    const tilts = F.map(tilt).sort((x, y) => x - y)
+    const base = tilts[Math.floor(tilts.length / 2)] ?? 0
     ic.forEach(({ i, s }) => {
       const f = F[i]
       const r = g(f, 'hip', 0)
@@ -193,14 +242,13 @@ export function analyzeRun(frames: Frame[], view: 'lado' | 'detras', slow = 1, w
       const side = s === 0 ? Math.sign(r.x - mid) : Math.sign(l.x - mid)
       if ((fx - mid) * side < -0.05 * hipW) cross++
       // caída de la pelvis en los fotogramas de ese apoyo
-      for (let k = i; k < Math.min(F.length, i + 6); k++) {
-        const a = g(F[k], 'hip', 0)
-        const b = g(F[k], 'hip', 1)
-        drops.push(Math.abs(deg(Math.atan2(Y(a) - Y(b), Math.abs(X(a) - X(b)) || 1))))
-      }
+      const sec = 0.15 * slow
+      for (let k = i; k < F.length && F[k].t - F[i].t <= sec; k++) drops.push(Math.abs(tilt(F[k]) - base))
     })
     res.crossover = cross
-    res.pelvicDrop = drops.length ? Math.round(Math.max(...drops)) : null
+    // pico típico (no el máximo absoluto, que suele ser ruido): percentil 90
+    const ds = drops.sort((x, y) => x - y)
+    res.pelvicDrop = ds.length ? Math.round(ds[Math.floor(ds.length * 0.9)]) : null
   }
 
   // conclusiones
@@ -214,8 +262,9 @@ export function analyzeRun(frames: Frame[], view: 'lado' | 'detras', slow = 1, w
     )
   else fd.push({ level: 'info', title: 'Cadencia', text: 'No he detectado suficientes apoyos. Graba 3-4 zancadas seguidas, de lado y con todo el cuerpo.' })
   if (view === 'lado') {
-    const over = (res.shank != null && res.shank >= R.shank.warn) || (res.reach != null && res.reach >= R.reach.warn)
-    const bad = (res.shank != null && res.shank >= R.shank.bad) || (res.reach != null && res.reach >= R.reach.bad)
+    // la sobrezancada se decide por la tibia al apoyar (lo más estudiado); el alcance del pie es un dato de apoyo
+    const over = res.shank != null && res.shank >= R.shank.warn
+    const bad = res.shank != null && res.shank >= R.shank.bad
     if (res.shank != null)
       fd.push({
         level: bad ? 'bad' : over ? 'warn' : 'ok',
@@ -226,8 +275,8 @@ export function analyzeRun(frames: Frame[], view: 'lado' | 'detras', slow = 1, w
       const type = res.foot > R.footStrike.heel ? 'de talón' : res.foot < R.footStrike.fore ? 'de antepié (punta)' : 'de mediopié'
       fd.push({
         level: 'info',
-        title: `Pisada ${type}`,
-        text: `El pie llega al suelo con ${res.foot}° respecto al suelo. No hay una pisada mejor: la de talón carga más la rodilla; la de antepié, más Aquiles y gemelo. Valóralo según su lesión.`,
+        title: `Pisada probable ${type}`,
+        text: `El pie llega al suelo con ${res.foot}° respecto al suelo (compruébalo a cámara lenta: con 30 fps es aproximado). No hay una pisada mejor: la de talón carga más la rodilla; la de antepié, más Aquiles y gemelo. Valóralo según su lesión.`,
       })
     }
     if (res.trunk != null)
@@ -241,8 +290,8 @@ export function analyzeRun(frames: Frame[], view: 'lado' | 'detras', slow = 1, w
   } else {
     if (res.crossover != null)
       fd.push(
-        res.crossover > 0
-          ? { level: res.crossover >= 2 ? 'bad' : 'warn', title: 'Zancada que cruza la línea media', text: `En ${res.crossover} de ${res.contacts} apoyos el pie cruza al otro lado. Se relaciona con cintilla iliotibial y sobrecarga de tibia; abrir un poco el apoyo ayuda.` }
+        res.crossover >= Math.max(2, res.contacts * 0.25)
+          ? { level: res.crossover >= res.contacts * 0.5 ? 'bad' : 'warn', title: 'Zancada que cruza la línea media', text: `En ${res.crossover} de ${res.contacts} apoyos el pie cruza al otro lado. Se relaciona con cintilla iliotibial y sobrecarga de tibia; abrir un poco el apoyo ayuda.` }
           : { level: 'ok', title: 'El pie no cruza la línea media', text: 'Apoyos con buena anchura.' },
       )
     if (res.pelvicDrop != null)
