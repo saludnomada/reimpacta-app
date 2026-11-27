@@ -1359,3 +1359,5 @@ html .pg-grow i.miss,html[data-theme] .h5-day.miss i,html .h5-day.miss i{backgro
 .an-mark{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:13px}
 .an-pt em{opacity:0;transition:opacity .15s;background:rgba(10,20,13,.85);padding:2px 6px;border-radius:6px;text-shadow:none}
 .an-pt:hover em,.an-pt:active em{opacity:1}
+.demo-warn{position:sticky;top:0;z-index:30;background:#FF7F50;color:#0A140D;font-size:13px;text-align:center;padding:7px 12px;line-height:1.35}
+.demo-warn button{background:#0A140D;color:#fff;border:0;border-radius:99px;padding:3px 10px;font:inherit;font-weight:700;margin-left:6px;cursor:pointer}
